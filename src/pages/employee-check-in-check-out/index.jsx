@@ -1,244 +1,247 @@
 import React, { useState, useEffect } from 'react';
+import { Clock, MapPin, CheckCircle, XCircle } from 'lucide-react';
 import Header from '../../components/ui/Header';
 import Sidebar from '../../components/ui/Sidebar';
 import BreadcrumbNavigation from '../../components/ui/BreadcrumbNavigation';
-import CheckInOutWidget from './components/CheckInOutWidget';
-import AttendanceStatus from './components/AttendanceStatus';
-import BreakTracker from './components/BreakTracker';
-import AttendanceHistory from './components/AttendanceHistory';
-import AttendanceSummary from './components/AttendanceSummary';
-import LocationVerification from './components/LocationVerification';
+import attendanceService from '../../services/attendanceService';
+import employeeService from '../../services/employeeService';
+import useAuthStore from '../../store/useAuthStore';
 
-
-const EmployeeCheckInCheckOut = () => {
+const QuickAttendance = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [attendanceStatus, setAttendanceStatus] = useState({
-    isCheckedIn: false,
-    checkInTime: null,
-    currentSessionDuration: '0h 0m',
-    totalWorkToday: '0h 0m',
-    breakTime: '0h 0m',
-    isOnBreak: false,
-    location: null,
-    workMode: 'office'
-  });
-  const [location, setLocation] = useState({
-    latitude: null,
-    longitude: null,
-    address: 'Detecting location...',
-    verified: false
-  });
-
-  // Update current time every second
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-      if (attendanceStatus?.isCheckedIn && attendanceStatus?.checkInTime) {
-        updateSessionDuration();
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [attendanceStatus?.checkInTime]);
-
-  // Get user location
-  useEffect(() => {
-    getCurrentLocation();
-  }, []);
-
-  const getCurrentLocation = () => {
-    if (navigator?.geolocation) {
-      navigator?.geolocation?.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position?.coords;
-          setLocation({
-            latitude,
-            longitude,
-            address: `${latitude?.toFixed(6)}, ${longitude?.toFixed(6)}`,
-            verified: true
-          });
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-          setLocation({
-            latitude: null,
-            longitude: null,
-            address: 'Location access denied',
-            verified: false
-          });
-        },
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
-    } else {
-      setLocation({
-        latitude: null,
-        longitude: null,
-        address: 'Location not supported',
-        verified: false
-      });
-    }
-  };
-
-  const updateSessionDuration = () => {
-    if (attendanceStatus?.checkInTime) {
-      const now = new Date();
-      const checkIn = new Date(attendanceStatus?.checkInTime);
-      const diff = now - checkIn;
-
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor(diff % (1000 * 60 * 60) / (1000 * 60));
-
-      setAttendanceStatus((prev) => ({
-        ...prev,
-        currentSessionDuration: `${hours}h ${minutes}m`
-      }));
-    }
-  };
-
-  const handleCheckIn = (workMode, notes) => {
-    const now = new Date();
-    setAttendanceStatus((prev) => ({
-      ...prev,
-      isCheckedIn: true,
-      checkInTime: now,
-      workMode,
-      location: location?.address,
-      notes
-    }));
-
-    console.log('Checked in at:', now, 'Mode:', workMode, 'Location:', location);
-  };
-
-  const handleCheckOut = (notes) => {
-    const now = new Date();
-    const sessionDuration = attendanceStatus?.currentSessionDuration;
-
-    setAttendanceStatus((prev) => ({
-      ...prev,
-      isCheckedIn: false,
-      checkInTime: null,
-      totalWorkToday: sessionDuration,
-      currentSessionDuration: '0h 0m',
-      checkOutNotes: notes
-    }));
-
-    console.log('Checked out at:', now, 'Total work today:', sessionDuration);
-  };
-
-  const handleBreakToggle = () => {
-    setAttendanceStatus((prev) => ({
-      ...prev,
-      isOnBreak: !prev?.isOnBreak
-    }));
-  };
-
-  const handleToggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
-  };
+  const [loading, setLoading] = useState(false);
+  const [todayAttendance, setTodayAttendance] = useState(null);
+  const [employee, setEmployee] = useState(null);
+  const [location, setLocation] = useState('');
+  const [notes, setNotes] = useState('');
+  const { user } = useAuthStore();
 
   const breadcrumbItems = [
-  { label: 'Dashboard', path: '/dashboard' },
-  { label: 'Check-in/Check-out', path: '/employee-check-in-check-out' }];
+    { label: 'Dashboard', path: '/dashboard' },
+    { label: 'Quick Attendance', path: '/employee-check-in-check-out' }
+  ];
 
+  useEffect(() => {
+    fetchEmployeeAndAttendance();
+  }, []);
 
-  // Mock employee data
-  const employeeData = {
-    name: 'John Doe',
-    employeeId: 'EMP001',
-    department: 'Engineering',
-    shift: '9:00 AM - 6:00 PM',
-    profileImage: "https://images.unsplash.com/photo-1663720527180-4c60a78fe3b7",
-    alt: 'Professional headshot of John Doe, a software engineer with dark hair wearing a light blue shirt'
+  const fetchEmployeeAndAttendance = async () => {
+    try {
+      setLoading(true);
+      // Get employee record for current user
+      const employees = await employeeService.getAll({ userId: user.id });
+      if (employees && employees.length > 0) {
+        const emp = employees[0];
+        setEmployee(emp);
+
+        // Get today's attendance
+        const attendance = await attendanceService.getTodayAttendance(emp.id);
+        setTodayAttendance(attendance);
+      }
+    } catch (err) {
+      console.error('Error fetching data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCheckIn = async () => {
+    if (!employee) {
+      alert('Employee record not found');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await attendanceService.checkIn(employee.id, location, notes);
+      alert('Checked in successfully!');
+      await fetchEmployeeAndAttendance();
+      setLocation('');
+      setNotes('');
+    } catch (err) {
+      console.error('Error checking in:', err);
+      alert('Failed to check in. You may have already checked in today.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCheckOut = async () => {
+    if (!todayAttendance) {
+      alert('No check-in record found for today');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await attendanceService.checkOut(todayAttendance.id, notes);
+      alert('Checked out successfully!');
+      await fetchEmployeeAndAttendance();
+      setNotes('');
+    } catch (err) {
+      console.error('Error checking out:', err);
+      alert('Failed to check out. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getCurrentTime = () => {
+    return new Date().toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
+
+  const getCurrentDate = () => {
+    return new Date().toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <Sidebar isCollapsed={sidebarCollapsed} onToggleCollapse={handleToggleSidebar} />
-      <main className={`transition-all duration-300 ${
-      sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'} pt-16 pb-20 lg:pb-8`
-      }>
-        <div className="p-6 max-w-6xl mx-auto">
-          {/* Header Section */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
-            <div>
-              <BreadcrumbNavigation items={breadcrumbItems} />
-              <h1 className="text-3xl font-semibold text-foreground mb-2">Check-in/Check-out</h1>
-              <p className="text-muted-foreground">
-                Log your daily attendance with location verification and work status updates
-              </p>
-            </div>
-            
-            {/* Current Time Display */}
-            <div className="mt-4 lg:mt-0 text-center lg:text-right">
-              <div className="text-3xl font-mono font-semibold text-foreground">
-                {currentTime?.toLocaleTimeString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                  hour12: true
-                })}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {currentTime?.toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </div>
-            </div>
+      <Sidebar isCollapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
+
+      <main className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'} pt-16 pb-20 lg:pb-6`}>
+        <div className="p-6">
+          <BreadcrumbNavigation items={breadcrumbItems} />
+
+          <div className="mb-8">
+            <h1 className="text-3xl font-semibold text-foreground mb-2">Quick Attendance</h1>
+            <p className="text-muted-foreground">
+              Check in and check out quickly and easily
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            {/* Left Column - Main Actions */}
-            <div className="xl:col-span-2 space-y-6">
-              {/* Check-in/Check-out Widget */}
-              <CheckInOutWidget
-                attendanceStatus={attendanceStatus}
-                location={location}
-                onCheckIn={handleCheckIn}
-                onCheckOut={handleCheckOut}
-                employeeData={employeeData} />
-
-
-              {/* Current Status & Break Tracker */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <AttendanceStatus
-                  attendanceStatus={attendanceStatus}
-                  currentTime={currentTime} />
-
-                
-                <BreakTracker
-                  attendanceStatus={attendanceStatus}
-                  onBreakToggle={handleBreakToggle} />
-
+          <div className="max-w-2xl mx-auto">
+            {/* Current Time Card */}
+            <div className="bg-card rounded-lg shadow-sm border border-border p-8 mb-6 text-center">
+              <div className="flex items-center justify-center mb-4">
+                <Clock className="h-12 w-12 text-primary" />
               </div>
-
-              {/* Location Verification */}
-              <LocationVerification
-                location={location}
-                onRefreshLocation={getCurrentLocation}
-                workMode={attendanceStatus?.workMode} />
-
-
-              {/* Attendance History */}
-              <AttendanceHistory />
+              <div className="text-5xl font-bold text-foreground mb-2">{getCurrentTime()}</div>
+              <div className="text-lg text-muted-foreground">{getCurrentDate()}</div>
             </div>
 
-            {/* Right Column - Summary & Stats */}
-            <div className="xl:col-span-1">
-              <AttendanceSummary
-                attendanceStatus={attendanceStatus}
-                employeeData={employeeData} />
+            {/* Status Card */}
+            {todayAttendance && (
+              <div className="bg-card rounded-lg shadow-sm border border-border p-6 mb-6">
+                <h3 className="text-lg font-semibold mb-4">Today's Status</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Check-in Time:</span>
+                    <span className="font-medium flex items-center">
+                      <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                      {todayAttendance.checkInTime}
+                    </span>
+                  </div>
+                  {todayAttendance.checkOutTime ? (
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Check-out Time:</span>
+                      <span className="font-medium flex items-center">
+                        <CheckCircle className="h-4 w-4 text-blue-500 mr-2" />
+                        {todayAttendance.checkOutTime}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Check-out Time:</span>
+                      <span className="font-medium flex items-center">
+                        <XCircle className="h-4 w-4 text-gray-400 mr-2" />
+                        Not checked out yet
+                      </span>
+                    </div>
+                  )}
+                  {todayAttendance.workHours && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Work Hours:</span>
+                      <span className="font-medium">{todayAttendance.workHours} hours</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
+            {/* Action Form */}
+            <div className="bg-card rounded-lg shadow-sm border border-border p-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    <MapPin className="inline h-4 w-4 mr-1" />
+                    Location (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="e.g., Office, Home, Client Site"
+                    className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    disabled={loading || (todayAttendance && todayAttendance.checkOutTime)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Notes (Optional)
+                  </label>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Add any notes..."
+                    rows={3}
+                    className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    disabled={loading || (todayAttendance && todayAttendance.checkOutTime)}
+                  />
+                </div>
+
+                <div className="flex gap-4">
+                  {!todayAttendance && (
+                    <button
+                      onClick={handleCheckIn}
+                      disabled={loading}
+                      className="flex-1 bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      {loading ? 'Processing...' : 'Check In'}
+                    </button>
+                  )}
+
+                  {todayAttendance && !todayAttendance.checkOutTime && (
+                    <button
+                      onClick={handleCheckOut}
+                      disabled={loading}
+                      className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      {loading ? 'Processing...' : 'Check Out'}
+                    </button>
+                  )}
+
+                  {todayAttendance && todayAttendance.checkOutTime && (
+                    <div className="flex-1 bg-gray-100 text-gray-600 py-3 px-6 rounded-lg text-center font-medium">
+                      Attendance Completed for Today
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Info Card */}
+            <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                <strong>Tip:</strong> Make sure to check in when you start work and check out when you finish.
+                Your work hours will be automatically calculated.
+              </p>
             </div>
           </div>
         </div>
       </main>
-    </div>);
-
+    </div>
+  );
 };
 
-export default EmployeeCheckInCheckOut;
+export default QuickAttendance;

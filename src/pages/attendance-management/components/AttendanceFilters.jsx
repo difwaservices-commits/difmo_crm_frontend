@@ -85,7 +85,7 @@ const AttendanceFilters = ({ filters, onFilterChange, attendanceData }) => {
           </label>
           <Select
             value={filters?.dateRange}
-            onValueChange={(value) => onFilterChange({ dateRange: value })}
+            onChange={(e) => onFilterChange({ dateRange: e.target.value })}
           >
             {dateRangeOptions?.map(option => (
               <option key={option?.value} value={option?.value}>
@@ -128,7 +128,7 @@ const AttendanceFilters = ({ filters, onFilterChange, attendanceData }) => {
           </label>
           <Select
             value={filters?.department}
-            onValueChange={(value) => onFilterChange({ department: value })}
+            onChange={(e) => onFilterChange({ department: e.target.value })}
           >
             {departmentOptions?.map(option => (
               <option key={option?.value} value={option?.value}>
@@ -145,7 +145,7 @@ const AttendanceFilters = ({ filters, onFilterChange, attendanceData }) => {
           </label>
           <Select
             value={filters?.status}
-            onValueChange={(value) => onFilterChange({ status: value })}
+            onChange={(e) => onFilterChange({ status: e.target.value })}
           >
             {statusOptions?.map(option => (
               <option key={option?.value} value={option?.value}>
@@ -162,7 +162,7 @@ const AttendanceFilters = ({ filters, onFilterChange, attendanceData }) => {
           </label>
           <Select
             value={filters?.location}
-            onValueChange={(value) => onFilterChange({ location: value })}
+            onChange={(e) => onFilterChange({ location: e.target.value })}
           >
             {locationOptions?.map(option => (
               <option key={option?.value} value={option?.value}>
@@ -185,7 +185,7 @@ const AttendanceFilters = ({ filters, onFilterChange, attendanceData }) => {
               <span>Late Arrivals</span>
               <Icon name="Clock" size={14} />
             </button>
-            
+
             <button
               onClick={() => onFilterChange({ status: 'absent' })}
               className="w-full flex items-center justify-between px-3 py-2 text-sm bg-error/10 text-error border border-error/20 rounded-lg hover:bg-error/20 transition-colors duration-150"
@@ -193,7 +193,7 @@ const AttendanceFilters = ({ filters, onFilterChange, attendanceData }) => {
               <span>Absent Today</span>
               <Icon name="UserX" size={14} />
             </button>
-            
+
             <button
               onClick={() => onFilterChange({ location: 'WFH' })}
               className="w-full flex items-center justify-between px-3 py-2 text-sm bg-blue-50 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors duration-150"

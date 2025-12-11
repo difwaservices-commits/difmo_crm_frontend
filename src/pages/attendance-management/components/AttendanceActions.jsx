@@ -2,62 +2,64 @@ import React, { useState } from 'react';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
-const AttendanceActions = ({ 
-  selectedEmployees, 
-  onBulkAction, 
-  onExportReport, 
-  totalRecords 
+const AttendanceActions = ({
+  selectedEmployees,
+  onBulkAction,
+  onExportReport,
+  onManualEntry,
+  onTakeAttendance,
+  totalRecords
 }) => {
   const [showExportMenu, setShowExportMenu] = useState(false);
 
   const bulkActions = [
-    { 
-      id: 'mark_present', 
-      label: 'Mark Present', 
-      icon: 'UserCheck', 
+    {
+      id: 'mark_present',
+      label: 'Mark Present',
+      icon: 'UserCheck',
       color: 'success',
       description: 'Mark selected employees as present'
     },
-    { 
-      id: 'mark_absent', 
-      label: 'Mark Absent', 
-      icon: 'UserX', 
+    {
+      id: 'mark_absent',
+      label: 'Mark Absent',
+      icon: 'UserX',
       color: 'error',
       description: 'Mark selected employees as absent'
     },
-    { 
-      id: 'approve_overtime', 
-      label: 'Approve Overtime', 
-      icon: 'Clock', 
+    {
+      id: 'approve_overtime',
+      label: 'Approve Overtime',
+      icon: 'Clock',
       color: 'warning',
       description: 'Approve overtime for selected employees'
     },
-    { 
-      id: 'send_notification', 
-      label: 'Send Notification', 
-      icon: 'Bell', 
+    {
+      id: 'send_notification',
+      label: 'Send Notification',
+      icon: 'Bell',
       color: 'primary',
       description: 'Send attendance notification to selected employees'
     }
   ];
 
   const exportFormats = [
-    { 
-      id: 'excel', 
-      label: 'Excel (.xlsx)', 
-      icon: 'FileSpreadsheet', 
+    {
+      id: 'excel',
+      label: 'Excel (.xlsx)',
+      icon: 'FileSpreadsheet',
       description: 'Download as Excel spreadsheet'
     },
-    { 
-      id: 'pdf', 
-      label: 'PDF Report', 
-      icon: 'FileText', 
+    {
+      id: 'pdf',
+      label: 'PDF Report',
+      icon: 'FileText',
       description: 'Generate PDF attendance report'
     },
-    { 
-      id: 'csv', 
-      label: 'CSV Data', 
-      icon: 'Database', 
+    {
+      id: 'csv',
+      label: 'CSV Data',
+      icon: 'Database',
       description: 'Export as CSV file'
     }
   ];
@@ -81,13 +83,13 @@ const AttendanceActions = ({
             <div className="flex items-center space-x-2">
               <Icon name="Users" size={20} className="text-muted-foreground" />
               <span className="text-sm text-foreground">
-                {selectedEmployees?.length > 0 
+                {selectedEmployees?.length > 0
                   ? `${selectedEmployees?.length} of ${totalRecords} selected`
                   : `${totalRecords} total records`
                 }
               </span>
             </div>
-            
+
             {selectedEmployees?.length > 0 && (
               <div className="h-4 w-px bg-border"></div>
             )}
@@ -120,11 +122,22 @@ const AttendanceActions = ({
 
         {/* Right Side - Actions */}
         <div className="flex items-center space-x-3">
+          {/* Take Attendance */}
+          <Button
+            variant="default"
+            size="sm"
+            onClick={onTakeAttendance}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+          >
+            <Icon name="ClipboardCheck" size={14} className="mr-1" />
+            Take Attendance
+          </Button>
+
           {/* Manual Entry */}
           <Button
             variant="outline"
             size="sm"
-            onClick={() => console.log('Manual attendance entry')}
+            onClick={onManualEntry}
           >
             <Icon name="Edit" size={14} className="mr-1" />
             Manual Entry

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
 import { Lock, Mail, ArrowRight, CheckCircle } from 'lucide-react';
 
@@ -8,19 +8,26 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [agreeTerms, setAgreeTerms] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
     const { login, isLoading, error, clearError } = useAuthStore();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log('[Login] Form submitted');
         if (!agreeTerms) {
             // Ideally show a toast or inline error
             alert('Please agree to the Terms and Conditions');
             return;
         }
         try {
+            console.log('[Login] Calling login...');
             await login(email, password);
-            navigate('/dashboard');
+            console.log('[Login] Login successful, navigating...');
+            // Redirect to the intended location or dashboard
+            const from = location.state?.from?.pathname || '/dashboard';
+            navigate(from, { replace: true });
         } catch (err) {
+            console.error('[Login] Login failed:', err);
             // Error is handled by store
         }
     };

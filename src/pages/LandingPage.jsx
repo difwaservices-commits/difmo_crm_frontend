@@ -1,8 +1,24 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle, BarChart2, Users, Shield } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, CheckCircle, BarChart2, Users, Shield, LogOut, User } from 'lucide-react';
+import useAuthStore from '../store/useAuthStore';
 
 const LandingPage = () => {
+    const { user, isAuthenticated, logout } = useAuthStore();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
+
+    const getFullName = () => {
+        if (user?.firstName && user?.lastName) {
+            return `${user.firstName} ${user.lastName}`;
+        }
+        return user?.email || 'User';
+    };
+
     return (
         <div className="min-h-screen bg-white">
             {/* Navigation */}
@@ -13,10 +29,31 @@ const LandingPage = () => {
                             <span className="text-2xl font-bold text-blue-600">DifmoCRM</span>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <Link to="/login" className="text-gray-600 hover:text-gray-900 font-medium">Log in</Link>
-                            <Link to="/company-registration" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                                Get Started
-                            </Link>
+                            {isAuthenticated ? (
+                                <>
+                                    <Link
+                                        to="/dashboard"
+                                        className="text-gray-600 hover:text-gray-900 font-medium flex items-center space-x-2"
+                                    >
+                                        <User className="h-4 w-4" />
+                                        <span>{getFullName()}</span>
+                                    </Link>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="flex items-center space-x-2 bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100 transition font-medium"
+                                    >
+                                        <LogOut className="h-4 w-4" />
+                                        <span>Logout</span>
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <Link to="/login" className="text-gray-600 hover:text-gray-900 font-medium">Log in</Link>
+                                    <Link to="/company-registration" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                                        Get Started
+                                    </Link>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>

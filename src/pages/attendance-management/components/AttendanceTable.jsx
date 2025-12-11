@@ -3,11 +3,14 @@ import Icon from '../../../components/AppIcon';
 import AppImage from '../../../components/AppImage';
 import AttendanceModal from './AttendanceModal';
 
-const AttendanceTable = ({ 
-  attendanceData, 
-  loading, 
-  selectedEmployees, 
-  onSelectionChange 
+const AttendanceTable = ({
+  attendanceData,
+  loading,
+  selectedEmployees,
+  onSelectionChange,
+  onCheckIn,
+  onCheckOut,
+  onViewHistory
 }) => {
   const [sortField, setSortField] = useState('employeeName');
   const [sortDirection, setSortDirection] = useState('asc');
@@ -49,7 +52,8 @@ const AttendanceTable = ({
       present: { color: 'bg-success text-success-foreground', label: 'Present', icon: 'Check' },
       absent: { color: 'bg-error text-error-foreground', label: 'Absent', icon: 'X' },
       late: { color: 'bg-warning text-warning-foreground', label: 'Late', icon: 'Clock' },
-      early_departure: { color: 'bg-orange-500 text-white', label: 'Early Out', icon: 'LogOut' }
+      early_departure: { color: 'bg-orange-500 text-white', label: 'Early Out', icon: 'LogOut' },
+      not_checked_in: { color: 'bg-muted text-muted-foreground', label: 'Not Checked In', icon: 'MinusCircle' }
     };
 
     const config = statusConfig?.[status] || statusConfig?.absent;
@@ -77,12 +81,12 @@ const AttendanceTable = ({
   const sortedData = [...(attendanceData || [])]?.sort((a, b) => {
     let aValue = a?.[sortField];
     let bValue = b?.[sortField];
-    
+
     if (typeof aValue === 'string') {
       aValue = aValue?.toLowerCase();
       bValue = bValue?.toLowerCase();
     }
-    
+
     if (sortDirection === 'asc') {
       return aValue > bValue ? 1 : -1;
     } else {
@@ -91,20 +95,32 @@ const AttendanceTable = ({
   });
 
   const SortableHeader = ({ field, children }) => (
-    <th 
+    <th
       className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer hover:bg-accent transition-colors duration-150"
       onClick={() => handleSort(field)}
     >
       <div className="flex items-center space-x-1">
         <span>{children}</span>
-        <Icon 
-          name={sortField === field && sortDirection === 'desc' ? 'ChevronDown' : 'ChevronUp'} 
+        <Icon
+          name={sortField === field && sortDirection === 'desc' ? 'ChevronDown' : 'ChevronUp'}
           size={14}
           className={sortField === field ? 'text-primary' : 'text-muted-foreground/50'}
         />
       </div>
     </th>
   );
+
+  const formatTime = (timeString) => {
+    if (!timeString || timeString === '--') return '--';
+    try {
+      const [hours, minutes] = timeString.split(':');
+      const date = new Date();
+      date.setHours(parseInt(hours), parseInt(minutes));
+      return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    } catch (e) {
+      return timeString;
+    }
+  };
 
   if (loading) {
     return (
@@ -149,8 +165,8 @@ const AttendanceTable = ({
             </thead>
             <tbody className="bg-card divide-y divide-border">
               {sortedData?.map((employee) => (
-                <tr 
-                  key={employee?.id} 
+                <tr
+                  key={employee?.id}
                   className="hover:bg-accent/50 transition-colors duration-150 cursor-pointer"
                   onClick={() => handleEmployeeClick(employee)}
                 >
@@ -173,7 +189,7 @@ const AttendanceTable = ({
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-foreground">{employee?.employeeName}</div>
-                        <div className="text-sm text-muted-foreground">{employee?.employeeId}</div>
+                        <div className="text-sm text-muted-foreground">{employee?.employeeCode || employee?.employeeId}</div>
                       </div>
                     </div>
                   </td>
@@ -182,12 +198,12 @@ const AttendanceTable = ({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-foreground font-mono">
-                      {employee?.checkInTime}
+                      {formatTime(employee?.checkInTime)}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-foreground font-mono">
-                      {employee?.checkOutTime}
+                      {formatTime(employee?.checkOutTime)}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -203,10 +219,10 @@ const AttendanceTable = ({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-1">
-                      <Icon 
-                        name={employee?.location === 'Office' ? 'Building' : employee?.location === 'WFH' ? 'Home' : 'MapPin'} 
-                        size={14} 
-                        className="text-muted-foreground" 
+                      <Icon
+                        name={employee?.location === 'Office' ? 'Building' : employee?.location === 'WFH' ? 'Home' : 'MapPin'}
+                        size={14}
+                        className="text-muted-foreground"
                       />
                       <span className="text-sm text-foreground">{employee?.location}</span>
                     </div>
@@ -219,23 +235,37 @@ const AttendanceTable = ({
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" onClick={(e) => e?.stopPropagation()}>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center justify-end space-x-2">
+                      {!employee.hasRecord ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onCheckIn(employee.employeeId);
+                          }}
+                          className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded hover:bg-primary/90 transition-colors"
+                        >
+                          Check In
+                        </button>
+                      ) : !employee.checkOutTime || employee.checkOutTime === '--' ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onCheckOut(employee.id);
+                          }}
+                          className="text-xs bg-warning text-warning-foreground px-2 py-1 rounded hover:bg-warning/90 transition-colors"
+                        >
+                          Check Out
+                        </button>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Completed</span>
+                      )}
+
                       <button
-                        onClick={() => handleEmployeeClick(employee)}
-                        className="text-primary hover:text-primary/80 transition-colors duration-150"
-                        title="View Details"
+                        onClick={() => onViewHistory(employee)}
+                        className="text-muted-foreground hover:text-foreground transition-colors duration-150"
+                        title="View History"
                       >
                         <Icon name="Eye" size={16} />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e?.stopPropagation();
-                          console.log('Edit attendance for:', employee?.employeeName);
-                        }}
-                        className="text-muted-foreground hover:text-foreground transition-colors duration-150"
-                        title="Edit Attendance"
-                      >
-                        <Icon name="Edit" size={16} />
                       </button>
                     </div>
                   </td>
@@ -243,7 +273,7 @@ const AttendanceTable = ({
               ))}
             </tbody>
           </table>
-          
+
           {attendanceData?.length === 0 && (
             <div className="text-center py-12">
               <Icon name="Users" size={48} className="mx-auto text-muted-foreground mb-4" />
