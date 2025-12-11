@@ -28,20 +28,20 @@ const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
 
   // Fetch employees on mount and when filters change
   useEffect(() => {
-    // Only fetch if user is loaded
-    if (user && user.id) {
+    // Only fetch if user is loaded and authenticated
+    if (isAuthenticated && user && user.id) {
       fetchEmployees();
     }
-  }, [filters, user]);
+  }, [filters, user, isAuthenticated]);
 
   const fetchEmployees = async () => {
     // Don't fetch if user not loaded yet
-    if (!user || !user.id) {
-      console.log('[EmployeeManagement] Waiting for user data...');
+    if (!isAuthenticated || !user || !user.id) {
+      console.log('[EmployeeManagement] Waiting for user data/auth...');
       return;
     }
 

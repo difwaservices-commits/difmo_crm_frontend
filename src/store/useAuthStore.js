@@ -31,13 +31,17 @@ const getInitialState = () => {
     const userStr = localStorage.getItem('user');
     let user = null;
 
-    if (userStr) {
+    if (token && userStr) {
         try {
             user = JSON.parse(userStr);
         } catch (e) {
             console.error('Failed to parse user data from localStorage:', e);
             localStorage.removeItem('user');
         }
+    } else {
+        // If no token, ensure no user is set
+        user = null;
+        if (userStr) localStorage.removeItem('user');
     }
 
     return {

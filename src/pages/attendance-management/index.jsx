@@ -34,20 +34,22 @@ const AttendanceManagement = () => {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [historyEmployee, setHistoryEmployee] = useState(null);
   const [analyticsData, setAnalyticsData] = useState(null);
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    if (user?.company?.id) {
+    if (isAuthenticated && user?.company?.id) {
       fetchAttendanceData();
       fetchEmployees();
     }
-  }, [user]);
+  }, [user, isAuthenticated]);
 
   useEffect(() => {
     applyFilters();
   }, [filters, attendanceData]);
 
   const fetchAttendanceData = async () => {
+    if (!isAuthenticated || !user?.company?.id) return;
+
     setLoading(true);
     try {
       const [attendanceRecords, employeesList, analytics] = await Promise.all([

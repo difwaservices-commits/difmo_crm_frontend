@@ -28,6 +28,7 @@ export const register = async (companyData) => {
 
 export const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
 };
 
 export const getToken = () => {

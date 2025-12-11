@@ -14,7 +14,7 @@ const QuickAttendance = () => {
   const [employee, setEmployee] = useState(null);
   const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
 
   const breadcrumbItems = [
     { label: 'Dashboard', path: '/dashboard' },
@@ -22,10 +22,13 @@ const QuickAttendance = () => {
   ];
 
   useEffect(() => {
-    fetchEmployeeAndAttendance();
-  }, []);
+    if (isAuthenticated && user?.id) {
+      fetchEmployeeAndAttendance();
+    }
+  }, [user, isAuthenticated]);
 
   const fetchEmployeeAndAttendance = async () => {
+    if (!isAuthenticated || !user?.id) return;
     try {
       setLoading(true);
       // Get employee record for current user
