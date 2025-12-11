@@ -56,7 +56,7 @@ const Header = () => {
               <span>{item?.label}</span>
             </button>
           ))}
-          
+
           {/* More Dropdown */}
           <div className="relative group">
             <button className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors duration-150">
@@ -84,7 +84,7 @@ const Header = () => {
         <div className="flex items-center space-x-4">
           <NotificationCenter />
           <UserProfileDropdown />
-          
+
           {/* Mobile Menu Button */}
           <button
             onClick={toggleMobileMenu}

@@ -7,14 +7,24 @@ function Image({
   ...props
 }) {
 
+  const [imgSrc, setImgSrc] = React.useState(src);
+
+  React.useEffect(() => {
+    setImgSrc(src);
+  }, [src]);
+
+  const handleError = () => {
+    if (imgSrc !== "/assets/images/no_image.png") {
+      setImgSrc("/assets/images/crm_landing_hero.png");
+    }
+  };
+
   return (
     <img
-      src={src}
+      src={imgSrc}
       alt={alt}
       className={className}
-      onError={(e) => {
-        e.target.src = "/assets/images/no_image.png"
-      }}
+      onError={handleError}
       {...props}
     />
   );
