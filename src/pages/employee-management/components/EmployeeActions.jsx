@@ -3,12 +3,12 @@ import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import Select from '../../../components/ui/Select';
 
-const EmployeeActions = ({ 
-  selectedEmployees, 
-  onAddEmployee, 
-  onBulkAction, 
-  onImportEmployees, 
-  onExportEmployees 
+const EmployeeActions = ({
+  selectedEmployees,
+  onAddEmployee,
+  onBulkAction,
+  onImportEmployees,
+  onExportEmployees
 }) => {
   const [bulkAction, setBulkAction] = useState('');
   const [showBulkActions, setShowBulkActions] = useState(false);
@@ -21,6 +21,7 @@ const EmployeeActions = ({
     { value: 'delete', label: 'Delete Selected' },
     { value: 'assign-manager', label: 'Assign Manager' },
     { value: 'change-department', label: 'Change Department' },
+    { value: 'bulk-check-in', label: 'Bulk Check-in' },
     { value: 'send-notification', label: 'Send Notification' }
   ];
 

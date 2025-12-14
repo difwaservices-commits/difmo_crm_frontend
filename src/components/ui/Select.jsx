@@ -113,19 +113,25 @@ const Select = React.forwardRef(({
                 </label>
             )}
             <div className="relative">
-                <button
+                <div
                     ref={ref}
                     id={selectId}
-                    type="button"
                     className={cn(
-                        "flex h-10 w-full items-center justify-between rounded-md border border-input bg-white text-black px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                        "flex h-10 w-full items-center justify-between rounded-md border border-input bg-white text-black px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer",
                         error && "border-destructive focus:ring-destructive",
                         !hasValue && "text-muted-foreground"
                     )}
                     onClick={handleToggle}
-                    disabled={disabled}
                     aria-expanded={isOpen}
                     aria-haspopup="listbox"
+                    role="combobox"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleToggle();
+                        }
+                    }}
                     {...props}
                 >
                     <span className="truncate">{getSelectedDisplay()}</span>
@@ -139,19 +145,19 @@ const Select = React.forwardRef(({
                         )}
 
                         {clearable && hasValue && !loading && (
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-4 w-4"
+                            <div
+                                className="h-4 w-4 flex items-center justify-center hover:bg-muted rounded-full cursor-pointer"
                                 onClick={handleClear}
+                                role="button"
+                                tabIndex={0}
                             >
                                 <X className="h-3 w-3" />
-                            </Button>
+                            </div>
                         )}
 
                         <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
                     </div>
-                </button>
+                </div>
 
                 {/* Hidden native select for form submission */}
                 <select

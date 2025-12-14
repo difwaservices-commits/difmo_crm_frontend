@@ -62,6 +62,12 @@ const Sidebar = ({ isCollapsed = false, onToggleCollapse }) => {
       tooltip: 'Financial processing'
     },
     {
+      label: 'Company Profile',
+      path: '/company-profile',
+      icon: 'Building',
+      tooltip: 'Manage company settings'
+    },
+    {
       label: 'Settings',
       path: '/settings',
       icon: 'Settings',

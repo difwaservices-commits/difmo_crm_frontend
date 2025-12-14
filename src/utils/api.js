@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:5000',
     // baseURL: 'https://difmo-crm-backend.onrender.com',
 
     headers: {
@@ -56,7 +56,8 @@ api.interceptors.response.use(
 
                 // Redirect to login
                 setTimeout(() => {
-                    // window.location.href = '/login';
+                    window.dispatchEvent(new Event('auth:logout'));
+                    window.location.href = '/login';
                 }, 100);
             }
         }

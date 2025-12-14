@@ -7,6 +7,7 @@ import EmployeeFilters from './components/EmployeeFilters';
 import EmployeeActions from './components/EmployeeActions';
 import EmployeeModal from './components/EmployeeModal';
 import employeeService from '../../services/employeeService';
+import attendanceService from '../../services/attendanceService';
 import useAuthStore from '../../store/useAuthStore';
 
 const EmployeeManagement = () => {
@@ -89,7 +90,7 @@ const EmployeeManagement = () => {
         skills: emp.skills || [],
         userId: emp.userId,
         companyId: emp.companyId,
-        departmentId: emp.departmentId
+        departmentId: emp.department?.id || emp.departmentId
       }));
 
       setEmployees(transformedData);
@@ -214,8 +215,21 @@ const EmployeeManagement = () => {
 
   const handleBulkAction = async (action, employeeIds) => {
     console.log('Bulk action:', action, 'for employees:', employeeIds);
-    // Implement bulk actions as needed
-    setSelectedEmployees([]);
+
+    if (action === 'bulk-check-in') {
+      try {
+        const notes = prompt('Enter notes for bulk check-in (optional):');
+        await attendanceService.bulkCheckIn(employeeIds, notes);
+        alert('Bulk check-in successful!');
+        setSelectedEmployees([]);
+      } catch (error) {
+        console.error('Bulk check-in failed:', error);
+        alert('Failed to process bulk check-in. Please try again.');
+      }
+    } else {
+      // Implement other bulk actions as needed
+      setSelectedEmployees([]);
+    }
   };
 
   const handleImportEmployees = (file) => {
@@ -239,9 +253,9 @@ const EmployeeManagement = () => {
           firstName: employeeData.firstName,
           lastName: employeeData.lastName,
           phone: employeeData.phone,
-          password: 'Welcome123!', // Default password, or could be generated/input
+          password: 'Welcome123!',
           companyId: user?.company?.id,
-          departmentId: employeeData.departmentId,
+          departmentId: employeeData.department,
           role: employeeData.role,
           hireDate: employeeData.hireDate,
           salary: employeeData.salary,
@@ -256,7 +270,9 @@ const EmployeeManagement = () => {
         });
       } else if (modalState.mode === 'edit') {
         await employeeService.update(modalState.employee.id, {
-          departmentId: employeeData.departmentId,
+          firstName: employeeData.firstName,
+          lastName: employeeData.lastName,
+          departmentId: employeeData.department,
           role: employeeData.role,
           hireDate: employeeData.hireDate,
           salary: employeeData.salary,

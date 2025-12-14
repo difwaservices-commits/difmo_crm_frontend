@@ -2,21 +2,34 @@ import api from '../utils/api';
 
 export const attendanceService = {
     // Check in
-    async checkIn(employeeId, location = '', notes = '') {
+    async checkIn(employeeId, location = '', notes = '', latitude = null, longitude = null) {
         const response = await api.post('/attendance/check-in', {
             employeeId,
             location,
+            notes,
+            latitude,
+            longitude
+        });
+        return response.data.data || response.data;
+    },
+
+    // Bulk Check-in
+    async bulkCheckIn(employeeIds, notes = '') {
+        const response = await api.post('/attendance/bulk-check-in', {
+            employeeIds,
             notes
         });
         return response.data.data || response.data;
     },
 
     // Check out
-    async checkOut(attendanceId, notes = '') {
+    async checkOut(attendanceId, notes = '', latitude = null, longitude = null) {
         console.log('[AttendanceService] Checking out:', { attendanceId, notes });
         const response = await api.post('/attendance/check-out', {
             attendanceId,
-            notes
+            notes,
+            latitude,
+            longitude
         });
         return response.data.data || response.data;
     },

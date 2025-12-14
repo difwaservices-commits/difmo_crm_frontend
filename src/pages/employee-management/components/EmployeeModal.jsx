@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import api from '../../../utils/api';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Select from '../../../components/ui/Select';
 
-const EmployeeModal = ({ 
-  isOpen, 
-  onClose, 
-  employee, 
+const EmployeeModal = ({
+  isOpen,
+  onClose,
+  employee,
   mode, // 'view', 'edit', 'add'
-  onSave 
+  onSave
 }) => {
   const [formData, setFormData] = useState({
     firstName: '',
@@ -43,7 +44,7 @@ const EmployeeModal = ({
         lastName: employee?.name?.split(' ')?.slice(1)?.join(' ') || '',
         email: employee?.email || '',
         phone: employee?.phone || '',
-        department: employee?.department || '',
+        department: employee?.departmentId || '',
         role: employee?.role || '',
         employmentType: employee?.employmentType || '',
         status: employee?.status || 'active',
@@ -80,16 +81,25 @@ const EmployeeModal = ({
     }
   }, [employee, mode]);
 
-  const departmentOptions = [
-    { value: 'engineering', label: 'Engineering' },
-    { value: 'marketing', label: 'Marketing' },
-    { value: 'sales', label: 'Sales' },
-    { value: 'hr', label: 'Human Resources' },
-    { value: 'finance', label: 'Finance' },
-    { value: 'operations', label: 'Operations' },
-    { value: 'design', label: 'Design' },
-    { value: 'support', label: 'Customer Support' }
-  ];
+  const [departments, setDepartments] = useState([]);
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await api.get('/departments');
+        let departmentsData = [];
+        if (Array.isArray(response.data)) {
+          departmentsData = response.data;
+        } else if (response.data && Array.isArray(response.data.data)) {
+          departmentsData = response.data.data;
+        }
+        setDepartments(departmentsData.map(dept => ({ value: dept.id, label: dept.name })));
+      } catch (error) {
+        console.error('Failed to fetch departments:', error);
+      }
+    };
+    fetchDepartments();
+  }, []);
 
   const employmentTypeOptions = [
     { value: 'full-time', label: 'Full-time' },
@@ -138,7 +148,7 @@ const EmployeeModal = ({
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData?.firstName?.trim()) newErrors.firstName = 'First name is required';
     if (!formData?.lastName?.trim()) newErrors.lastName = 'Last name is required';
     if (!formData?.email?.trim()) newErrors.email = 'Email is required';
@@ -160,7 +170,7 @@ const EmployeeModal = ({
         name: `${formData?.firstName} ${formData?.lastName}`?.trim(),
         id: employee?.id || Date.now()
       };
-      
+
       await onSave(employeeData);
       onClose();
     } catch (error) {
@@ -203,10 +213,9 @@ const EmployeeModal = ({
               <button
                 key={tab?.id}
                 onClick={() => setActiveTab(tab?.id)}
-                className={`flex items-center space-x-2 py-4 border-b-2 text-sm font-medium transition-colors ${
-                  activeTab === tab?.id
-                    ? 'border-primary text-primary' :'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+                className={`flex items-center space-x-2 py-4 border-b-2 text-sm font-medium transition-colors ${activeTab === tab?.id
+                  ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
               >
                 <Icon name={tab?.icon} size={16} />
                 <span>{tab?.label}</span>
@@ -283,7 +292,7 @@ const EmployeeModal = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select
                   label="Department"
-                  options={departmentOptions}
+                  options={departments}
                   value={formData?.department}
                   onChange={(value) => handleInputChange('department', value)}
                   error={errors?.department}

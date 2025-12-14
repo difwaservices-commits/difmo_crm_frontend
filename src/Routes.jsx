@@ -20,6 +20,7 @@ import Login from './pages/Login';
 
 import LandingPage from './pages/LandingPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import CompanyProfile from './pages/company-profile';
 
 const Routes = () => {
   return (
@@ -71,6 +72,11 @@ const Routes = () => {
           <Route path="/attendance-analytics" element={
             <ProtectedRoute>
               <AttendanceAnalytics />
+            </ProtectedRoute>
+          } />
+          <Route path="/company-profile" element={
+            <ProtectedRoute>
+              <CompanyProfile />
             </ProtectedRoute>
           } />
 
