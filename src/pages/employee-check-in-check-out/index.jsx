@@ -1,25 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, MapPin, CheckCircle, XCircle } from 'lucide-react';
+import { Clock, MapPin, CheckCircle, XCircle, LogOut } from 'lucide-react';
 import Header from '../../components/ui/Header';
 import Sidebar from '../../components/ui/Sidebar';
-import BreadcrumbNavigation from '../../components/ui/BreadcrumbNavigation';
 import attendanceService from '../../services/attendanceService';
 import employeeService from '../../services/employeeService';
 import useAuthStore from '../../store/useAuthStore';
+import AttendanceHistory from '../../components/AttendanceHistory';
+import { useNavigate } from 'react-router-dom';
 
 const QuickAttendance = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [todayAttendance, setTodayAttendance] = useState(null);
   const [employee, setEmployee] = useState(null);
-  const [location, setLocation] = useState('');
+  const [locationName, setLocationName] = useState('');
   const [notes, setNotes] = useState('');
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, logout } = useAuthStore();
+  const navigate = useNavigate();
 
-  const breadcrumbItems = [
-    { label: 'Dashboard', path: '/dashboard' },
-    { label: 'Quick Attendance', path: '/employee-check-in-check-out' }
-  ];
+  // Time state
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated && user?.id) {
@@ -48,6 +53,26 @@ const QuickAttendance = () => {
     }
   };
 
+  const getGeolocation = () => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Geolocation is not supported by your browser'));
+      } else {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            });
+          },
+          (error) => {
+            reject(error);
+          }
+        );
+      }
+    });
+  };
+
   const handleCheckIn = async () => {
     if (!employee) {
       alert('Employee record not found');
@@ -56,14 +81,27 @@ const QuickAttendance = () => {
 
     try {
       setLoading(true);
-      await attendanceService.checkIn(employee.id, location, notes);
+      const coords = await getGeolocation();
+
+      await attendanceService.checkIn(
+        employee.id,
+        locationName || 'Unknown Location',
+        notes,
+        coords.latitude,
+        coords.longitude
+      );
+
       alert('Checked in successfully!');
       await fetchEmployeeAndAttendance();
-      setLocation('');
+      setLocationName('');
       setNotes('');
     } catch (err) {
       console.error('Error checking in:', err);
-      alert('Failed to check in. You may have already checked in today.');
+      if (err.code === 1) { // Permission denied
+        alert('Please allow location access to check in.');
+      } else {
+        alert('Failed to check in. ' + (err.message || ''));
+      }
     } finally {
       setLoading(false);
     }
@@ -77,171 +115,182 @@ const QuickAttendance = () => {
 
     try {
       setLoading(true);
-      await attendanceService.checkOut(todayAttendance.id, notes);
+      const coords = await getGeolocation();
+
+      await attendanceService.checkOut(
+        todayAttendance.id,
+        notes,
+        coords.latitude,
+        coords.longitude
+      );
+
       alert('Checked out successfully!');
       await fetchEmployeeAndAttendance();
       setNotes('');
     } catch (err) {
       console.error('Error checking out:', err);
-      alert('Failed to check out. Please try again.');
+      if (err.code === 1) {
+        alert('Please allow location access to check out.');
+      } else {
+        alert('Failed to check out. ' + (err.message || ''));
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const getCurrentTime = () => {
-    return new Date().toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  };
-
-  const getCurrentDate = () => {
-    return new Date().toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <Sidebar isCollapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
-
-      <main className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'} pt-16 pb-20 lg:pb-6`}>
-        <div className="p-6">
-          <BreadcrumbNavigation items={breadcrumbItems} />
-
-          <div className="mb-8">
-            <h1 className="text-3xl font-semibold text-foreground mb-2">Quick Attendance</h1>
-            <p className="text-muted-foreground">
-              Check in and check out quickly and easily
-            </p>
-          </div>
-
-          <div className="max-w-2xl mx-auto">
-            {/* Current Time Card */}
-            <div className="bg-card rounded-lg shadow-sm border border-border p-8 mb-6 text-center">
-              <div className="flex items-center justify-center mb-4">
-                <Clock className="h-12 w-12 text-primary" />
-              </div>
-              <div className="text-5xl font-bold text-foreground mb-2">{getCurrentTime()}</div>
-              <div className="text-lg text-muted-foreground">{getCurrentDate()}</div>
-            </div>
-
-            {/* Status Card */}
-            {todayAttendance && (
-              <div className="bg-card rounded-lg shadow-sm border border-border p-6 mb-6">
-                <h3 className="text-lg font-semibold mb-4">Today's Status</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Check-in Time:</span>
-                    <span className="font-medium flex items-center">
-                      <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                      {todayAttendance.checkInTime}
-                    </span>
-                  </div>
-                  {todayAttendance.checkOutTime ? (
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Check-out Time:</span>
-                      <span className="font-medium flex items-center">
-                        <CheckCircle className="h-4 w-4 text-blue-500 mr-2" />
-                        {todayAttendance.checkOutTime}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Check-out Time:</span>
-                      <span className="font-medium flex items-center">
-                        <XCircle className="h-4 w-4 text-gray-400 mr-2" />
-                        Not checked out yet
-                      </span>
-                    </div>
-                  )}
-                  {todayAttendance.workHours && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Work Hours:</span>
-                      <span className="font-medium">{todayAttendance.workHours} hours</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Action Form */}
-            <div className="bg-card rounded-lg shadow-sm border border-border p-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    <MapPin className="inline h-4 w-4 mr-1" />
-                    Location (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    placeholder="e.g., Office, Home, Client Site"
-                    className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    disabled={loading || (todayAttendance && todayAttendance.checkOutTime)}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Notes (Optional)
-                  </label>
-                  <textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Add any notes..."
-                    rows={3}
-                    className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    disabled={loading || (todayAttendance && todayAttendance.checkOutTime)}
-                  />
-                </div>
-
-                <div className="flex gap-4">
-                  {!todayAttendance && (
-                    <button
-                      onClick={handleCheckIn}
-                      disabled={loading}
-                      className="flex-1 bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                    >
-                      {loading ? 'Processing...' : 'Check In'}
-                    </button>
-                  )}
-
-                  {todayAttendance && !todayAttendance.checkOutTime && (
-                    <button
-                      onClick={handleCheckOut}
-                      disabled={loading}
-                      className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                    >
-                      {loading ? 'Processing...' : 'Check Out'}
-                    </button>
-                  )}
-
-                  {todayAttendance && todayAttendance.checkOutTime && (
-                    <div className="flex-1 bg-gray-100 text-gray-600 py-3 px-6 rounded-lg text-center font-medium">
-                      Attendance Completed for Today
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Info Card */}
-            <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-800">
-                <strong>Tip:</strong> Make sure to check in when you start work and check out when you finish.
-                Your work hours will be automatically calculated.
-              </p>
-            </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Mobile-like Header */}
+      <div className="bg-white shadow-sm px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="Logo" className="h-8 w-8" />
+          <div>
+            <h1 className="text-lg font-bold text-gray-900">Difmo CRM</h1>
+            <p className="text-xs text-gray-500">Employee Portal</p>
           </div>
         </div>
+        <button onClick={handleLogout} className="p-2 text-gray-500 hover:text-red-600 transition-colors">
+          <LogOut size={20} />
+        </button>
+      </div>
+
+      <main className="p-4 max-w-md mx-auto space-y-6 pb-24">
+        {/* Welcome Section */}
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Hello, {user?.name || 'Employee'}!</h2>
+          <p className="text-gray-500">Mark your attendance for today</p>
+        </div>
+
+        {/* Clock Card */}
+        <div className="bg-blue-600 rounded-3xl p-6 text-white shadow-lg shadow-blue-200 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-10 -mt-10"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-10 rounded-full -ml-10 -mb-10"></div>
+
+          <div className="relative z-10 flex flex-col items-center justify-center py-4">
+            <Clock className="w-8 h-8 mb-3 opacity-80" />
+            <h3 className="text-5xl font-bold mb-1">
+              {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }).split(' ')[0]}
+              <span className="text-xl ml-1">{currentTime.toLocaleTimeString('en-US', { hour12: true }).split(' ')[1]}</span>
+            </h3>
+            <p className="text-blue-100">
+              {currentTime.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            </p>
+          </div>
+        </div>
+
+        {/* Action Card */}
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+          {todayAttendance ? (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center bg-gray-50 p-4 rounded-2xl">
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Check In Time</p>
+                  <p className="font-bold text-gray-900 flex items-center gap-2">
+                    <CheckCircle size={16} className="text-green-500" />
+                    {todayAttendance.checkInTime}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-gray-500 mb-1">Status</p>
+                  <span className="inline-block px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-md">
+                    PRESENT
+                  </span>
+                </div>
+              </div>
+
+              {!todayAttendance.checkOutTime ? (
+                <>
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-gray-700">Notes (Optional)</label>
+                    <textarea
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Leaving for..."
+                      className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      rows={2}
+                    />
+                  </div>
+                  <button
+                    onClick={handleCheckOut}
+                    disabled={loading}
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-200 transition-all flex items-center justify-center gap-2"
+                  >
+                    {loading ? 'Processing...' : (
+                      <>
+                        <LogOut size={20} />
+                        Check Out
+                      </>
+                    )}
+                  </button>
+                </>
+              ) : (
+                <div className="flex justify-between items-center bg-gray-50 p-4 rounded-2xl">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Check Out Time</p>
+                    <p className="font-bold text-gray-900 flex items-center gap-2">
+                      <CheckCircle size={16} className="text-orange-500" />
+                      {todayAttendance.checkOutTime}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-gray-500 mb-1">Work Hours</p>
+                    <p className="font-bold text-gray-900">{todayAttendance.workHours} hrs</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-gray-700">Location</label>
+                <div className="relative">
+                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  <input
+                    type="text"
+                    value={locationName}
+                    onChange={(e) => setLocationName(e.target.value)}
+                    placeholder="Office, Home, etc."
+                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-gray-700">Notes (Optional)</label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Any notes for today..."
+                  className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  rows={2}
+                />
+              </div>
+
+              <button
+                onClick={handleCheckIn}
+                disabled={loading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2"
+              >
+                {loading ? 'Processing...' : (
+                  <>
+                    <CheckCircle size={20} />
+                    Check In
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* History Section */}
+        {employee && <AttendanceHistory employeeId={employee.id} />}
+
       </main>
     </div>
   );
