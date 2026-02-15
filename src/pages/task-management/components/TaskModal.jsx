@@ -95,7 +95,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, employees = [] }) => 
       const dueDate = new Date(formData.dueDate);
       const today = new Date();
       today?.setHours(0, 0, 0, 0);
-      
+
       if (dueDate < today) {
         newErrors.dueDate = 'Due date cannot be in the past';
       }
@@ -111,7 +111,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, employees = [] }) => 
 
   const handleSubmit = async (e) => {
     e?.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -123,9 +123,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, employees = [] }) => 
         ...formData,
         tags: formData?.tags?.split(',')?.map(tag => tag?.trim())?.filter(tag => tag),
         estimatedHours: formData?.estimatedHours ? parseInt(formData?.estimatedHours) : null,
-        id: task?.id || Date.now(),
-        createdAt: task?.createdAt || new Date()?.toISOString(),
-        updatedAt: new Date()?.toISOString(),
+        ...(task?.id && { id: task.id }),
         progress: task?.progress || 0
       };
 
@@ -148,7 +146,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, employees = [] }) => 
       type: file?.type,
       url: URL.createObjectURL(file)
     }));
-    
+
     setFormData(prev => ({
       ...prev,
       attachments: [...prev?.attachments, ...newAttachments]

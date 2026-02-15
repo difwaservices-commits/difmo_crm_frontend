@@ -22,6 +22,8 @@ import EmployeeDashboard from './pages/employee-dashboard';
 import LandingPage from './pages/LandingPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import CompanyProfile from './pages/company-profile';
+import RolesManagement from './pages/settings/roles';
+import PayrollPage from './pages/payroll';
 
 const Routes = () => {
   return (
@@ -83,6 +85,16 @@ const Routes = () => {
           <Route path="/company-profile" element={
             <ProtectedRoute>
               <CompanyProfile />
+            </ProtectedRoute>
+          } />
+          <Route path="/payroll" element={
+            <ProtectedRoute>
+              <PayrollPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/settings/roles" element={
+            <ProtectedRoute>
+              <RolesManagement />
             </ProtectedRoute>
           } />
 

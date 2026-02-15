@@ -15,13 +15,7 @@ const Sidebar = ({ isCollapsed = false, onToggleCollapse }) => {
   const isAdmin = user?.roles?.some(r => ['Super Admin', 'Admin'].includes(r.name));
   const isEmployee = user?.roles?.some(r => r.name === 'Employee');
 
-  const comingSoonPaths = [
-    '/task-management',
-    '/time-tracking',
-    '/monitoring-dashboard',
-    '/payroll',
-    '/settings'
-  ];
+  const comingSoonPaths = [];
 
   let navigationItems = [];
 
@@ -76,9 +70,9 @@ const Sidebar = ({ isCollapsed = false, onToggleCollapse }) => {
         tooltip: 'Manage company settings'
       },
       {
-        label: 'Settings',
-        path: '/settings',
-        icon: 'Settings',
+        label: 'Roles & Permissions',
+        path: '/settings/roles',
+        icon: 'Shield',
         tooltip: 'System configuration'
       },
     ];

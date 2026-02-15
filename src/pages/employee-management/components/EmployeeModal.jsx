@@ -5,6 +5,7 @@ import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Select from '../../../components/ui/Select';
+import useAuthStore from '../../../store/useAuthStore';
 
 const EmployeeModal = ({
   isOpen,
@@ -19,7 +20,7 @@ const EmployeeModal = ({
     email: '',
     phone: '',
     department: '',
-    role: '',
+    roleIds: [], // Changed to roleIds array
     employmentType: '',
     status: 'active',
     hireDate: '',
@@ -36,6 +37,9 @@ const EmployeeModal = ({
   const [activeTab, setActiveTab] = useState('basic');
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [roles, setRoles] = useState([]); // New state for roles list
+
+  const { user: currentUser } = useAuthStore();
 
   useEffect(() => {
     if (employee && mode !== 'add') {
@@ -45,7 +49,8 @@ const EmployeeModal = ({
         email: employee?.email || '',
         phone: employee?.phone || '',
         department: employee?.departmentId || '',
-        role: employee?.role || '',
+        designationId: employee?.designationId || '', // Added designationId here
+        roleIds: employee?.roleIds || [],
         employmentType: employee?.employmentType || '',
         status: employee?.status || 'active',
         hireDate: employee?.hireDate || '',
@@ -65,7 +70,7 @@ const EmployeeModal = ({
         email: '',
         phone: '',
         department: '',
-        role: '',
+        roleIds: [],
         employmentType: 'full-time',
         status: 'active',
         hireDate: new Date()?.toISOString()?.split('T')?.[0],
@@ -81,25 +86,39 @@ const EmployeeModal = ({
     }
   }, [employee, mode]);
 
-  const [departments, setDepartments] = useState([]);
-
   useEffect(() => {
-    const fetchDepartments = async () => {
+    const fetchData = async () => {
       try {
-        const response = await api.get('/departments');
-        let departmentsData = [];
-        if (Array.isArray(response.data)) {
-          departmentsData = response.data;
-        } else if (response.data && Array.isArray(response.data.data)) {
-          departmentsData = response.data.data;
+        const [deptRes, roleRes, designRes] = await Promise.all([
+          api.get('/departments'),
+          api.get(`/access-control/roles?companyId=${currentUser?.company?.id}`),
+          api.get(`/designations?companyId=${currentUser?.company?.id}`) // Fetch designations
+        ]);
+
+        if (roleRes.data) {
+          setRoles(roleRes.data.map(r => ({ value: r.id, label: r.name })));
         }
-        setDepartments(departmentsData.map(dept => ({ value: dept.id, label: dept.name })));
+
+        if (designRes.data) {
+          setDesignations(designRes.data.map(d => ({ value: d.id, label: d.name })));
+        }
+
+        if (deptRes.data) {
+          setDepartments(deptRes.data.map(d => ({ value: d.id, label: d.name })));
+        }
       } catch (error) {
-        console.error('Failed to fetch departments:', error);
+        console.error('Failed to fetch modal data:', error);
       }
     };
-    fetchDepartments();
-  }, []);
+    if (isOpen) fetchData();
+  }, [isOpen, currentUser]);
+
+  const tabs = [
+    { id: 'basic', label: 'Basic Info', icon: 'User' },
+    { id: 'employment', label: 'Roles & Employment', icon: 'Shield' },
+    { id: 'contact', label: 'Contact', icon: 'Phone' },
+    { id: 'documents', label: 'Documents', icon: 'FileText' }
+  ];
 
   const employmentTypeOptions = [
     { value: 'full-time', label: 'Full-time' },
@@ -132,13 +151,6 @@ const EmployeeModal = ({
     { value: 'lisa-anderson', label: 'Lisa Anderson' }
   ];
 
-  const tabs = [
-    { id: 'basic', label: 'Basic Info', icon: 'User' },
-    { id: 'employment', label: 'Employment', icon: 'Briefcase' },
-    { id: 'contact', label: 'Contact', icon: 'Phone' },
-    { id: 'documents', label: 'Documents', icon: 'FileText' }
-  ];
-
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors?.[field]) {
@@ -153,7 +165,7 @@ const EmployeeModal = ({
     if (!formData?.lastName?.trim()) newErrors.lastName = 'Last name is required';
     if (!formData?.email?.trim()) newErrors.email = 'Email is required';
     if (!formData?.department) newErrors.department = 'Department is required';
-    if (!formData?.role?.trim()) newErrors.role = 'Role is required';
+    if (!formData?.roleIds || formData.roleIds.length === 0) newErrors.roleIds = 'System role is required';
     if (!formData?.hireDate) newErrors.hireDate = 'Hire date is required';
 
     setErrors(newErrors);
@@ -168,6 +180,7 @@ const EmployeeModal = ({
       const employeeData = {
         ...formData,
         name: `${formData?.firstName} ${formData?.lastName}`?.trim(),
+        roleIds: formData.roleIds,
         id: employee?.id || Date.now()
       };
 
@@ -299,13 +312,25 @@ const EmployeeModal = ({
                   required
                   disabled={isReadOnly}
                 />
-                <Input
-                  label="Job Role"
-                  value={formData?.role}
-                  onChange={(e) => handleInputChange('role', e?.target?.value)}
-                  error={errors?.role}
+                <Select
+                  label="Designation"
+                  options={designations}
+                  value={formData?.designationId}
+                  onChange={(value) => handleInputChange('designationId', value)}
+                  error={errors?.designationId}
                   required
                   disabled={isReadOnly}
+                  placeholder="Select a designation"
+                />
+                <Select
+                  label="System Role"
+                  options={roles}
+                  value={formData?.roleIds?.[0]}
+                  onChange={(value) => handleInputChange('roleIds', [value])}
+                  error={errors?.roleIds}
+                  required
+                  disabled={isReadOnly}
+                  placeholder="Select a role"
                 />
                 <Select
                   label="Employment Type"

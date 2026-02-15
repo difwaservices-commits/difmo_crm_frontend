@@ -14,6 +14,9 @@ import ProductivityAnalytics from './components/ProductivityAnalytics';
 import ScreenshotMonitoring from './components/ScreenshotMonitoring';
 import ManualTimeEntry from './components/ManualTimeEntry';
 
+import timeTrackingService from '../../services/timeTrackingService';
+import useAuthStore from '../../store/useAuthStore';
+
 const TimeTrackingPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('timer');
@@ -21,6 +24,28 @@ const TimeTrackingPage = () => {
   const [showManualEntry, setShowManualEntry] = useState(false);
   const [dateRange, setDateRange] = useState('week');
   const [selectedEmployee, setSelectedEmployee] = useState('all');
+  const [timeEntries, setTimeEntries] = useState([]);
+  const { user } = useAuthStore();
+
+  useEffect(() => {
+    // Determine which employee ID to fetch for
+    // If Admin/HR, might fetch for selectedEmployee. 
+    // If just Employee, fetch for self (user?.employeeId or user?.id depending on backend)
+    // Assuming user object has employeeId attached or we use user.id which maps to Employee
+    const targetEmployeeId = user?.employeeId;
+
+    const fetchEntries = async () => {
+      if (targetEmployeeId) {
+        try {
+          const data = await timeTrackingService.getAll(targetEmployeeId);
+          setTimeEntries(data);
+        } catch (error) {
+          console.error("Failed to load time entries", error);
+        }
+      }
+    };
+    fetchEntries();
+  }, [user, selectedEmployee]);
 
   const breadcrumbItems = [
     { label: 'Dashboard', path: '/dashboard' },
@@ -86,7 +111,7 @@ const TimeTrackingPage = () => {
               currentTask={currentTask}
               onTaskChange={handleTaskChange}
             />
-            
+
             {showManualEntry && (
               <ManualTimeEntry
                 onAddEntry={handleAddManualEntry}
@@ -95,22 +120,22 @@ const TimeTrackingPage = () => {
             )}
           </div>
         );
-      
+
       case 'timesheet':
         return (
           <TimesheetTable
-            entries={[]} // Add missing entries prop with empty array as default
+            entries={timeEntries}
             onEditEntry={handleEditEntry}
             onDeleteEntry={handleDeleteEntry}
           />
         );
-      
+
       case 'analytics':
         return <ProductivityAnalytics />;
-      
+
       case 'monitoring':
         return <ScreenshotMonitoring />;
-      
+
       default:
         return null;
     }
@@ -119,16 +144,15 @@ const TimeTrackingPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <Sidebar 
-        isCollapsed={sidebarCollapsed} 
-        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} 
+      <Sidebar
+        isCollapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
-      <main className={`pt-16 pb-20 lg:pb-8 transition-all duration-300 ${
-        sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'
-      }`}>
+      <main className={`pt-16 pb-20 lg:pb-8 transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'
+        }`}>
         <div className="px-6 py-8">
           <BreadcrumbNavigation items={breadcrumbItems} />
-          
+
           {/* Page Header */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 mb-8">
             <div>
@@ -137,7 +161,7 @@ const TimeTrackingPage = () => {
                 Monitor productivity and manage work hours efficiently
               </p>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
               <Button
                 variant="outline"
@@ -147,7 +171,7 @@ const TimeTrackingPage = () => {
               >
                 Manual Entry
               </Button>
-              
+
               <Button
                 variant="outline"
                 onClick={handleExportTimesheet}
@@ -156,7 +180,7 @@ const TimeTrackingPage = () => {
               >
                 Export Report
               </Button>
-              
+
               <Button
                 variant="default"
                 onClick={() => setActiveTab('timer')}
@@ -179,7 +203,7 @@ const TimeTrackingPage = () => {
                   onChange={setDateRange}
                   className="w-full sm:w-40"
                 />
-                
+
                 <Select
                   label="Employee"
                   options={employeeOptions}
@@ -187,7 +211,7 @@ const TimeTrackingPage = () => {
                   onChange={setSelectedEmployee}
                   className="w-full sm:w-48"
                 />
-                
+
                 <div className="flex space-x-2">
                   <Input
                     type="date"
@@ -201,7 +225,7 @@ const TimeTrackingPage = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <Button variant="outline" size="sm" iconName="Filter">
                   More Filters
@@ -221,11 +245,10 @@ const TimeTrackingPage = () => {
                   <button
                     key={tab?.id}
                     onClick={() => setActiveTab(tab?.id)}
-                    className={`flex items-center space-x-2 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-150 ${
-                      activeTab === tab?.id
-                        ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                    }`}
+                    className={`flex items-center space-x-2 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-150 ${activeTab === tab?.id
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      }`}
                   >
                     <Icon name={tab?.icon} size={16} />
                     <span>{tab?.label}</span>
