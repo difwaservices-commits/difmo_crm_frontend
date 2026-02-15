@@ -6,7 +6,7 @@ import { Lock, Mail, ArrowRight, CheckCircle } from 'lucide-react';
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [agreeTerms, setAgreeTerms] = useState(false);
+    const [agreeTerms, setAgreeTerms] = useState(true);
     const navigate = useNavigate();
     const location = useLocation();
     const { login, isLoading, error, clearError } = useAuthStore();
@@ -24,7 +24,19 @@ const Login = () => {
             await login(email, password);
             console.log('[Login] Login successful, navigating...');
             // Redirect to the intended location or dashboard
-            const from = location.state?.from?.pathname || '/dashboard';
+            const user = useAuthStore.getState().user;
+            let targetPath = '/dashboard';
+
+            const isAdmin = user?.roles?.some(r => ['Super Admin', 'Admin'].includes(r.name));
+            const isEmployee = user?.roles?.some(r => r.name === 'Employee');
+
+            if (isAdmin) {
+                targetPath = '/dashboard';
+            } else if (isEmployee) {
+                targetPath = '/employee-dashboard';
+            }
+
+            const from = location.state?.from?.pathname || targetPath;
             navigate(from, { replace: true });
         } catch (err) {
             console.error('[Login] Login failed:', err);
@@ -119,7 +131,7 @@ const Login = () => {
                         </div>
 
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center">
+                            {/* <div className="flex items-center">
                                 <input
                                     id="terms"
                                     name="terms"
@@ -131,7 +143,7 @@ const Login = () => {
                                 <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
                                     I agree to the <a href="#" className="text-blue-600 hover:text-blue-500">Terms and Conditions</a>
                                 </label>
-                            </div>
+                            </div> */}
 
                             <div className="text-sm">
                                 <a href="#" className="font-medium text-blue-600 hover:text-blue-500">

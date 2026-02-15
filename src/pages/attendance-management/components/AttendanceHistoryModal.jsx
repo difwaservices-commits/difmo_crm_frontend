@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import attendanceService from '../../../services/attendanceService';
 import Icon from '../../../components/AppIcon';
+import { formatTime12h } from '../../../utils/dateUtils';
 
 const AttendanceHistoryModal = ({ isOpen, onClose, employee }) => {
     const [history, setHistory] = useState([]);
@@ -38,17 +39,7 @@ const AttendanceHistoryModal = ({ isOpen, onClose, employee }) => {
         }
     };
 
-    const formatTime = (timeString) => {
-        if (!timeString || timeString === '--') return '--';
-        try {
-            const [hours, minutes] = timeString.split(':');
-            const date = new Date();
-            date.setHours(parseInt(hours), parseInt(minutes));
-            return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-        } catch (e) {
-            return timeString;
-        }
-    };
+
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('en-US', {
@@ -65,9 +56,11 @@ const AttendanceHistoryModal = ({ isOpen, onClose, employee }) => {
             <div className="bg-card w-full max-w-4xl rounded-lg shadow-lg border border-border animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]">
                 <div className="flex items-center justify-between p-6 border-b border-border">
                     <div>
-                        <h2 className="text-xl font-semibold text-foreground">Attendance History</h2>
+                        <h2 className="text-xl font-semibold text-foreground">
+                            {employee?.user ? `${employee.user.firstName} ${employee.user.lastName}` : (employee?.employeeName || employee?.name || 'Employee')}
+                        </h2>
                         <p className="text-sm text-muted-foreground">
-                            {employee?.employeeName || employee?.name} ({employee?.employeeCode || employee?.employeeId || employee?.id}) - {employee?.department}
+                            Code: {employee?.employeeCode || 'N/A'} | Department: {employee?.department?.name || employee?.department || 'N/A'}
                         </p>
                     </div>
                     <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
@@ -110,15 +103,17 @@ const AttendanceHistoryModal = ({ isOpen, onClose, employee }) => {
                                 {history.map((record) => (
                                     <tr key={record.id} className="hover:bg-accent/50">
                                         <td className="px-4 py-3 text-sm text-foreground">{formatDate(record.date)}</td>
-                                        <td className="px-4 py-3 text-sm font-mono text-foreground">{formatTime(record.checkInTime)}</td>
-                                        <td className="px-4 py-3 text-sm font-mono text-foreground">{formatTime(record.checkOutTime)}</td>
+                                        <td className="px-4 py-3 text-sm font-mono text-foreground">{formatTime12h(record.checkInTime)}</td>
+                                        <td className="px-4 py-3 text-sm font-mono text-foreground">{formatTime12h(record.checkOutTime)}</td>
                                         <td className="px-4 py-3 text-sm text-foreground">{record.workHours ? `${record.workHours}h` : '--'}</td>
                                         <td className="px-4 py-3 text-sm">
                                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium 
-                        ${record.status === 'present' ? 'bg-success/10 text-success' :
-                                                    record.status === 'absent' ? 'bg-error/10 text-error' :
-                                                        'bg-warning/10 text-warning'}`}>
-                                                {record.status}
+                                                ${record.status === 'present' ? 'bg-green-100 text-green-700' :
+                                                    record.status === 'late' ? 'bg-yellow-100 text-yellow-700' :
+                                                        record.status === 'early_departure' ? 'bg-orange-100 text-orange-700' :
+                                                            record.status === 'absent' ? 'bg-red-100 text-red-700' :
+                                                                'bg-gray-100 text-gray-700'}`}>
+                                                {record.status?.replace('_', ' ').toUpperCase()}
                                             </span>
                                         </td>
                                         <td className="px-4 py-3 text-sm text-muted-foreground truncate max-w-xs" title={record.notes}>

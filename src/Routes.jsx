@@ -17,6 +17,7 @@ import EmployeeCheckInCheckOut from './pages/employee-check-in-check-out';
 import AttendanceAnalytics from './pages/attendance-analytics';
 import ScrollToTop from "./components/ScrollToTop";
 import Login from './pages/Login';
+import EmployeeDashboard from './pages/employee-dashboard';
 
 import LandingPage from './pages/LandingPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -37,6 +38,11 @@ const Routes = () => {
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/employee-dashboard" element={
+            <ProtectedRoute>
+              <EmployeeDashboard />
             </ProtectedRoute>
           } />
           <Route path="/task-management" element={

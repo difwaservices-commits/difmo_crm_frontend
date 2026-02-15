@@ -49,7 +49,12 @@ export const attendanceService = {
     // Get today's attendance for an employee
     async getTodayAttendance(employeeId) {
         const response = await api.get(`/attendance/today/${employeeId}`);
-        return response.data.data || response.data;
+        // If data.data is null (explicitly), it means no attendance. 
+        // We should check if data property exists on response.data
+        if (response.data && response.data.data !== undefined) {
+            return response.data.data;
+        }
+        return response.data;
     },
 
     // Get attendance analytics
