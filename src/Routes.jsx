@@ -17,6 +17,7 @@ import EmployeeCheckInCheckOut from './pages/employee-check-in-check-out';
 import AttendanceAnalytics from './pages/attendance-analytics';
 import ScrollToTop from "./components/ScrollToTop";
 import Login from './pages/Login';
+import Profile from "./pages/profile";
 
 import LandingPage from './pages/LandingPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -79,6 +80,13 @@ const Routes = () => {
               <CompanyProfile />
             </ProtectedRoute>
           } />
+
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
+
 
           <Route path="*" element={<NotFound />} />
         </RouterRoutes>

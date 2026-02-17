@@ -240,7 +240,8 @@ const CompanyRegistration = () => {
         enablePayroll: formData.enablePayroll,
       };
 
-      await register(registrationData);
+      const response=await register(registrationData);
+      localStorage.setItem('user', JSON.stringify(response.user || response.data?.user));
 
       // Store registration data in localStorage
       localStorage.setItem('companyRegistration', JSON.stringify(registrationData));
@@ -257,6 +258,7 @@ const CompanyRegistration = () => {
 
       alert('Registration completed successfully! Please login.');
       navigate('/login');
+      // navigate('/profile');
 
     } catch (error) {
       console.error('Registration failed:', error);
