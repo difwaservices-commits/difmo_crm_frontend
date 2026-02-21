@@ -10,12 +10,37 @@ import RecentActivityFeed from './components/RecentActivityFeed';
 import PendingApprovals from './components/PendingApprovals';
 import UpcomingEvents from './components/UpcomingEvents';
 import Icon from '../../components/AppIcon';
+import useAuthStore from '../../store/useAuthStore';
+import dashboardService from '../../services/dashboardService';
 
 const Dashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [metrics, setMetrics] = useState({
+    totalEmployees: 0,
+    presentToday: 0,
+    tasksCompleted: 0,
+    avgProductivity: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuthStore();
 
-  // Update current time every minute
+  const fetchMetrics = async () => {
+    if (!user?.company?.id) return;
+    try {
+      const data = await dashboardService.getMetrics(user.company.id);
+      setMetrics(data);
+    } catch (error) {
+      console.error('Failed to fetch metrics:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMetrics();
+  }, [user]);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -31,7 +56,7 @@ const Dashboard = () => {
   const metricsData = [
     {
       title: 'Total Employees',
-      value: '247',
+      value: (metrics?.totalEmployees ?? 0).toString(),
       change: '+12',
       changeType: 'positive',
       icon: 'Users',
@@ -39,7 +64,7 @@ const Dashboard = () => {
     },
     {
       title: 'Present Today',
-      value: '198',
+      value: (metrics?.presentToday ?? 0).toString(),
       change: '+5.2%',
       changeType: 'positive',
       icon: 'UserCheck',
@@ -47,7 +72,7 @@ const Dashboard = () => {
     },
     {
       title: 'Tasks Completed',
-      value: '1,247',
+      value: (metrics?.tasksCompleted ?? 0).toString(),
       change: '+18%',
       changeType: 'positive',
       icon: 'CheckSquare',
@@ -55,7 +80,7 @@ const Dashboard = () => {
     },
     {
       title: 'Avg Productivity',
-      value: '87%',
+      value: `${metrics?.avgProductivity ?? 0}%`,
       change: '+3.1%',
       changeType: 'positive',
       icon: 'TrendingUp',
@@ -109,9 +134,8 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <Sidebar isCollapsed={sidebarCollapsed} onToggleCollapse={handleToggleSidebar} />
-      <main className={`transition-all duration-300 ${
-        sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'
-      } pt-16 pb-20 lg:pb-8`}>
+      <main className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'
+        } pt-16 pb-20 lg:pb-8`}>
         <div className="p-6 max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
@@ -122,26 +146,26 @@ const Dashboard = () => {
                 Welcome back! Here's what's happening with your team today.
               </p>
             </div>
-            
+
             <div className="flex items-center space-x-4 mt-4 lg:mt-0">
               <div className="text-right">
                 <p className="text-sm font-medium text-foreground">
-                  {currentTime?.toLocaleDateString('en-US', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
+                  {currentTime?.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
                   })}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {currentTime?.toLocaleTimeString('en-US', { 
-                    hour: '2-digit', 
+                  {currentTime?.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
                     minute: '2-digit',
-                    hour12: true 
+                    hour12: true
                   })}
                 </p>
               </div>
-              
+
               <button
                 onClick={handleRefreshData}
                 className="flex items-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors duration-150"
@@ -196,11 +220,11 @@ const Dashboard = () => {
             <div className="lg:col-span-1">
               <RecentActivityFeed />
             </div>
-            
+
             <div className="lg:col-span-1">
               <PendingApprovals />
             </div>
-            
+
             <div className="lg:col-span-1">
               <UpcomingEvents />
             </div>

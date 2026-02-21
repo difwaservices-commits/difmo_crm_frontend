@@ -10,115 +10,52 @@ import CameraMonitoringPanel from './components/CameraMonitoringPanel';
 import ProductivityBenchmark from './components/ProductivityBenchmark';
 import Icon from '../../components/AppIcon';
 
+import { employeeService } from '../../services/employeeService';
+import useAuthStore from '../../store/useAuthStore';
+
 const MonitoringDashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [filters, setFilters] = useState({});
+  const [employees, setEmployees] = useState([]);
+  const { user } = useAuthStore();
 
-  const breadcrumbItems = [
-  { label: 'Dashboard', path: '/dashboard' },
-  { label: 'Monitoring Dashboard', path: '/monitoring-dashboard' }];
-
-
-  const employees = [
-  {
-    id: 1,
-    name: 'Sarah Johnson',
-    department: 'Engineering',
-    avatar: "https://images.unsplash.com/photo-1684262855358-88f296a2cfc2",
-    avatarAlt: 'Professional headshot of woman with brown hair in white blazer smiling at camera',
-    workMode: 'WFH',
-    status: 'Active',
-    productivityScore: 92,
-    hoursWorked: 7.5,
-    lastActivity: '2 min ago',
-    currentTask: 'Code Review - Authentication Module',
-    cameraEnabled: true,
-    screenMonitoring: true
-  },
-  {
-    id: 2,
-    name: 'Michael Chen',
-    department: 'Marketing',
-    avatar: "https://images.unsplash.com/photo-1687256457585-3608dfa736c5",
-    avatarAlt: 'Professional headshot of Asian man with short black hair in navy suit',
-    workMode: 'Office',
-    status: 'Active',
-    productivityScore: 88,
-    hoursWorked: 8.2,
-    lastActivity: '5 min ago',
-    currentTask: 'Campaign Analysis Report',
-    cameraEnabled: false,
-    screenMonitoring: true
-  },
-  {
-    id: 3,
-    name: 'Emily Rodriguez',
-    department: 'Design',
-    avatar: "https://images.unsplash.com/photo-1654110951517-0307aed76b75",
-    avatarAlt: 'Professional headshot of Hispanic woman with long dark hair in black top',
-    workMode: 'WFH',
-    status: 'Idle',
-    productivityScore: 76,
-    hoursWorked: 6.8,
-    lastActivity: '15 min ago',
-    currentTask: 'UI Mockups - Mobile App',
-    cameraEnabled: true,
-    screenMonitoring: true
-  },
-  {
-    id: 4,
-    name: 'David Kim',
-    department: 'Sales',
-    avatar: "https://images.unsplash.com/photo-1722368378695-8a56b520fcf0",
-    avatarAlt: 'Professional headshot of Korean man with glasses in dark suit',
-    workMode: 'Client-site',
-    status: 'Away',
-    productivityScore: 85,
-    hoursWorked: 5.5,
-    lastActivity: '1 hour ago',
-    currentTask: 'Client Presentation - Q4 Proposal',
-    cameraEnabled: false,
-    screenMonitoring: false
-  },
-  {
-    id: 5,
-    name: 'Lisa Thompson',
-    department: 'HR',
-    avatar: "https://images.unsplash.com/photo-1648466982925-65dac4ed0814",
-    avatarAlt: 'Professional headshot of blonde woman in business attire with friendly smile',
-    workMode: 'Office',
-    status: 'Active',
-    productivityScore: 94,
-    hoursWorked: 7.8,
-    lastActivity: '1 min ago',
-    currentTask: 'Employee Performance Reviews',
-    cameraEnabled: false,
-    screenMonitoring: true
-  },
-  {
-    id: 6,
-    name: 'James Wilson',
-    department: 'Engineering',
-    avatar: "https://images.unsplash.com/photo-1734221649687-5d27081388d7",
-    avatarAlt: 'Professional headshot of African American man with beard in casual shirt',
-    workMode: 'WFH',
-    status: 'Active',
-    productivityScore: 89,
-    hoursWorked: 8.0,
-    lastActivity: '3 min ago',
-    currentTask: 'Database Optimization',
-    cameraEnabled: true,
-    screenMonitoring: true
-  }];
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      if (user?.company?.id) {
+        try {
+          const data = await employeeService.getAll(user.company.id);
+          // Transform to monitoring format
+          const formatted = (data || []).map(emp => ({
+            id: emp.id,
+            name: `${emp.user?.firstName} ${emp.user?.lastName}`,
+            department: emp.department?.name || 'N/A',
+            avatar: emp.user?.avatar,
+            workMode: 'Office', // Default, needs backend support
+            status: 'Active', // Default
+            productivityScore: 85, // Default
+            hoursWorked: 0,
+            lastActivity: 'Just now',
+            currentTask: 'N/A',
+            cameraEnabled: true,
+            screenMonitoring: true
+          }));
+          setEmployees(formatted);
+        } catch (error) {
+          console.error("Failed to load monitoring data", error);
+        }
+      }
+    };
+    fetchEmployees();
+  }, [user]);
 
 
   const tabs = [
-  { id: 'overview', label: 'Overview', icon: 'LayoutDashboard' },
-  { id: 'activity', label: 'Activity Tracking', icon: 'BarChart3' },
-  { id: 'screenshots', label: 'Screenshots', icon: 'Camera' },
-  { id: 'camera', label: 'Camera Monitoring', icon: 'Video' },
-  { id: 'benchmarks', label: 'Benchmarks', icon: 'TrendingUp' }];
+    { id: 'overview', label: 'Overview', icon: 'LayoutDashboard' },
+    { id: 'activity', label: 'Activity Tracking', icon: 'BarChart3' },
+    { id: 'screenshots', label: 'Screenshots', icon: 'Camera' },
+    { id: 'camera', label: 'Camera Monitoring', icon: 'Video' },
+    { id: 'benchmarks', label: 'Benchmarks', icon: 'TrendingUp' }];
 
 
   const handleFiltersChange = (newFilters) => {
@@ -140,12 +77,11 @@ const MonitoringDashboard = () => {
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={handleSidebarToggle} />
 
-      <main className={`pt-16 pb-20 lg:pb-8 transition-all duration-300 ${
-      sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'}`
+      <main className={`pt-16 pb-20 lg:pb-8 transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'}`
       }>
         <div className="p-6">
           <BreadcrumbNavigation items={breadcrumbItems} />
-          
+
           {/* Page Header */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
             <div>
@@ -173,13 +109,12 @@ const MonitoringDashboard = () => {
           <div className="border-b border-border mb-6">
             <nav className="flex space-x-8 overflow-x-auto">
               {tabs?.map((tab) =>
-              <button
-                key={tab?.id}
-                onClick={() => setActiveTab(tab?.id)}
-                className={`flex items-center space-x-2 py-3 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                activeTab === tab?.id ?
-                'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'}`
-                }>
+                <button
+                  key={tab?.id}
+                  onClick={() => setActiveTab(tab?.id)}
+                  className={`flex items-center space-x-2 py-3 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab?.id ?
+                    'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'}`
+                  }>
 
                   <Icon name={tab?.icon} size={16} />
                   <span>{tab?.label}</span>
@@ -191,7 +126,7 @@ const MonitoringDashboard = () => {
           {/* Tab Content */}
           <div className="space-y-6">
             {activeTab === 'overview' &&
-            <>
+              <>
                 {/* Quick Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                   <div className="bg-card border border-border rounded-lg p-4">
@@ -237,27 +172,27 @@ const MonitoringDashboard = () => {
                   <h2 className="text-lg font-semibold text-foreground mb-4">Employee Status</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {employees?.map((employee) =>
-                  <EmployeeStatusCard key={employee?.id} employee={employee} />
-                  )}
+                      <EmployeeStatusCard key={employee?.id} employee={employee} />
+                    )}
                   </div>
                 </div>
               </>
             }
 
             {activeTab === 'activity' &&
-            <ActivityChart />
+              <ActivityChart />
             }
 
             {activeTab === 'screenshots' &&
-            <ScreenshotGallery employee={selectedEmployee} />
+              <ScreenshotGallery employee={selectedEmployee} />
             }
 
             {activeTab === 'camera' &&
-            <CameraMonitoringPanel />
+              <CameraMonitoringPanel />
             }
 
             {activeTab === 'benchmarks' &&
-            <ProductivityBenchmark />
+              <ProductivityBenchmark />
             }
           </div>
         </div>

@@ -3,7 +3,13 @@ import api from '../utils/api';
 export const employeeService = {
     // Get all employees with optional filters
     async getAll(filters = {}) {
-        const response = await api.get('/employees', { params: filters });
+        let params = {};
+        if (typeof filters === 'string' || typeof filters === 'number') {
+            params = { companyId: filters };
+        } else if (filters && typeof filters === 'object') {
+            params = filters;
+        }
+        const response = await api.get('/employees', { params });
         const data = response.data.data || response.data;
         // Ensure we always return an array
         return Array.isArray(data) ? data : [];

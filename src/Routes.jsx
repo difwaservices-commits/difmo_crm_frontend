@@ -17,11 +17,13 @@ import EmployeeCheckInCheckOut from './pages/employee-check-in-check-out';
 import AttendanceAnalytics from './pages/attendance-analytics';
 import ScrollToTop from "./components/ScrollToTop";
 import Login from './pages/Login';
-import Profile from "./pages/profile";
+import EmployeeDashboard from './pages/employee-dashboard';
 
 import LandingPage from './pages/LandingPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import CompanyProfile from './pages/company-profile';
+import RolesManagement from './pages/settings/roles';
+import PayrollPage from './pages/payroll';
 
 const Routes = () => {
   return (
@@ -38,6 +40,11 @@ const Routes = () => {
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/employee-dashboard" element={
+            <ProtectedRoute>
+              <EmployeeDashboard />
             </ProtectedRoute>
           } />
           <Route path="/task-management" element={
@@ -78,6 +85,16 @@ const Routes = () => {
           <Route path="/company-profile" element={
             <ProtectedRoute>
               <CompanyProfile />
+            </ProtectedRoute>
+          } />
+          <Route path="/payroll" element={
+            <ProtectedRoute>
+              <PayrollPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/settings/roles" element={
+            <ProtectedRoute>
+              <RolesManagement />
             </ProtectedRoute>
           } />
 

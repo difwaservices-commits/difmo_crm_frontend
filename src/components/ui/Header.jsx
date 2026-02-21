@@ -3,21 +3,37 @@ import Icon from '../AppIcon';
 import UserProfileDropdown from './UserProfileDropdown';
 import NotificationCenter from './NotificationCenter';
 
+import useAuthStore from '../../store/useAuthStore';
+
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user } = useAuthStore();
+  const isAdmin = user?.roles?.some(r => ['Super Admin', 'Admin'].includes(r.name));
+  const isEmployee = user?.roles?.some(r => r.name === 'Employee');
 
-  const navigationItems = [
-    { label: 'Dashboard', path: '/dashboard', icon: 'LayoutDashboard' },
-    { label: 'Employees', path: '/employee-management', icon: 'Users' },
-    { label: 'Tasks', path: '/task-management', icon: 'CheckSquare' },
-    { label: 'Time Tracking', path: '/time-tracking', icon: 'Clock' },
-  ];
+  let navigationItems = [];
+  let moreItems = [];
 
-  const moreItems = [
-    { label: 'Monitoring', path: '/monitoring-dashboard', icon: 'Monitor' },
-    { label: 'Payroll', path: '/payroll', icon: 'DollarSign' },
-    { label: 'Settings', path: '/settings', icon: 'Settings' },
-  ];
+  // Employee only view if employee AND NOT admin
+  if (isEmployee && !isAdmin) {
+    navigationItems = [
+      { label: 'Dashboard', path: '/employee-dashboard', icon: 'LayoutDashboard' }
+    ];
+    moreItems = [];
+  } else {
+    navigationItems = [
+      { label: 'Dashboard', path: '/dashboard', icon: 'LayoutDashboard' },
+      { label: 'Employees', path: '/employee-management', icon: 'Users' },
+      { label: 'Tasks', path: '/task-management', icon: 'CheckSquare' },
+      { label: 'Time Tracking', path: '/time-tracking', icon: 'Clock' },
+    ];
+
+    moreItems = [
+      { label: 'Monitoring', path: '/monitoring-dashboard', icon: 'Monitor' },
+      { label: 'Payroll', path: '/payroll', icon: 'DollarSign' },
+      { label: 'Settings', path: '/settings', icon: 'Settings' },
+    ];
+  }
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);

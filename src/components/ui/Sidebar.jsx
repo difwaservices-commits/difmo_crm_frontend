@@ -4,76 +4,102 @@ import ComingSoonModal from './ComingSoonModal';
 
 import { useNavigate, useLocation } from 'react-router-dom';
 
+import useAuthStore from '../../store/useAuthStore';
+
 const Sidebar = ({ isCollapsed = false, onToggleCollapse }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const activeItem = location.pathname;
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { user } = useAuthStore();
+  const isAdmin = user?.roles?.some(r => ['Super Admin', 'Admin'].includes(r.name));
+  const isEmployee = user?.roles?.some(r => r.name === 'Employee');
 
-  const comingSoonPaths = [
-    '/task-management',
-    '/time-tracking',
-    '/monitoring-dashboard',
-    '/payroll',
-    '/settings'
-  ];
+  const comingSoonPaths = [];
 
-  const navigationItems = [
-    {
-      label: 'Dashboard',
-      path: '/dashboard',
-      icon: 'LayoutDashboard',
-      tooltip: 'Analytics overview and metrics'
-    },
-    {
-      label: 'Employees',
-      path: '/employee-management',
-      icon: 'Users',
-      tooltip: 'Workforce management'
-    },
-    {
-      label: 'Attendance',
-      path: '/attendance-management',
-      icon: 'CalendarCheck',
-      tooltip: 'Daily check-in/out'
-    },
-    {
-      label: 'Tasks',
-      path: '/task-management',
-      icon: 'CheckSquare',
-      tooltip: 'Project and assignment management'
-    },
-    {
-      label: 'Time Tracking',
-      path: '/time-tracking',
-      icon: 'Clock',
-      tooltip: 'Productivity monitoring'
-    },
-    {
-      label: 'Monitoring',
-      path: '/monitoring-dashboard',
-      icon: 'Monitor',
-      tooltip: 'Advanced oversight capabilities'
-    },
-    {
-      label: 'Payroll',
-      path: '/payroll',
-      icon: 'DollarSign',
-      tooltip: 'Financial processing'
-    },
-    {
-      label: 'Company Profile',
-      path: '/company-profile',
-      icon: 'Building',
-      tooltip: 'Manage company settings'
-    },
-    {
-      label: 'Settings',
-      path: '/settings',
-      icon: 'Settings',
-      tooltip: 'System configuration'
-    },
-  ];
+  let navigationItems = [];
+
+  if (isAdmin) {
+    navigationItems = [
+      {
+        label: 'Dashboard',
+        path: '/dashboard',
+        icon: 'LayoutDashboard',
+        tooltip: 'Analytics overview and metrics'
+      },
+      {
+        label: 'Employees',
+        path: '/employee-management',
+        icon: 'Users',
+        tooltip: 'Workforce management'
+      },
+      {
+        label: 'Attendance',
+        path: '/attendance-management',
+        icon: 'CalendarCheck',
+        tooltip: 'Daily check-in/out'
+      },
+      {
+        label: 'Tasks',
+        path: '/task-management',
+        icon: 'CheckSquare',
+        tooltip: 'Project and assignment management'
+      },
+      {
+        label: 'Time Tracking',
+        path: '/time-tracking',
+        icon: 'Clock',
+        tooltip: 'Productivity monitoring'
+      },
+      {
+        label: 'Monitoring',
+        path: '/monitoring-dashboard',
+        icon: 'Monitor',
+        tooltip: 'Advanced oversight capabilities'
+      },
+      {
+        label: 'Payroll',
+        path: '/payroll',
+        icon: 'DollarSign',
+        tooltip: 'Financial processing'
+      },
+      {
+        label: 'Company Profile',
+        path: '/company-profile',
+        icon: 'Building',
+        tooltip: 'Manage company settings'
+      },
+      {
+        label: 'Roles & Permissions',
+        path: '/settings/roles',
+        icon: 'Shield',
+        tooltip: 'System configuration'
+      },
+    ];
+  } else if (isEmployee) {
+    navigationItems = [
+      {
+        label: 'Dashboard',
+        path: '/employee-dashboard',
+        icon: 'LayoutDashboard',
+        tooltip: 'My Dashboard'
+      },
+      // Add other employee specific links here if needed
+      // For now, just Dashboard as requested
+    ];
+  } else {
+    // Default/Fallback (Full menu for now if no role matches, or handle as guest/error)
+    navigationItems = [
+      {
+        label: 'Dashboard',
+        path: '/dashboard',
+        icon: 'LayoutDashboard',
+        tooltip: 'Analytics overview and metrics'
+      },
+      // ... simplified items?
+      { label: 'Employees', path: '/employee-management', icon: 'Users', tooltip: 'Workforce management' },
+    ];
+  }
 
   const handleNavigation = (path) => {
     if (comingSoonPaths.includes(path)) {

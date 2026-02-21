@@ -90,7 +90,8 @@ const EmployeeManagement = () => {
         skills: emp.skills || [],
         userId: emp.userId,
         companyId: emp.companyId,
-        departmentId: emp.department?.id || emp.departmentId
+        departmentId: emp.department?.id || emp.departmentId,
+        roleIds: emp.user?.roles?.map(r => r.id) || []
       }));
 
       setEmployees(transformedData);
@@ -245,10 +246,7 @@ const EmployeeManagement = () => {
   const handleSaveEmployee = async (employeeData) => {
     try {
       if (modalState.mode === 'add') {
-        // For new employee, we need to create user first, then employee
-        // The backend now handles user creation if userId is missing
         await employeeService.create({
-          // userId: employeeData.userId, // Don't send userId for new employees unless explicitly selecting an existing user
           email: employeeData.email,
           firstName: employeeData.firstName,
           lastName: employeeData.lastName,
@@ -256,7 +254,8 @@ const EmployeeManagement = () => {
           password: 'Welcome123!',
           companyId: user?.company?.id,
           departmentId: employeeData.department,
-          role: employeeData.role,
+          designationId: employeeData.designationId,
+          roleIds: employeeData.roleIds,
           hireDate: employeeData.hireDate,
           salary: employeeData.salary,
           manager: employeeData.manager,
@@ -273,7 +272,8 @@ const EmployeeManagement = () => {
           firstName: employeeData.firstName,
           lastName: employeeData.lastName,
           departmentId: employeeData.department,
-          role: employeeData.role,
+          designationId: employeeData.designationId,
+          roleIds: employeeData.roleIds,
           hireDate: employeeData.hireDate,
           salary: employeeData.salary,
           manager: employeeData.manager,
