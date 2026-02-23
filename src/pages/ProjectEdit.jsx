@@ -27,7 +27,7 @@ const ProjectEdit = () => {
     // Fetch existing project details
     const fetchProject = async () => {
         try {
-            const res = await axios.get(`http://localhost:5001/add-projects/${id}`);
+            const res = await axios.get(`https://difmo-crm-backend.onrender.com/add-projects/${id}`);
             const data = res.data.data;
 
             // Parse assignedPeople string to comma-separated
@@ -65,7 +65,7 @@ const ProjectEdit = () => {
                     .map((p) => p.trim()),
             };
 
-            await axios.put(`http://localhost:5001/add-projects/${id}`, payload);
+            await axios.put(`https://difmo-crm-backend.onrender.com/add-projects/${id}`, payload);
             alert("Project updated successfully!");
             navigate("/projects");
         } catch (err) {

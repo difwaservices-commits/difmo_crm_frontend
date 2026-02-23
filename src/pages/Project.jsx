@@ -26,7 +26,7 @@ export default function Projects() {
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get("http://localhost:5001/add-projects");
+      const res = await axios.get("https://difmo-crm-backend.onrender.com/add-projects");
 
       const cleanData = res.data.data.map((p) => ({
         ...p,
@@ -47,7 +47,7 @@ export default function Projects() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5001/add-projects/${id}`);
+      await axios.delete(`https://difmo-crm-backend.onrender.com/add-projects/${id}`);
       fetchProjects();
     } catch (err) {
       console.error(err);

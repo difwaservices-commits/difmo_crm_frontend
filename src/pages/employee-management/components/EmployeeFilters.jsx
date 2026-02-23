@@ -7,11 +7,18 @@ import Button from '../../../components/ui/Button';
 const EmployeeFilters = ({ 
   searchTerm, 
   onSearchChange, 
-  filters, 
+  filters,  
   onFilterChange, 
   onClearFilters,
   resultCount 
 }) => {
+
+   React.useEffect(() => {
+    if (!filters.status) {
+      onFilterChange('status', 'active');
+    }
+  }, []); 
+
   const departmentOptions = [
     { value: '', label: 'All Departments' },
     { value: 'engineering', label: 'Engineering' },
@@ -44,7 +51,6 @@ const EmployeeFilters = ({
   ];
 
   const statusOptions = [
-    { value: '', label: 'All Statuses' },
     { value: 'active', label: 'Active' },
     { value: 'inactive', label: 'Inactive' },
     { value: 'pending', label: 'Pending' },
@@ -102,7 +108,7 @@ const EmployeeFilters = ({
           label="Status"
           options={statusOptions}
           value={filters?.status}
-          onChange={(value) => onFilterChange('status', value)}
+          onChange={ (value) => onFilterChange('status', value)}
           placeholder="Select status"
         />
       </div>

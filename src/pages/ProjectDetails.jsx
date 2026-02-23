@@ -12,7 +12,7 @@ const ProjectDetails = () => {
 
     const fetchProject = async () => {
         try {
-            const res = await axios.get(`http://localhost:5001/add-projects/${id}`);
+            const res = await axios.get(`https://difmo-crm-backend.onrender.com/add-projects/${id}`);
             // Parse assignedPeople from backend string to array
             const assignedPeople = res.data.data.assignedPeople
                 ? res.data.data.assignedPeople.replace(/[{}"]/g, "").split(",")

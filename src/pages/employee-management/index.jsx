@@ -209,11 +209,18 @@ const EmployeeManagement = () => {
         alert('Employee deleted successfully');
       } catch (err) {
         console.error('Error deleting employee:', err);
-        alert('Failed to delete employee. Please try again.');
+
+        // Detailed message for frontend
+        const message =
+          err.response?.data?.message || // agar backend JSON me message bheje
+          err.response?.data ||          // ya pura response object
+          err.message ||                 // AxiosError ka message
+          'Failed to delete employee.';
+
+        alert(`Failed to delete employee: ${message}`);
       }
     }
   };
-
   const handleBulkAction = async (action, employeeIds) => {
     console.log('Bulk action:', action, 'for employees:', employeeIds);
 
@@ -243,48 +250,111 @@ const EmployeeManagement = () => {
     // Implement CSV export
   };
 
+  // const handleSaveEmployee = async (employeeData) => {
+  //   try {
+  //     console.log('Sending employee data:', employeeData);
+  //     if (modalState.mode === 'add') {
+  //       // await employeeService.create({
+
+  //       //   email: employeeData.email,
+  //       //   firstName: employeeData.firstName,
+  //       //   lastName: employeeData.lastName,
+  //       //   phone: employeeData.phone,
+  //       //   password: 'Welcome123!',
+  //       //   companyId: user?.company?.id,
+  //       //   departmentId: employeeData.department,
+  //       //   designationId: employeeData.designationId,
+  //       //   roleIds: employeeData.roleIds,
+  //       //   hireDate: employeeData.hireDate,
+  //       //   salary: employeeData.salary,
+  //       //   manager: employeeData.manager,
+  //       //   branch: employeeData.branch,
+  //       //   employmentType: employeeData.employmentType,
+  //       //   status: employeeData.status || 'active',
+  //       //   address: employeeData.address,
+  //       //   emergencyContact: employeeData.emergencyContact,
+  //       //   emergencyPhone: employeeData.emergencyPhone,
+  //       //   skills: employeeData.skills
+  //       // });
+  //       await employeeService.create({
+  //         firstName: employeeData.firstName,
+  //         lastName: employeeData.lastName,
+  //         email: employeeData.email,
+  //         phone: employeeData.phone,
+  //         password: 'Welcome123!',          // required
+  //         companyId: user?.company?.id,    // ✅ ensure this exists
+  //         departmentId: employeeData.department, // ✅ rename from department to departmentId
+  //         roleIds: employeeData.roleIds || [],   // ✅ ensure array
+  //         hireDate: employeeData.hireDate,
+  //         salary: employeeData.salary || '',
+  //         manager: employeeData.manager || '',
+  //         branch: employeeData.branch || '',
+  //         employmentType: employeeData.employmentType || '',
+  //         status: employeeData.status || 'active',
+  //         address: employeeData.address || '',
+  //         emergencyContact: employeeData.emergencyContact || '',
+  //         emergencyPhone: employeeData.emergencyPhone || '',
+  //         skills: employeeData.skills || [],
+  //       });
+  //     } else if (modalState.mode === 'edit') {
+  //       await employeeService.update(modalState.employee.id, {
+  //         firstName: employeeData.firstName,
+  //         lastName: employeeData.lastName,
+  //         departmentId: employeeData.department,
+  //         designationId: employeeData.designationId,
+  //         roleIds: employeeData.roleIds,
+  //         hireDate: employeeData.hireDate,
+  //         salary: employeeData.salary,
+  //         manager: employeeData.manager,
+  //         branch: employeeData.branch,
+  //         employmentType: employeeData.employmentType,
+  //         status: employeeData.status,
+  //         address: employeeData.address,
+  //         emergencyContact: employeeData.emergencyContact,
+  //         emergencyPhone: employeeData.emergencyPhone,
+  //         skills: employeeData.skills
+  //       });
+  //     }
+
+  //     await fetchEmployees(); // Refresh list
+  //     handleCloseModal();
+  //   } catch (err) {
+  //     console.error('Error saving employee:', err);
+  //     throw new Error('Failed to save employee. Please try again.');
+  //   }
+  // };
+
   const handleSaveEmployee = async (employeeData) => {
+    console.log('Sending employee data:', employeeData);
+
     try {
+      const payload = {
+        firstName: employeeData.firstName || '',
+        lastName: employeeData.lastName || '',
+        email: employeeData.email || '',
+        phone: employeeData.phone || '',
+        password: 'Welcome123!',
+        companyId: user?.company?.id || '',
+        departmentId: employeeData.department || '',
+        role: employeeData.roleIds?.[0] || '', // take first role as string
+        hireDate: employeeData.hireDate || new Date().toISOString(),
+        salary: employeeData.salary || '',
+        manager: employeeData.manager || '',
+        branch: employeeData.branch || '',
+        employmentType: employeeData.employmentType || '',
+        status: employeeData.status || 'active',
+        address: employeeData.address || '',
+        emergencyContact: employeeData.emergencyContact || '',
+        emergencyPhone: employeeData.emergencyPhone || '',
+        skills: employeeData.skills || []
+      };
+
+      console.log('Payload sent to backend:', payload);
+
       if (modalState.mode === 'add') {
-        await employeeService.create({
-          email: employeeData.email,
-          firstName: employeeData.firstName,
-          lastName: employeeData.lastName,
-          phone: employeeData.phone,
-          password: 'Welcome123!',
-          companyId: user?.company?.id,
-          departmentId: employeeData.department,
-          designationId: employeeData.designationId,
-          roleIds: employeeData.roleIds,
-          hireDate: employeeData.hireDate,
-          salary: employeeData.salary,
-          manager: employeeData.manager,
-          branch: employeeData.branch,
-          employmentType: employeeData.employmentType,
-          status: employeeData.status || 'active',
-          address: employeeData.address,
-          emergencyContact: employeeData.emergencyContact,
-          emergencyPhone: employeeData.emergencyPhone,
-          skills: employeeData.skills
-        });
+        await employeeService.create(payload);
       } else if (modalState.mode === 'edit') {
-        await employeeService.update(modalState.employee.id, {
-          firstName: employeeData.firstName,
-          lastName: employeeData.lastName,
-          departmentId: employeeData.department,
-          designationId: employeeData.designationId,
-          roleIds: employeeData.roleIds,
-          hireDate: employeeData.hireDate,
-          salary: employeeData.salary,
-          manager: employeeData.manager,
-          branch: employeeData.branch,
-          employmentType: employeeData.employmentType,
-          status: employeeData.status,
-          address: employeeData.address,
-          emergencyContact: employeeData.emergencyContact,
-          emergencyPhone: employeeData.emergencyPhone,
-          skills: employeeData.skills
-        });
+        await employeeService.update(modalState.employee.id, payload);
       }
 
       await fetchEmployees(); // Refresh list
@@ -294,7 +364,6 @@ const EmployeeManagement = () => {
       throw new Error('Failed to save employee. Please try again.');
     }
   };
-
   const handleCloseModal = () => {
     setModalState({
       isOpen: false,
@@ -346,6 +415,7 @@ const EmployeeManagement = () => {
           )}
 
           <EmployeeActions
+            employees={filteredAndSortedEmployees}
             selectedEmployees={selectedEmployees}
             onAddEmployee={handleAddEmployee}
             onBulkAction={handleBulkAction}

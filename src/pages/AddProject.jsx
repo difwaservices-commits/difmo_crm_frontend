@@ -42,7 +42,7 @@ const AddProject = () => {
           .map((person) => person.trim()),
       };
 
-      await axios.post("http://localhost:5001/add-projects", payload);
+      await axios.post("https://difmo-crm-backend.onrender.com/add-projects", payload);
 
       alert("Project Added Successfully!");
       navigate("/projects");
