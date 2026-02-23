@@ -10,6 +10,7 @@ export const employeeService = {
             params = filters;
         }
         const response = await api.get('/employees', { params });
+        // console.log(first)
         const data = response.data.data || response.data;
         // Ensure we always return an array
         return Array.isArray(data) ? data : [];

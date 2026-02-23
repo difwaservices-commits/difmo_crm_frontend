@@ -12,7 +12,7 @@ import UpcomingEvents from './components/UpcomingEvents';
 import Icon from '../../components/AppIcon';
 import useAuthStore from '../../store/useAuthStore';
 import dashboardService from '../../services/dashboardService';
-
+import employeeService from '../../services/employeeService';
 const Dashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -29,7 +29,8 @@ const Dashboard = () => {
     if (!user?.company?.id) return;
     try {
       const data = await dashboardService.getMetrics(user.company.id);
-      setMetrics(data);
+         console.log("✅ Metrics from backend:", data.data);
+      setMetrics(data.data);
     } catch (error) {
       console.error('Failed to fetch metrics:', error);
     } finally {

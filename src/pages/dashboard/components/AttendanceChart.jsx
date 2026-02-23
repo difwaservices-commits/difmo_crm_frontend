@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { useEffect } from 'react';
+import attendanceService from 'services/attendanceService';
+import useAuthStore from 'store/useAuthStore';
 
 
 const AttendanceChart = () => {
@@ -21,13 +24,29 @@ const AttendanceChart = () => {
     { period: 'Week 3', present: 85, absent: 15, wfh: 26, office: 59 },
     { period: 'Week 4', present: 89, absent: 11, wfh: 29, office: 60 }
   ];
-
   const currentData = timeRange === 'week' ? weeklyData : monthlyData;
 
   const handleRangeChange = (range) => {
     setTimeRange(range);
   };
+  const user = useAuthStore((state) => state.user);
+  console.log("ertfghj", user);
+  useEffect(() => {
+    if (!user?.company?.id) return;
 
+    const fetchAnalytics = async () => {
+      try {
+        const res = await attendanceService.getAnalytics({
+          companyId: user.company.id
+        });
+        console.log('analytics:', res);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchAnalytics();
+  }, [user]);
   return (
     <div className="bg-card border border-border rounded-lg p-6 card-shadow">
       <div className="flex items-center justify-between mb-6">
@@ -38,17 +57,15 @@ const AttendanceChart = () => {
         <div className="flex items-center space-x-2">
           <button
             onClick={() => handleRangeChange('week')}
-            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-150 ${
-              timeRange === 'week' ?'bg-primary text-primary-foreground' :'text-muted-foreground hover:text-foreground hover:bg-muted'
-            }`}
+            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-150 ${timeRange === 'week' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              }`}
           >
             Week
           </button>
           <button
             onClick={() => handleRangeChange('month')}
-            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-150 ${
-              timeRange === 'month' ?'bg-primary text-primary-foreground' :'text-muted-foreground hover:text-foreground hover:bg-muted'
-            }`}
+            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-150 ${timeRange === 'month' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              }`}
           >
             Month
           </button>
@@ -59,13 +76,13 @@ const AttendanceChart = () => {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={currentData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-            <XAxis 
-              dataKey={timeRange === 'week' ? 'day' : 'period'} 
+            <XAxis
+              dataKey={timeRange === 'week' ? 'day' : 'period'}
               stroke="var(--color-muted-foreground)"
               fontSize={12}
             />
             <YAxis stroke="var(--color-muted-foreground)" fontSize={12} />
-            <Tooltip 
+            <Tooltip
               contentStyle={{
                 backgroundColor: 'var(--color-popover)',
                 border: '1px solid var(--color-border)',

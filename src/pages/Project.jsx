@@ -92,7 +92,9 @@ export default function Projects() {
 
           {loading ? (
             <p>Loading projects...</p>
-          ) : (
+          ) : projects.length == 0 ? (<div className="text-center py-10 text-gray-500 font-semibold text-2xl">
+            No Project
+          </div>) : (
             <>
               <div className="overflow-x-auto bg-white rounded-xl shadow">
 
