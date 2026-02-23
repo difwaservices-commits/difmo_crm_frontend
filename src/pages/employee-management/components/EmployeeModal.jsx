@@ -38,6 +38,9 @@ const EmployeeModal = ({
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [roles, setRoles] = useState([]); // New state for roles list
+  const [designations, setDesignations] = useState([]);
+  const [departments, setDepartments] = useState([]);
+
 
   const { user: currentUser } = useAuthStore();
 
@@ -95,16 +98,26 @@ const EmployeeModal = ({
           api.get(`/designations?companyId=${currentUser?.company?.id}`) // Fetch designations
         ]);
 
-        if (roleRes.data) {
-          setRoles(roleRes.data.map(r => ({ value: r.id, label: r.name })));
-        }
+        // if (roleRes.data) {
+        //   setRoles(roleRes.data.map(r => ({ value: r.id, label: r.name })));
+        // }
+
+        const rolesData = roleRes.data?.data || roleRes.data || [];
+        setRoles(
+          rolesData.map(r => ({
+            value: r.id,
+            label: r.name,
+          }))
+        );
+
+        console.log("designRes:", designRes.data);
 
         if (designRes.data) {
-          setDesignations(designRes.data.map(d => ({ value: d.id, label: d.name })));
+          setDesignations(designRes.data.data.map(d => ({ value: d.id, label: d.name })));
         }
 
         if (deptRes.data) {
-          setDepartments(deptRes.data.map(d => ({ value: d.id, label: d.name })));
+          setDepartments(deptRes.data.data.map(d => ({ value: d.id, label: d.name })));
         }
       } catch (error) {
         console.error('Failed to fetch modal data:', error);

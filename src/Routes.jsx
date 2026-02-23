@@ -18,13 +18,16 @@ import AttendanceAnalytics from './pages/attendance-analytics';
 import ScrollToTop from "./components/ScrollToTop";
 import Login from './pages/Login';
 import EmployeeDashboard from './pages/employee-dashboard';
-
+import Profile from "pages/Profile";
 import LandingPage from './pages/LandingPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import CompanyProfile from './pages/company-profile';
 import RolesManagement from './pages/settings/roles';
 import PayrollPage from './pages/payroll';
-
+import AddProject from "pages/AddProject";
+import Project from "pages/Project";
+import ProjectDetails from "pages/ProjectDetails";
+import ProjectEdit from "pages/ProjectEdit";
 const Routes = () => {
   return (
     <BrowserRouter>
@@ -98,13 +101,37 @@ const Routes = () => {
             </ProtectedRoute>
           } />
 
+          <Route path="/projects" element={
+            <ProtectedRoute>
+              <Project/>
+            </ProtectedRoute>
+          }
+          />
+          <Route path="/add-project" element={
+            <ProtectedRoute>
+              <AddProject/>
+            </ProtectedRoute>
+          }/>
           <Route path="/profile" element={
             <ProtectedRoute>
               <Profile />
             </ProtectedRoute>
           } />
 
+          <Route path="/project-details/:id" element={
+            <ProtectedRoute>
+              <ProjectDetails/>
+            </ProtectedRoute>
 
+          }/>
+
+          <Route path="/edit-project/:id" element={
+            <ProtectedRoute>
+              <ProjectEdit/>
+            </ProtectedRoute>
+          }
+          />
+          
           <Route path="*" element={<NotFound />} />
         </RouterRoutes>
       </ErrorBoundary>

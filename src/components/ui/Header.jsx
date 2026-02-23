@@ -4,6 +4,7 @@ import UserProfileDropdown from './UserProfileDropdown';
 import NotificationCenter from './NotificationCenter';
 
 import useAuthStore from '../../store/useAuthStore';
+import { path } from 'd3';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -26,6 +27,7 @@ const Header = () => {
       { label: 'Employees', path: '/employee-management', icon: 'Users' },
       { label: 'Tasks', path: '/task-management', icon: 'CheckSquare' },
       { label: 'Time Tracking', path: '/time-tracking', icon: 'Clock' },
+      { label: 'Project', path: '/projects', icon: 'Folder' }
     ];
 
     moreItems = [

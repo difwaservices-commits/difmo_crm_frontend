@@ -52,6 +52,12 @@ const Sidebar = ({ isCollapsed = false, onToggleCollapse }) => {
         tooltip: 'Productivity monitoring'
       },
       {
+        label: 'Project',       
+        path: '/projects',
+        icon: 'Folder',
+        tooltip: 'Manage projects and assignments'
+      },
+      {
         label: 'Monitoring',
         path: '/monitoring-dashboard',
         icon: 'Monitor',
