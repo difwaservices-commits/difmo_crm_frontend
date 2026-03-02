@@ -3,6 +3,7 @@ import useAuthStore from '../../../store/useAuthStore';
 import api from '../../../utils/api';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
+import { formatTime12h } from '../../../utils/dateUtils';
 
 const CompanyDetails = () => {
     const { user } = useAuthStore();
@@ -30,20 +31,22 @@ const CompanyDetails = () => {
 
             // Fetch by ID
             const response = await api.get(`/company/id/${user.company.id}`);
-            const company = response.data;
-            setFormData({
-                name: company.name || '',
-                website: company.website || '',
-                industry: company.industry || '',
-                size: company.size || '',
-                email: company.email || '',
-                phone: company.phone || '',
-                address: company.address || '',
-                city: company.city || '',
-                country: company.country || '',
-                openingTime: company.openingTime || '',
-                closingTime: company.closingTime || ''
-            });
+            const company = response.data?.data || response.data;
+            if (company) {
+                setFormData({
+                    name: company.name || '',
+                    website: company.website || '',
+                    industry: company.industry || '',
+                    size: company.size || '',
+                    email: company.email || '',
+                    phone: company.phone || '',
+                    address: company.address || '',
+                    city: company.city || '',
+                    country: company.country || '',
+                    openingTime: company.openingTime || '',
+                    closingTime: company.closingTime || ''
+                });
+            }
         } catch (error) {
             console.error('Failed to fetch company details:', error);
         } finally {
@@ -202,11 +205,11 @@ const CompanyDetails = () => {
                         </div>
                         <div>
                             <label className="text-sm font-medium text-muted-foreground">Opening Time</label>
-                            <p className="text-lg mt-1">{formData.openingTime || '-'}</p>
+                            <p className="text-lg mt-1">{formData.openingTime ? formatTime12h(formData.openingTime) : '-'}</p>
                         </div>
                         <div>
                             <label className="text-sm font-medium text-muted-foreground">Closing Time</label>
-                            <p className="text-lg mt-1">{formData.closingTime || '-'}</p>
+                            <p className="text-lg mt-1">{formData.closingTime ? formatTime12h(formData.closingTime) : '-'}</p>
                         </div>
                     </div>
                 </div>

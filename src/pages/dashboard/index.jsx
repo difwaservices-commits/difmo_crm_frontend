@@ -29,7 +29,7 @@ const Dashboard = () => {
     if (!user?.company?.id) return;
     try {
       const data = await dashboardService.getMetrics(user.company.id);
-         console.log("✅ Metrics from backend:", data.data);
+      console.log("✅ Metrics from backend:", data.data);
       setMetrics(data.data);
     } catch (error) {
       console.error('Failed to fetch metrics:', error);
@@ -195,7 +195,7 @@ const Dashboard = () => {
           {/* Charts Section */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
             <AttendanceChart />
-            <ProductivityChart />
+            {/* <ProductivityChart /> */}
           </div>
 
           {/* Quick Actions */}
@@ -217,7 +217,7 @@ const Dashboard = () => {
           </div>
 
           {/* Bottom Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-1">
               <RecentActivityFeed />
             </div>
@@ -229,10 +229,10 @@ const Dashboard = () => {
             <div className="lg:col-span-1">
               <UpcomingEvents />
             </div>
-          </div>
+          </div> */}
 
           {/* Footer Stats */}
-          <div className="mt-8 pt-6 border-t border-border">
+          {/* <div className="mt-8 pt-6 border-t border-border">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">
               <div>
                 <p className="text-2xl font-semibold text-foreground">98.5%</p>
@@ -251,7 +251,7 @@ const Dashboard = () => {
                 <p className="text-sm text-muted-foreground">Avg Response Time</p>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </main>
     </div>

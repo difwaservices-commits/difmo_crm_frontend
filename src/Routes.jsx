@@ -28,6 +28,8 @@ import AddProject from "pages/AddProject";
 import Project from "pages/Project";
 import ProjectDetails from "pages/ProjectDetails";
 import ProjectEdit from "pages/ProjectEdit";
+import ExpensesPage from './pages/expenses';
+import NotificationsPage from './pages/notifications';
 const Routes = () => {
   return (
     <BrowserRouter>
@@ -103,15 +105,15 @@ const Routes = () => {
 
           <Route path="/projects" element={
             <ProtectedRoute>
-              <Project/>
+              <Project />
             </ProtectedRoute>
           }
           />
           <Route path="/add-project" element={
             <ProtectedRoute>
-              <AddProject/>
+              <AddProject />
             </ProtectedRoute>
-          }/>
+          } />
           <Route path="/profile" element={
             <ProtectedRoute>
               <Profile />
@@ -120,18 +122,31 @@ const Routes = () => {
 
           <Route path="/project-details/:id" element={
             <ProtectedRoute>
-              <ProjectDetails/>
+              <ProjectDetails />
             </ProtectedRoute>
 
-          }/>
+          } />
 
           <Route path="/edit-project/:id" element={
             <ProtectedRoute>
-              <ProjectEdit/>
+              <ProjectEdit />
             </ProtectedRoute>
           }
           />
-          
+
+          <Route path="/expenses" element={
+            <ProtectedRoute>
+              <ExpensesPage />
+            </ProtectedRoute>
+          } />
+
+
+          <Route path="/notifications" element={
+            <ProtectedRoute>
+              <NotificationsPage />
+            </ProtectedRoute>
+          } />
+
           <Route path="*" element={<NotFound />} />
         </RouterRoutes>
       </ErrorBoundary>

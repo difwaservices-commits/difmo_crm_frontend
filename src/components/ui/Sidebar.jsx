@@ -52,7 +52,7 @@ const Sidebar = ({ isCollapsed = false, onToggleCollapse }) => {
         tooltip: 'Productivity monitoring'
       },
       {
-        label: 'Project',       
+        label: 'Project',
         path: '/projects',
         icon: 'Folder',
         tooltip: 'Manage projects and assignments'
@@ -68,6 +68,18 @@ const Sidebar = ({ isCollapsed = false, onToggleCollapse }) => {
         path: '/payroll',
         icon: 'DollarSign',
         tooltip: 'Financial processing'
+      },
+      {
+        label: 'Expenses',
+        path: '/expenses',
+        icon: 'CreditCard',
+        tooltip: 'Expense tracking'
+      },
+      {
+        label: 'Notifications',
+        path: '/notifications',
+        icon: 'Bell',
+        tooltip: 'Email & push notifications'
       },
       {
         label: 'Company Profile',
@@ -89,6 +101,12 @@ const Sidebar = ({ isCollapsed = false, onToggleCollapse }) => {
         path: '/employee-dashboard',
         icon: 'LayoutDashboard',
         tooltip: 'My Dashboard'
+      },
+      {
+        label: 'Expenses',
+        path: '/expenses',
+        icon: 'CreditCard',
+        tooltip: 'Expense tracking'
       },
       // Add other employee specific links here if needed
       // For now, just Dashboard as requested

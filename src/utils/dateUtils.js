@@ -14,12 +14,15 @@ export const formatTime12h = (timeStr) => {
         if (parts.length < 2) return timeStr;
 
         const hours = parseInt(parts[0]);
-        const minutes = parts[1];
+        // Extract and pad minutes to 2 digits
+        const minutes = parts[1].padStart(2, '0').substring(0, 2);
 
         const ampm = hours >= 12 ? 'PM' : 'AM';
         const h12 = hours % 12 || 12;
+        // Pad hour to 2 digits (e.g., 09:00 AM)
+        const h12Str = h12.toString().padStart(2, '0');
 
-        return `${h12}:${minutes} ${ampm}`;
+        return `${h12Str}:${minutes} ${ampm}`;
     } catch (e) {
         console.error('Error formatting time:', e);
         return timeStr;

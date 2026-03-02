@@ -440,6 +440,15 @@ const EmployeeManagement = () => {
             onEditEmployee={handleEditEmployee}
             onViewEmployee={handleViewEmployee}
             onDeleteEmployee={handleDeleteEmployee}
+            onStatusChange={async (employeeId, status) => {
+              try {
+                await employeeService.update(employeeId, { status });
+                await fetchEmployees();
+              } catch (err) {
+                console.error('Failed to update status:', err);
+                alert('Failed to update status');
+              }
+            }}
             sortConfig={sortConfig}
             onSort={handleSort}
             loading={loading}

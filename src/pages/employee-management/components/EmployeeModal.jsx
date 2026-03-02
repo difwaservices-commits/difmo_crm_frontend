@@ -144,7 +144,8 @@ const EmployeeModal = ({
   const statusOptions = [
     { value: 'active', label: 'Active' },
     { value: 'inactive', label: 'Inactive' },
-    { value: 'pending', label: 'Pending' }
+    { value: 'pending', label: 'Pending' },
+    { value: 'terminated', label: 'Terminated' }
   ];
 
   const branchOptions = [

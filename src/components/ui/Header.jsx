@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Icon from '../AppIcon';
 import UserProfileDropdown from './UserProfileDropdown';
 import NotificationCenter from './NotificationCenter';
+import useLocale from '../../hooks/useLocale';
 
 import useAuthStore from '../../store/useAuthStore';
 import { path } from 'd3';
@@ -33,6 +34,8 @@ const Header = () => {
     moreItems = [
       { label: 'Monitoring', path: '/monitoring-dashboard', icon: 'Monitor' },
       { label: 'Payroll', path: '/payroll', icon: 'DollarSign' },
+      { label: 'Expenses', path: '/expenses', icon: 'CreditCard' },
+      { label: 'Notifications', path: '/notifications', icon: 'Bell' },
       { label: 'Settings', path: '/settings', icon: 'Settings' },
     ];
   }
@@ -45,6 +48,8 @@ const Header = () => {
     window.location.href = path;
     setIsMobileMenuOpen(false);
   };
+
+  const { location, currencySymbol } = useLocale();
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-card border-b border-border z-50 h-16">
@@ -100,6 +105,13 @@ const Header = () => {
 
         {/* Right Section */}
         <div className="flex items-center space-x-4">
+          {location && (
+            <div className="hidden md:flex items-center px-3 py-1.5 bg-muted rounded-full border border-border">
+              <Icon name="Globe" size={14} className="text-primary mr-2" />
+              <span className="text-xs font-semibold text-foreground mr-1">{location.countryCode}</span>
+              <span className="text-[10px] text-muted-foreground pt-0.5">({location.currency})</span>
+            </div>
+          )}
           <NotificationCenter />
           <UserProfileDropdown />
 

@@ -3,16 +3,17 @@ import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
 
-const EmployeeTable = ({ 
-  employees, 
-  selectedEmployees, 
-  onSelectEmployee, 
-  onSelectAll, 
-  onEditEmployee, 
-  onViewEmployee, 
+const EmployeeTable = ({
+  employees,
+  selectedEmployees,
+  onSelectEmployee,
+  onSelectAll,
+  onEditEmployee,
+  onViewEmployee,
   onDeleteEmployee,
+  onStatusChange,
   sortConfig,
-  onSort 
+  onSort
 }) => {
   const [hoveredRow, setHoveredRow] = useState(null);
 
@@ -21,19 +22,27 @@ const EmployeeTable = ({
     return sortConfig?.direction === 'asc' ? 'ArrowUp' : 'ArrowDown';
   };
 
-  const getStatusBadge = (status) => {
+  const StatusDropdown = ({ employee }) => {
     const statusConfig = {
       active: { color: 'bg-success/10 text-success border-success/20', label: 'Active' },
       inactive: { color: 'bg-error/10 text-error border-error/20', label: 'Inactive' },
       pending: { color: 'bg-warning/10 text-warning border-warning/20', label: 'Pending' },
       terminated: { color: 'bg-muted text-muted-foreground border-border', label: 'Terminated' }
     };
-    
-    const config = statusConfig?.[status] || statusConfig?.active;
+
+    const current = statusConfig?.[employee.status] || statusConfig?.active;
+
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full border ${config?.color}`}>
-        {config?.label}
-      </span>
+      <select
+        value={employee.status}
+        onChange={(e) => onStatusChange(employee.id, e.target.value)}
+        className={`px-2 py-1 text-xs font-semibold rounded-full border cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary/50 appearance-none bg-none ${current.color}`}
+      >
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+        <option value="pending">Pending</option>
+        <option value="terminated">Terminated</option>
+      </select>
     );
   };
 
@@ -121,7 +130,7 @@ const EmployeeTable = ({
                   <span className="text-sm text-foreground">{employee?.role}</span>
                 </td>
                 <td className="px-4 py-4">
-                  {getStatusBadge(employee?.status)}
+                  <StatusDropdown employee={employee} />
                 </td>
                 <td className="px-4 py-4">
                   <span className="text-sm text-muted-foreground">{formatDate(employee?.hireDate)}</span>
@@ -186,9 +195,9 @@ const EmployeeTable = ({
                   <p className="text-xs text-muted-foreground">{employee?.email}</p>
                 </div>
               </div>
-              {getStatusBadge(employee?.status)}
+              <StatusDropdown employee={employee} />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-3 text-sm mb-4">
               <div>
                 <p className="text-muted-foreground">Department</p>
@@ -207,7 +216,7 @@ const EmployeeTable = ({
                 <p className="text-foreground font-medium">{employee?.manager}</p>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-end space-x-2 pt-3 border-t border-border">
               <Button
                 variant="outline"

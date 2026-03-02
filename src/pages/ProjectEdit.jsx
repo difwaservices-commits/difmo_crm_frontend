@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-import Header from "components/ui/Header";
-import Sidebar from "components/ui/Sidebar";
+import Header from "../components/ui/Header";
+import Sidebar from "../components/ui/Sidebar";
+import Icon from "../components/AppIcon";
+import Button from "../components/ui/Button";
+import BreadcrumbNavigation from "../components/ui/BreadcrumbNavigation";
+import { projectService } from "../services/projectService";
 
 const ProjectEdit = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-    const [project, setProject] = useState({
+    const [formData, setFormData] = useState({
         projectName: "",
         githubLink: "",
         clientName: "",
@@ -22,196 +26,301 @@ const ProjectEdit = () => {
         paymentReceived: "",
         assignedPeople: "",
     });
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
 
-    // Fetch existing project details
     const fetchProject = async () => {
+        setIsLoading(true);
         try {
-            const res = await axios.get(`https://difmo-crm-backend.onrender.com/add-projects/${id}`);
-            const data = res.data.data;
+            const responseData = await projectService.getById(id);
+            const data = responseData?.data || responseData;
 
-            // Parse assignedPeople string to comma-separated
-            const assignedPeople = data.assignedPeople
-                ? data.assignedPeople.replace(/["{}]/g, "").split(",").join(", ")
-                : "";
+            if (data) {
+                // Formatting dates for HTML inputs
+                const formatDateS = (d) => d ? new Date(d).toISOString().split('T')[0] : "";
 
-            setProject({ ...data, assignedPeople });
+                // Parse assignedPeople to string
+                const assignedPeople = Array.isArray(data.assignedPeople) ? data.assignedPeople.join(", ") :
+                    (typeof data.assignedPeople === 'string' ? data.assignedPeople.replace(/[{}"]/g, "") : "");
+
+                setFormData({
+                    ...data,
+                    assignedPeople,
+                    assigningDate: formatDateS(data.assigningDate),
+                    deadline: formatDateS(data.deadline)
+                });
+            }
         } catch (err) {
             console.error("Error fetching project:", err);
+            alert("Failed to load project details.");
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchProject();
+        if (id) fetchProject();
     }, [id]);
 
-    // Handle input changes
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setProject({ ...project, [name]: value });
+        setFormData({ ...formData, [name]: value });
     };
 
-    // Handle form submit
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSaving(true);
         try {
-            // Convert assignedPeople back to array for backend
             const payload = {
-                ...project,
-                assignedPeople: project.assignedPeople
+                ...formData,
+                totalPayment: Number(formData.totalPayment),
+                paymentReceived: Number(formData.paymentReceived),
+                assignedPeople: formData.assignedPeople
                     .split(",")
-                    .map((p) => p.trim()),
+                    .map((p) => p.trim())
+                    .filter(p => p !== ""),
             };
 
-            await axios.put(`https://difmo-crm-backend.onrender.com/add-projects/${id}`, payload);
+            await projectService.update(id, payload);
             alert("Project updated successfully!");
             navigate("/projects");
         } catch (err) {
             console.error("Error updating project:", err);
-            alert("Failed to update project.");
+            alert("Failed to update project: " + (err.response?.data?.message || err.message));
+        } finally {
+            setIsSaving(false);
         }
     };
 
-    if (loading) return (
-        <div className="flex bg-gray-100 min-h-screen">
-            <Sidebar />
+    const breadcrumbItems = [
+        { label: 'Dashboard', path: '/dashboard' },
+        { label: 'Projects', path: '/projects' },
+        { label: 'Edit Project', path: `/edit-project/${id}` },
+    ];
 
-            <div className="flex-1 ml-64">
-                <Header />
-
-                <div className="flex flex-col items-center justify-center h-[70vh]">
-                    {/* Spinner */}
-                    <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-
-                    <p className="mt-4 text-gray-600 font-medium">
-                        Loading project details...
-                    </p>
+    if (isLoading) return (
+        <div className="min-h-screen bg-background text-foreground">
+            <Header />
+            <Sidebar isCollapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
+            <main className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'} pt-16 flex items-center justify-center h-[70vh]`}>
+                <div className="text-center">
+                    <Icon name="Loader2" size={40} className="animate-spin text-primary mx-auto mb-4" />
+                    <p className="text-muted-foreground font-medium">Loading project details...</p>
                 </div>
-            </div>
+            </main>
         </div>
     );
 
-
     return (
-        <div className="flex bg-gray-100 min-h-screen">
-            <Sidebar />
-            <div className="flex-1 ml-64">
-                <Header />
+        <div className="min-h-screen bg-background text-foreground">
+            <Header />
+            <Sidebar isCollapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
 
-                <div className="max-w-4xl mx-auto p-6 mt-20 bg-white rounded-2xl shadow">
-                    <h1 className="text-3xl font-bold mb-6 text-center text-blue-500">Edit Project</h1>
+            <main className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'} pt-16 pb-20 lg:pb-6`}>
+                <div className="p-6 max-w-4xl mx-auto">
+                    <BreadcrumbNavigation items={breadcrumbItems} />
 
-                    <form className="space-y-4" onSubmit={handleSubmit}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <InputField
-                                label="Project Name"
-                                name="projectName"
-                                value={project.projectName}
-                                onChange={handleChange}
-                            />
-                            <InputField
-                                label="GitHub Link"
-                                name="githubLink"
-                                value={project.githubLink}
-                                onChange={handleChange}
-                            />
-                            <InputField
-                                label="Client Name"
-                                name="clientName"
-                                value={project.clientName}
-                                onChange={handleChange}
-                            />
-                            <InputField
-                                label="Contact Info"
-                                name="contactInfo"
-                                value={project.contactInfo}
-                                onChange={handleChange}
-                            />
-                            <InputField
-                                label="Email"
-                                name="clientEmail"
-                                value={project.clientEmail}
-                                onChange={handleChange}
-                            />
-                            <InputField
-                                label="Phase"
-                                name="phase"
-                                value={project.phase}
-                                onChange={handleChange}
-                            />
-                            <InputField
-                                label="Deadline"
-                                name="deadline"
-                                type="date"
-                                value={project.deadline}
-                                onChange={handleChange}
-                            />
-                            <InputField
-                                label="Assigning Date"
-                                name="assigningDate"
-                                type="date"
-                                value={project.assigningDate}
-                                onChange={handleChange}
-                            />
-                            <InputField
-                                label="Deployment Link"
-                                name="deploymentLink"
-                                value={project.deploymentLink}
-                                onChange={handleChange}
-                            />
-                            <InputField
-                                label="Total Payment"
-                                name="totalPayment"
-                                type="number"
-                                value={project.totalPayment}
-                                onChange={handleChange}
-                            />
-                            <InputField
-                                label="Payment Received"
-                                name="paymentReceived"
-                                type="number"
-                                value={project.paymentReceived}
-                                onChange={handleChange}
-                            />
-                            <InputField
-                                label="Assigned People"
-                                name="assignedPeople"
-                                value={project.assignedPeople}
-                                onChange={handleChange}
-                                placeholder="Comma separated team members"
-                            />
+                    <div className="mb-8 flex justify-between items-center">
+                        <div>
+                            <h1 className="text-3xl font-bold text-foreground flex items-center">
+                                <Icon name="Edit" size={28} className="mr-3 text-warning" />
+                                Edit Project
+                            </h1>
+                            <p className="text-muted-foreground mt-1 ml-10">Modify project parameters and details</p>
+                        </div>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="bg-card border border-border rounded-2xl shadow-xl overflow-hidden">
+                        <div className="p-8 space-y-8">
+                            {/* General Section */}
+                            <section>
+                                <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-2 mb-4">Project Overview</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <InputField
+                                        label="Project Name"
+                                        name="projectName"
+                                        value={formData.projectName}
+                                        onChange={handleChange}
+                                        icon="Folder"
+                                        required
+                                    />
+                                    <InputField
+                                        label="GitHub Link"
+                                        name="githubLink"
+                                        value={formData.githubLink}
+                                        onChange={handleChange}
+                                        icon="Github"
+                                    />
+                                </div>
+                            </section>
+
+                            {/* Client Section */}
+                            <section>
+                                <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-2 mb-4">Client Contact</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <InputField
+                                        label="Client Name"
+                                        name="clientName"
+                                        value={formData.clientName}
+                                        onChange={handleChange}
+                                        icon="User"
+                                        required
+                                    />
+                                    <InputField
+                                        label="Client Email"
+                                        name="clientEmail"
+                                        value={formData.clientEmail}
+                                        onChange={handleChange}
+                                        icon="Mail"
+                                        type="email"
+                                    />
+                                    <InputField
+                                        label="Contact Info"
+                                        name="contactInfo"
+                                        value={formData.contactInfo}
+                                        onChange={handleChange}
+                                        icon="Phone"
+                                    />
+                                </div>
+                            </section>
+
+                            {/* Execution Section */}
+                            <section>
+                                <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-2 mb-4">Timeline & Deployment</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <InputField
+                                        label="Assigning Date"
+                                        name="assigningDate"
+                                        type="date"
+                                        value={formData.assigningDate}
+                                        onChange={handleChange}
+                                        icon="Calendar"
+                                    />
+                                    <InputField
+                                        label="Deadline"
+                                        name="deadline"
+                                        type="date"
+                                        value={formData.deadline}
+                                        onChange={handleChange}
+                                        icon="Clock"
+                                    />
+                                    <SelectField
+                                        label="Phase / Status"
+                                        name="phase"
+                                        value={formData.phase}
+                                        onChange={handleChange}
+                                        options={["Planning", "Development", "Testing", "Deployment", "Completed"]}
+                                        icon="Activity"
+                                    />
+                                </div>
+                                <div className="mt-6">
+                                    <InputField
+                                        label="Deployment Link"
+                                        name="deploymentLink"
+                                        value={formData.deploymentLink}
+                                        onChange={handleChange}
+                                        icon="ExternalLink"
+                                    />
+                                </div>
+                            </section>
+
+                            {/* Payment Section */}
+                            <section>
+                                <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-2 mb-4">Financial Details</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <InputField
+                                        label="Total Cost"
+                                        name="totalPayment"
+                                        type="number"
+                                        value={formData.totalPayment}
+                                        onChange={handleChange}
+                                        icon="DollarSign"
+                                    />
+                                    <InputField
+                                        label="Received to Date"
+                                        name="paymentReceived"
+                                        type="number"
+                                        value={formData.paymentReceived}
+                                        onChange={handleChange}
+                                        icon="CheckCircle"
+                                    />
+                                </div>
+                            </section>
+
+                            {/* Team Section */}
+                            <section>
+                                <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-2 mb-4">Team Management</h3>
+                                <InputField
+                                    label="Assigned Team Members"
+                                    name="assignedPeople"
+                                    value={formData.assignedPeople}
+                                    onChange={handleChange}
+                                    placeholder="Comma separated names"
+                                    icon="Users"
+                                />
+                            </section>
                         </div>
 
-                        <div className="flex justify-center mt-6">
-                            <button
+                        <div className="p-8 bg-muted/20 border-t border-border flex flex-col sm:flex-row gap-4 justify-end">
+                            <Button
+                                variant="outline"
+                                type="button"
+                                onClick={() => navigate("/projects")}
+                                disabled={isSaving}
+                            >
+                                Cancel Changes
+                            </Button>
+                            <Button
                                 type="submit"
-                                className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+                                isLoading={isSaving}
+                                iconName="Save"
                             >
                                 Update Project
-                            </button>
+                            </Button>
                         </div>
                     </form>
                 </div>
-            </div>
+            </main>
         </div>
     );
 };
 
-// Reusable input field component
-const InputField = ({ label, name, value, onChange, type = "text", placeholder }) => (
-    <div className="flex flex-col">
-        <label className="text-sm font-medium text-gray-600 mb-1">{label}</label>
+const InputField = ({ label, name, value, onChange, type = "text", placeholder, icon, required }) => (
+    <div className="space-y-1.5">
+        <label className="text-sm font-semibold text-foreground flex items-center">
+            {icon && <Icon name={icon} size={14} className="mr-2 text-muted-foreground" />}
+            {label} {required && <span className="text-error mb-0.5">*</span>}
+        </label>
         <input
             type={type}
             name={name}
             value={value}
             placeholder={placeholder}
             onChange={onChange}
-            className="p-2 border rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+            className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-sm"
+            required={required}
         />
     </div>
 );
 
+const SelectField = ({ label, name, value, onChange, options, icon }) => (
+    <div className="space-y-1.5">
+        <label className="text-sm font-semibold text-foreground flex items-center">
+            {icon && <Icon name={icon} size={14} className="mr-2 text-muted-foreground" />}
+            {label}
+        </label>
+        <select
+            name={name}
+            value={value}
+            onChange={onChange}
+            className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-sm cursor-pointer"
+        >
+            {options.map((opt, idx) => (
+                <option key={idx} value={opt}>{opt}</option>
+            ))}
+        </select>
+    </div>
+);
+
 export default ProjectEdit;
+

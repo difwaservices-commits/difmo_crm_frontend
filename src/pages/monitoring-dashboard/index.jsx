@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../../components/ui/Header';
 import Sidebar from '../../components/ui/Sidebar';
 import BreadcrumbNavigation from '../../components/ui/BreadcrumbNavigation';
@@ -19,14 +19,14 @@ const MonitoringDashboard = () => {
   const [filters, setFilters] = useState({});
   const [employees, setEmployees] = useState([]);
   const { user } = useAuthStore();
-
   useEffect(() => {
     const fetchEmployees = async () => {
       if (user?.company?.id) {
         try {
-          const data = await employeeService.getAll(user.company.id);
+          const response = await employeeService.getAll(user.company.id);
+          const data = response.data || response;
           // Transform to monitoring format
-          const formatted = (data || []).map(emp => ({
+          const formatted = (Array.isArray(data) ? data : (data.data || [])).map(emp => ({
             id: emp.id,
             name: `${emp.user?.firstName} ${emp.user?.lastName}`,
             department: emp.department?.name || 'N/A',
@@ -67,6 +67,11 @@ const MonitoringDashboard = () => {
   const handleSidebarToggle = () => {
     setSidebarCollapsed(!sidebarCollapsed);
   };
+
+  const breadcrumbItems = [
+    { label: 'Dashboard', path: '/dashboard' },
+    { label: 'Monitoring Dashboard', path: '/monitoring-dashboard' }
+  ];
 
   const selectedEmployee = employees?.find((emp) => emp?.workMode === 'WFH') || employees?.[0];
 
