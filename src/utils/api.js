@@ -44,7 +44,7 @@ api.interceptors.response.use(
         if (error.response?.status === 401) {
             console.error('[API] 401 Unauthorized error:', error.config.url);
 
-            // Only redirect if we're not already on login page and not in the middle of logging in
+
             const isLoginPage = window.location.pathname.includes('/login');
             const isLoginRequest = error.config.url.includes('/auth/login');
 

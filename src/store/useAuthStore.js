@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { login as apiLogin, register as apiRegister, logout as apiLogout, getProfile as apiGetProfile } from '../utils/authService';
+import authService from '../services/auth.service';
 
 // Sanitize user data to prevent circular references
 const sanitizeUser = (user) => {
@@ -60,7 +60,7 @@ const useAuthStore = create((set) => ({
         set({ isLoading: true, error: null });
         try {
             console.log('[useAuthStore] Calling apiLogin...');
-            const data = await apiLogin(email, password);
+            const data = await authService.login(email, password);
             console.log('[useAuthStore] apiLogin returned:', data);
             const sanitizedUser = sanitizeUser(data.user) || { email };
 
@@ -96,7 +96,7 @@ const useAuthStore = create((set) => ({
     register: async (companyData) => {
         set({ isLoading: true, error: null });
         try {
-            await apiRegister(companyData);
+            await authService.register(companyData);
             set({ isLoading: false });
         } catch (error) {
             set({
@@ -111,7 +111,7 @@ const useAuthStore = create((set) => ({
         set({ isLoading: true, error: null });
         try {
             console.log('[Auth] Fetching user profile...');
-            const userData = await apiGetProfile();
+            const userData = await authService.getProfile();
             console.log('[Auth] Profile fetched successfully:', userData);
             const sanitizedUser = sanitizeUser(userData);
 
@@ -132,7 +132,7 @@ const useAuthStore = create((set) => ({
     },
 
     logout: () => {
-        apiLogout();
+        authService.logout();
         localStorage.removeItem('user');
         set({ user: null, token: null, isAuthenticated: false });
     },
