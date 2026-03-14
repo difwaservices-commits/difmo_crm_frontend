@@ -12,13 +12,15 @@ const financeService = {
         const response = await apiClient.get(`${API_ENDPOINTS.FINANCE.BASE}/payroll`, {
             params: { companyId, month, year }
         });
-        return response.data;
+        const data = response.data.data || response.data;
+        return Array.isArray(data) ? data : [];
     },
     getExpenses: async (companyId) => {
         const response = await apiClient.get(`${API_ENDPOINTS.FINANCE.BASE}/expenses`, {
             params: { companyId }
         });
-        return response.data;
+        const data = response.data.data || response.data;
+        return Array.isArray(data) ? data : [];
     },
     createExpense: async (data) => {
         const response = await apiClient.post(`${API_ENDPOINTS.FINANCE.BASE}/expenses`, data);

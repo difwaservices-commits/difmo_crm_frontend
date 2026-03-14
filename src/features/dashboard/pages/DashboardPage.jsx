@@ -11,7 +11,7 @@ import {
   PendingApprovals,
   UpcomingEvents,
   useDashboardStore
-} from '..';
+} from 'features/dashboard';
 import useAuthStore from '../../../store/useAuthStore';
 import Icon from '../../../components/AppIcon';
 

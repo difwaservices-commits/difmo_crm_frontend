@@ -6,7 +6,8 @@ const designationService = {
         const response = await apiClient.get(API_ENDPOINTS.DESIGNATIONS.BASE, {
             params: { companyId }
         });
-        return response.data;
+        const data = response.data.data || response.data;
+        return Array.isArray(data) ? data : [];
     },
     create: async (data) => {
         const response = await apiClient.post(API_ENDPOINTS.DESIGNATIONS.BASE, data);

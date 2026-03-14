@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../../../components/ui/Header';
 import Sidebar from '../../../components/ui/Sidebar';
 import BreadcrumbNavigation from '../../../components/ui/BreadcrumbNavigation';
@@ -69,6 +69,11 @@ const MonitoringDashboard = () => {
   };
 
   const selectedEmployee = employees?.find((emp) => emp?.workMode === 'WFH') || employees?.[0];
+  
+  const breadcrumbItems = [
+    { label: 'Dashboard', path: '/dashboard' },
+    { label: 'Monitoring', path: '/monitoring-dashboard' }
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -108,9 +113,9 @@ const MonitoringDashboard = () => {
           {/* Tab Navigation */}
           <div className="border-b border-border mb-6">
             <nav className="flex space-x-8 overflow-x-auto">
-              {tabs?.map((tab) =>
+              {tabs?.map((tab, index) =>
                 <button
-                  key={tab?.id}
+                  key={tab?.id || `monitoring-tab-${index}`}
                   onClick={() => setActiveTab(tab?.id)}
                   className={`flex items-center space-x-2 py-3 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab?.id ?
                     'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'}`
@@ -171,8 +176,8 @@ const MonitoringDashboard = () => {
                 <div>
                   <h2 className="text-lg font-semibold text-foreground mb-4">Employee Status</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {employees?.map((employee) =>
-                      <EmployeeStatusCard key={employee?.id} employee={employee} />
+                    {employees?.map((employee, index) =>
+                      <EmployeeStatusCard key={employee?.id || `monitoring-card-${index}`} employee={employee} />
                     )}
                   </div>
                 </div>

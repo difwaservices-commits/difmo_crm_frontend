@@ -6,7 +6,8 @@ export const accessControlService = {
         const response = await apiClient.get(`${API_ENDPOINTS.ACCESS_CONTROL.BASE}/roles`, { 
             params: { companyId } 
         });
-        return response.data.data || response.data;
+        const data = response.data.data || response.data;
+        return Array.isArray(data) ? data : [];
     },
 
     async getRoleById(id) {
@@ -26,7 +27,8 @@ export const accessControlService = {
 
     async getAllPermissions() {
         const response = await apiClient.get(`${API_ENDPOINTS.ACCESS_CONTROL.BASE}/permissions`);
-        return response.data.data || response.data;
+        const data = response.data.data || response.data;
+        return Array.isArray(data) ? data : [];
     },
 
     async seedPermissions() {

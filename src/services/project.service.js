@@ -6,13 +6,15 @@ const taskService = {
         const response = await apiClient.get(`${API_ENDPOINTS.PROJECTS.BASE}/tasks`, {
             params: { projectId }
         });
-        return response.data.data || response.data;
+        const data = response.data.data || response.data;
+        return Array.isArray(data) ? data : [];
     },
     getAllByCompany: async (companyId) => {
         const response = await apiClient.get(`${API_ENDPOINTS.PROJECTS.BASE}/tasks/company`, {
             params: { companyId }
         });
-        return response.data.data || response.data;
+        const data = response.data.data || response.data;
+        return Array.isArray(data) ? data : [];
     },
     create: async (data) => {
         const response = await apiClient.post(`${API_ENDPOINTS.PROJECTS.BASE}/tasks`, data);
@@ -29,7 +31,8 @@ const projectService = {
         const response = await apiClient.get(API_ENDPOINTS.PROJECTS.BASE, {
             params: { companyId }
         });
-        return response.data;
+        const data = response.data.data || response.data;
+        return Array.isArray(data) ? data : [];
     },
     create: async (data) => {
         const response = await apiClient.post(API_ENDPOINTS.PROJECTS.BASE, data);
@@ -47,7 +50,8 @@ const projectService = {
         const response = await apiClient.get(`${API_ENDPOINTS.PROJECTS.BASE}/clients`, {
             params: { companyId }
         });
-        return response.data;
+        const data = response.data.data || response.data;
+        return Array.isArray(data) ? data : [];
     }
 };
 

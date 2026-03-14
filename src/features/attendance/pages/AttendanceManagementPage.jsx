@@ -11,7 +11,7 @@ import {
   AttendanceModal,
   TakeAttendanceModal,
   useAttendanceStore
-} from '..';
+} from 'features/attendance';
 import useAuthStore from '../../../store/useAuthStore';
 import Icon from '../../../components/AppIcon';
 
@@ -96,6 +96,28 @@ const AttendanceManagement = () => {
   const handleViewHistory = (employee) => {
     setHistoryEmployee(employee);
     setIsHistoryModalOpen(true);
+  };
+
+  const handleToggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+
+  const handleBulkAction = (action, employeeIds) => {
+    console.log(`Bulk action ${action} for employees:`, employeeIds);
+    alert('Bulk action executed');
+  };
+
+  const handleExportReport = () => {
+    console.log('Exporting attendance report...');
+    alert('Report generation started');
+  };
+
+  const handleManualEntry = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleTakeAttendance = () => {
+    setIsTakeAttendanceOpen(true);
   };
 
   const breadcrumbItems = [

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../../components/ui/Header";
 import Sidebar from "../../../components/ui/Sidebar";
-import { ProjectFilter, ActionDropdown, useProjectStore } from "..";
+import { ProjectFilter, ActionDropdown, useProjectStore } from "features/projects";
 import useAuthStore from "../../../store/useAuthStore";
 import BreadcrumbNavigation from "../../../components/ui/BreadcrumbNavigation";
 
@@ -118,8 +118,8 @@ const Projects = () => {
                   </thead>
 
                   <tbody className="divide-y divide-border">
-                    {filteredProjects.map((project) => (
-                      <tr key={project.id} className="hover:bg-muted/30 transition-colors text-sm">
+                    {filteredProjects.map((project, index) => (
+                      <tr key={project?.id || `project-${index}`} className="hover:bg-muted/30 transition-colors text-sm">
                         <td className="px-4 py-3 font-medium text-foreground">{project.projectName}</td>
                         <td className="px-4 py-3 text-muted-foreground">{project.clientName}</td>
                         <td className="px-4 py-3 text-muted-foreground">{project.deadline}</td>

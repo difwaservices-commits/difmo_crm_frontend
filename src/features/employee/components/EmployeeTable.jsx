@@ -177,8 +177,8 @@ const EmployeeTable = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {employees?.map((employee) => (
-              <tr key={employee.id || employee._id} className="hover:bg-muted/30 transition-colors">
+            {employees?.map((employee, index) => (
+              <tr key={employee?.id || employee?._id || `employee-${index}`} className="hover:bg-muted/30 transition-colors">
                 <td className="px-4 py-4">
                   <input
                     type="checkbox"
@@ -224,8 +224,8 @@ const EmployeeTable = ({
 
       {/* Mobile View */}
       <div className="lg:hidden space-y-4 p-4">
-        {employees?.map((employee) => (
-          <div key={employee.id || employee._id} className="bg-card border border-border rounded-lg p-4">
+        {employees?.map((employee, index) => (
+          <div key={employee?.id || employee?._id || `mobile-employee-${index}`} className="bg-card border border-border rounded-lg p-4">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 rounded-full overflow-hidden bg-muted">

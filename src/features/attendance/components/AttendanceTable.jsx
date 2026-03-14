@@ -164,9 +164,9 @@ const AttendanceTable = ({
               </tr>
             </thead>
             <tbody className="bg-card divide-y divide-border">
-              {sortedData?.map((employee) => (
+              {sortedData?.map((employee, index) => (
                 <tr
-                  key={employee?.id}
+                  key={employee?.id || `attendance-${index}`}
                   className="hover:bg-accent/50 transition-colors duration-150 cursor-pointer"
                   onClick={() => handleEmployeeClick(employee)}
                 >

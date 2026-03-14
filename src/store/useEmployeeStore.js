@@ -82,6 +82,10 @@ const useEmployeeStore = create((set, get) => ({
         } catch (error) {
             throw error;
         }
+    },
+
+    setEmployees: (employees) => {
+        set({ employees: typeof employees === 'function' ? employees(get().employees) : employees });
     }
 }));
 

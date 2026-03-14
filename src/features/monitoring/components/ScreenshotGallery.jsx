@@ -59,9 +59,9 @@ const ScreenshotGallery = ({ employee }) => {
         </div>
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        {screenshots?.map((screenshot) =>
+        {screenshots?.map((screenshot, index) =>
         <div
-          key={screenshot?.id}
+          key={screenshot?.id || `screenshot-${index}`}
           className="relative group cursor-pointer"
           onClick={() => setSelectedScreenshot(screenshot)}>
 

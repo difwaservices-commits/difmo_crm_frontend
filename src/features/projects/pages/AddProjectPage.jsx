@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Header from "../../../components/ui/Header";
 import Sidebar from "../../../components/ui/Sidebar";
 import { useNavigate } from "react-router-dom";
-import { useProjectStore } from "..";
+import { useProjectStore } from "features/projects";
 import useAuthStore from "../../../store/useAuthStore";
 import BreadcrumbNavigation from "../../../components/ui/BreadcrumbNavigation";
 

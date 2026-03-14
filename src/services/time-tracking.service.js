@@ -14,7 +14,8 @@ const timeTrackingService = {
         const response = await apiClient.get(API_ENDPOINTS.TIME_TRACKING.BASE, {
             params: { employeeId }
         });
-        return response.data;
+        const data = response.data.data || response.data;
+        return Array.isArray(data) ? data : [];
     }
 };
 

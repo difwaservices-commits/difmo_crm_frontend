@@ -7,8 +7,8 @@ import {
   EmployeeActions,
   EmployeeModal,
   useEmployeeStore
-} from '..';
-import { useAttendanceStore } from '../../attendance';
+} from 'features/employee';
+import { useAttendanceStore } from 'features/attendance';
 import useAuthStore from '../../../store/useAuthStore';
 import BreadcrumbNavigation from '../../../components/ui/BreadcrumbNavigation';
 
@@ -37,7 +37,8 @@ const EmployeeManagement = () => {
     fetchEmployees, 
     createEmployee, 
     updateEmployee, 
-    deleteEmployee 
+    deleteEmployee,
+    setEmployees 
   } = useEmployeeStore();
   const { bulkCheckIn } = useAttendanceStore();
 
@@ -133,6 +134,16 @@ const EmployeeManagement = () => {
         alert(`Failed to delete employee: ${err.message}`);
       }
     }
+  };
+
+  const handleImportEmployees = () => {
+    console.log('Import employees triggered');
+    alert('Import feature coming soon!');
+  };
+
+  const handleExportEmployees = () => {
+    console.log('Export employees triggered');
+    alert('Export feature coming soon!');
   };
 
   const handleBulkAction = async (action, employeeIds) => {

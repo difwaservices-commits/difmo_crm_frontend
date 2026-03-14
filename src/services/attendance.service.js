@@ -37,7 +37,8 @@ export const attendanceService = {
     // Get all attendance records with filters
     async getAll(filters = {}) {
         const response = await apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, { params: filters });
-        return response.data.data || response.data;
+        const data = response.data.data || response.data;
+        return Array.isArray(data) ? data : [];
     },
 
     // Get attendance by ID
@@ -74,7 +75,8 @@ export const attendanceService = {
             params.employeeId = employeeId;
         }
         const response = await apiClient.get(API_ENDPOINTS.ATTENDANCE.BASE, { params });
-        return response.data.data || response.data;
+        const data = response.data.data || response.data;
+        return Array.isArray(data) ? data : [];
     }
 };
 

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import Header from '../../../components/ui/Header';
+import Sidebar from '../../../components/ui/Sidebar';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import BreadcrumbNavigation from '../../../components/ui/BreadcrumbNavigation';
@@ -13,6 +15,7 @@ import { taskService } from '../../../services/project.service';
 import useAuthStore from '../../../store/useAuthStore';
 
 const TaskManagement = () => {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [filteredTasks, setFilteredTasks] = useState([]);
   const [selectedTasks, setSelectedTasks] = useState([]);
@@ -193,25 +196,26 @@ const TaskManagement = () => {
     setIsTaskModalOpen(true);
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background pt-16 lg:pl-60">
-        <div className="p-6">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <Icon name="Loader2" size={32} className="text-primary animate-spin mx-auto mb-4" />
-              <p className="text-muted-foreground">Loading tasks...</p>
-            </div>
-          </div>
-        </div>
-      </div>);
-
-  }
-
   return (
-    <div className="min-h-screen bg-background pt-16 lg:pl-60 pb-16 lg:pb-0">
-      <div className="p-6">
-        <BreadcrumbNavigation items={breadcrumbItems} />
+    <div className="min-h-screen bg-background">
+      <Header />
+      <Sidebar 
+        isCollapsed={sidebarCollapsed} 
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} 
+      />
+      <main className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'} pt-16 pb-20 lg:pb-8 flex flex-col min-h-screen`}>
+        <div className="p-6 flex-1 flex flex-col">
+          {isLoading ? (
+            <div className="flex-1 flex flex-col items-center justify-center">
+              <div className="text-center">
+                <Icon name="Loader2" size={40} className="text-primary animate-spin mx-auto mb-4" />
+                <p className="text-lg font-medium text-foreground">Loading tasks...</p>
+                <p className="text-sm text-muted-foreground">Please wait while we fetch your data</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <BreadcrumbNavigation items={breadcrumbItems} />
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
@@ -283,10 +287,13 @@ const TaskManagement = () => {
               setTasks(updatedTasks);
               setFilteredTasks(updatedTasks);
               setSelectedTask(null);
-            }} />
-
+            }} 
+          />
         }
-      </div>
+      </>
+    )}
+        </div>
+      </main>
     </div>);
 
 };
