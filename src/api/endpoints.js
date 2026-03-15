@@ -26,6 +26,10 @@ export const API_ENDPOINTS = {
         BASE: '/designations',
         BY_ID: (id) => `/designations/${id}`,
     },
+    DEPARTMENTS: {
+        BASE: '/departments',
+        BY_ID: (id) => `/departments/${id}`,
+    },
     DASHBOARD: {
         BASE: '/dashboard',
         STATS: '/dashboard/stats',
@@ -41,5 +45,7 @@ export const API_ENDPOINTS = {
     },
     ACCESS_CONTROL: {
         BASE: '/access-control',
+        ROLES: '/access-control/roles',
+        PERMISSIONS: '/access-control/permissions',
     }
 };

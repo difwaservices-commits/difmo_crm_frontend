@@ -21,7 +21,8 @@ const EmployeeModal = ({
     email: '',
     phone: '',
     department: '',
-    roleIds: [], 
+    roleIds: [],
+    permissionIds: [], // Added for direct permissions
     employmentType: '',
     status: 'active',
     hireDate: '',
@@ -39,7 +40,9 @@ const EmployeeModal = ({
   const [activeTab, setActiveTab] = useState('basic');
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [roles, setRoles] = useState([]); 
+  const [permissionsLoading, setPermissionsLoading] = useState(false); // Track permissions fetch
+  const [roles, setRoles] = useState([]);
+  const [availablePermissions, setAvailablePermissions] = useState([]); // All possible system permissions
   const [designations, setDesignations] = useState([]);
   const [departments, setDepartments] = useState([]);
 
@@ -52,13 +55,14 @@ const EmployeeModal = ({
   useEffect(() => {
     if (employee && mode !== 'add') {
       setFormData({
-        firstName: employee?.name?.split(' ')?.[0] || '',
-        lastName: employee?.name?.split(' ')?.slice(1)?.join(' ') || '',
+        firstName: employee?.firstName || '',
+        lastName: employee?.lastName || '',
         email: employee?.email || '',
         phone: employee?.phone || '',
         department: employee?.departmentId || '',
         designationId: employee?.designationId || '',
         roleIds: employee?.roleIds || [],
+        permissionIds: employee?.permissionIds || [], // Direct permissions from transformed employee
         employmentType: employee?.employmentType || '',
         status: employee?.status || 'active',
         hireDate: employee?.hireDate || '',
@@ -80,6 +84,7 @@ const EmployeeModal = ({
         phone: '',
         department: '',
         roleIds: [],
+        permissionIds: [],
         employmentType: 'full-time',
         status: 'active',
         hireDate: new Date()?.toISOString()?.split('T')?.[0],
@@ -98,23 +103,30 @@ const EmployeeModal = ({
 
   useEffect(() => {
     const fetchData = async () => {
+      setPermissionsLoading(true);
       try {
-        const [deptRes, roleRes, designRes] = await Promise.all([
+        const [deptRes, roleRes, designRes, permissionRes] = await Promise.all([
           apiClient.get(API_ENDPOINTS.DEPARTMENTS.BASE),
           apiClient.get(API_ENDPOINTS.ACCESS_CONTROL.ROLES, { params: { companyId: currentUser?.company?.id } }),
-          apiClient.get(API_ENDPOINTS.DESIGNATIONS.BASE, { params: { companyId: currentUser?.company?.id } }) 
+          apiClient.get(API_ENDPOINTS.DESIGNATIONS.BASE, { params: { companyId: currentUser?.company?.id } }),
+          apiClient.get(API_ENDPOINTS.ACCESS_CONTROL.PERMISSIONS)
         ]);
 
         const rolesData = roleRes.data?.data || roleRes.data || [];
-        setRoles(rolesData.map(r => ({ value: r.id, label: r.name })));
+        setRoles(rolesData); // Keep the whole object for permission lookup
 
         const designsData = designRes.data?.data || designRes.data || [];
         setDesignations(designsData.map(d => ({ value: d.id, label: d.name })));
 
         const deptsData = deptRes.data?.data || deptRes.data || [];
         setDepartments(deptsData.map(d => ({ value: d.id, label: d.name })));
+
+        const permsData = permissionRes.data?.data || permissionRes.data || [];
+        setAvailablePermissions(permsData);
       } catch (error) {
         console.error('Failed to fetch modal data:', error);
+      } finally {
+        setPermissionsLoading(false);
       }
     };
     if (isOpen) fetchData();
@@ -154,6 +166,7 @@ const EmployeeModal = ({
   const tabs = [
     { id: 'basic', label: 'Basic Info', icon: 'User' },
     { id: 'employment', label: 'Roles & Employment', icon: 'Shield' },
+    { id: 'permissions', label: 'Permissions', icon: 'Lock' },
     { id: 'contact', label: 'Contact', icon: 'Phone' },
     { id: 'documents', label: 'Documents', icon: 'FileText' }
   ];
@@ -191,7 +204,10 @@ const EmployeeModal = ({
   ];
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [field]: typeof value === 'function' ? value(prev[field]) : value
+    }));
     if (errors?.[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
@@ -317,7 +333,17 @@ const EmployeeModal = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select label="Department" options={departments} value={formData?.department} onChange={(value) => handleInputChange('department', value)} error={errors?.department} required disabled={isReadOnly} />
                 <Select label="Designation" options={designations} value={formData?.designationId} onChange={(value) => handleInputChange('designationId', value)} error={errors?.designationId} required disabled={isReadOnly} placeholder="Select a designation" />
-                <Select label="System Role" options={roles} value={formData?.roleIds?.[0]} onChange={(value) => handleInputChange('roleIds', [value])} error={errors?.roleIds} required disabled={isReadOnly} placeholder="Select a role" />
+                <Select 
+                  label="System Roles" 
+                  options={roles.map(r => ({ value: r.id, label: r.name }))} 
+                  value={formData?.roleIds} 
+                  onChange={(value) => handleInputChange('roleIds', value)} 
+                  error={errors?.roleIds} 
+                  required 
+                  disabled={isReadOnly} 
+                  placeholder="Select roles" 
+                  multiple={true}
+                />
                 <Select label="Employment Type" options={employmentTypeOptions} value={formData?.employmentType} onChange={(value) => handleInputChange('employmentType', value)} disabled={isReadOnly} />
                 <Select label="Status" options={statusOptions} value={formData?.status} onChange={(value) => handleInputChange('status', value)} disabled={isReadOnly} />
                 <Input label="Hire Date" type="date" value={formData?.hireDate} onChange={(e) => handleInputChange('hireDate', e?.target?.value)} error={errors?.hireDate} required disabled={isReadOnly} />
@@ -325,6 +351,169 @@ const EmployeeModal = ({
                 <Select label="Branch" options={branchOptions} value={formData?.branch} onChange={(value) => handleInputChange('branch', value)} disabled={isReadOnly} />
                 <Input label="Salary" type="number" value={formData?.salary} onChange={(e) => handleInputChange('salary', e?.target?.value)} disabled={isReadOnly} placeholder="Annual salary" />
               </div>
+
+              {/* Permissions Preview */}
+              <div className="mt-6 p-4 bg-muted/30 rounded-lg border border-border">
+                <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                  <Icon name="Shield" size={16} className="text-primary" />
+                  Granted Permissions
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {formData.roleIds.length === 0 ? (
+                    <p className="text-xs text-muted-foreground italic">No roles selected. No permissions granted.</p>
+                  ) : (
+                    // Extract unique permissions from selected roles
+                    Array.from(new Set(
+                      roles
+                        .filter(r => formData.roleIds.includes(r.id))
+                        .flatMap(r => r.permissions || [])
+                        .map(p => `${p.action}:${p.resource}`)
+                    )).map((permStr, idx) => {
+                      const [action, resource] = permStr.split(':');
+                      return (
+                        <span key={idx} className="inline-flex items-center px-2 py-1 rounded bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-tight">
+                          {action} {resource}
+                        </span>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'permissions' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">Custom Access Rights</h3>
+                  <p className="text-sm text-muted-foreground">Assign specific permissions directly to this employee, in addition to their roles.</p>
+                </div>
+                <div className="flex gap-2">
+                  <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                    {formData.permissionIds.length} Direct
+                  </div>
+                  <div className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                    {Array.from(new Set(
+                      roles
+                        .filter(r => formData.roleIds.includes(r.id))
+                        .flatMap(r => r.permissions || [])
+                        .map(p => p.id)
+                    )).length} From Roles
+                  </div>
+                </div>
+              </div>
+
+              {/* Group permissions by resource */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {Object.entries(
+                  availablePermissions.reduce((acc, perm) => {
+                    if (!acc[perm.resource]) acc[perm.resource] = [];
+                    acc[perm.resource].push(perm);
+                    return acc;
+                  }, {})
+                ).map(([resource, perms], idx) => {
+                  // Get permissions inherited from roles for this resource
+                  const inheritedPermIds = roles
+                    .filter(r => formData.roleIds.includes(r.id))
+                    .flatMap(r => r.permissions || [])
+                    .filter(p => p.resource === resource)
+                    .map(p => p.id);
+
+                  return (
+                    <div key={idx} className="p-5 border border-border rounded-xl bg-card shadow-sm">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="p-1.5 bg-primary/10 rounded-md text-primary">
+                          <Icon name="Database" size={16} />
+                        </div>
+                        <h4 className="font-bold text-sm capitalize">{resource} Management</h4>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        {perms.sort((a, b) => a.action.localeCompare(b.action)).map((perm) => {
+                          const isInherited = inheritedPermIds.includes(perm.id);
+                          const isDirect = formData.permissionIds.includes(perm.id);
+                          const isActive = isInherited || isDirect;
+
+                          return (
+                            <label 
+                              key={perm.id} 
+                              className={`flex items-center p-2 rounded-lg border transition-all cursor-pointer ${
+                                isInherited 
+                                  ? 'bg-primary/5 border-primary/20 cursor-not-allowed opacity-80' 
+                                  : isDirect 
+                                    ? 'bg-primary/10 border-primary/40' 
+                                    : 'hover:bg-muted/50 border-transparent'
+                              }`}
+                            >
+                              <div className="relative flex items-center">
+                                <input
+                                  type="checkbox"
+                                  className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                  checked={isActive}
+                                  disabled={isInherited || isReadOnly}
+                                  onChange={(e) => {
+                                    const isChecked = e.target.checked;
+                                    handleInputChange('permissionIds', (prevIds = []) => {
+                                      if (isChecked) {
+                                        return [...new Set([...prevIds, perm.id])];
+                                      } else {
+                                        return prevIds.filter(id => id !== perm.id);
+                                      }
+                                    });
+                                  }}
+                                />
+                              </div>
+                              <div className="ml-3">
+                                <span className={`text-xs font-medium capitalize ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>
+                                  {perm.action}
+                                </span>
+                                {isInherited && (
+                                  <p className="text-[9px] text-primary/70 leading-none mt-0.5">Via Role</p>
+                                )}
+                              </div>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {permissionsLoading && availablePermissions.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-12 text-center bg-muted/20 border border-dashed border-border rounded-2xl">
+                  <Icon name="Loader" size={32} className="text-muted-foreground animate-spin mb-4" />
+                  <h3 className="text-lg font-medium text-muted-foreground">Loading Permissions...</h3>
+                </div>
+              )}
+
+              {!permissionsLoading && availablePermissions.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-12 text-center bg-muted/20 border border-dashed border-border rounded-2xl">
+                  <Icon name="AlertCircle" size={48} className="text-muted-foreground/30 mb-4" />
+                  <h3 className="text-lg font-medium text-muted-foreground">No Permissions Found</h3>
+                  <p className="text-sm text-muted-foreground/70 max-w-xs mx-auto mt-2 mb-6">
+                    The system's permission table is currently empty. Please seed the permissions or contact your system administrator.
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    iconName="Database" 
+                    onClick={async () => {
+                      try {
+                        await apiClient.post(API_ENDPOINTS.ACCESS_CONTROL.BASE + '/seed');
+                        // Refresh data
+                        const res = await apiClient.get(API_ENDPOINTS.ACCESS_CONTROL.PERMISSIONS);
+                        setAvailablePermissions(res.data?.data || res.data || []);
+                        toast.success("Permissions seeded successfully!");
+                      } catch (err) {
+                        console.error('Seed failed:', err);
+                      }
+                    }}
+                  >
+                    Seed Default Permissions
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 
@@ -342,23 +531,23 @@ const EmployeeModal = ({
 
           {activeTab === 'documents' && (
             <div className="space-y-6">
-               {!isReadOnly && (
-                <div 
-                  className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:bg-muted/50 transition-colors cursor-pointer"
-                  onClick={() => docInputRef.current.click()}
-                >
-                  <input 
-                    type="file" 
-                    multiple 
-                    hidden 
-                    ref={docInputRef} 
-                    onChange={(e) => handleFileChange(e, 'doc')} 
-                  />
-                  <Icon name="UploadCloud" className="mx-auto mb-2 text-muted-foreground" size={32} />
-                  <h3 className="text-sm font-medium">Click to upload documents</h3>
-                  <p className="text-xs text-muted-foreground mt-1">PDF, DOCX, or Images up to 10MB</p>
-                </div>
-              )}
+                {!isReadOnly && (
+                  <div 
+                    className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:bg-muted/50 transition-colors cursor-pointer"
+                    onClick={() => docInputRef.current.click()}
+                  >
+                    <input 
+                      type="file" 
+                      multiple 
+                      hidden 
+                      ref={docInputRef} 
+                      onChange={(e) => handleFileChange(e, 'doc')} 
+                    />
+                    <Icon name="UploadCloud" className="mx-auto mb-2 text-muted-foreground" size={32} />
+                    <h3 className="text-sm font-medium">Click to upload documents</h3>
+                    <p className="text-xs text-muted-foreground mt-1">PDF, DOCX, or Images up to 10MB</p>
+                  </div>
+                )}
 
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold flex items-center gap-2">
@@ -409,6 +598,12 @@ const EmployeeModal = ({
 
         {/* Footer */}
         <div className="flex items-center justify-end space-x-3 p-6 border-t border-border">
+          {isReadOnly && (
+            <div className="flex-1 text-sm text-amber-600 font-medium flex items-center gap-2">
+              <Icon name="Lock" size={14} />
+              Read-Only Mode
+            </div>
+          )}
           <Button 
             variant="outline" 
             onClick={() => {

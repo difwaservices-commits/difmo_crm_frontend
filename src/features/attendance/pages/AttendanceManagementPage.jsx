@@ -18,14 +18,14 @@ import Icon from '../../../components/AppIcon';
 const AttendanceManagement = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { user, isAuthenticated } = useAuthStore();
-  const { 
-    attendanceData, 
-    filteredData, 
-    employees, 
-    analyticsData, 
-    loading, 
+  const {
+    attendanceData,
+    filteredData,
+    employees,
+    analyticsData,
+    loading,
     filters,
-    fetchAttendanceData, 
+    fetchAttendanceData,
     setFilters,
     checkIn,
     checkOut,
@@ -242,7 +242,7 @@ const AttendanceManagement = () => {
           }
 
           {/* Policy Violation Alerts */}
-          
+
 
           <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
             {/* Filters Panel */}

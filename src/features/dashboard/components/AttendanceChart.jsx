@@ -36,8 +36,6 @@ const AttendanceChart = () => {
           companyId: user.company.id
         });
 
-        console.log('analytics:', res);
-
         const mapped = res.punctualityTrend.map(item => ({
           period: item.month,
           late: Number(item.late),
@@ -60,23 +58,7 @@ const AttendanceChart = () => {
     setTimeRange(range);
   };
 
-  console.log("ertfghj", user);
-  useEffect(() => {
-    if (!user?.company?.id) return;
 
-    const fetchAnalytics = async () => {
-      try {
-        const res = await attendanceService.getAnalytics({
-          companyId: user.company.id
-        });
-        console.log('analytics:', res);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchAnalytics();
-  }, [user]);
   return (
     <div className="bg-card border border-border rounded-lg p-6 card-shadow">
       <div className="flex items-center justify-between mb-6">

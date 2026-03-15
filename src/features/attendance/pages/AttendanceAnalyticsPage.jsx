@@ -3,12 +3,12 @@ import Header from '../../../components/ui/Header';
 import Sidebar from '../../../components/ui/Sidebar';
 import BreadcrumbNavigation from '../../../components/ui/BreadcrumbNavigation';
 import Icon from '../../../components/AppIcon';
-import MetricsCard from '../components/MetricsCard';
-import AttendanceTrendChart from '../components/AttendanceTrendChart';
-import DepartmentAnalytics from '../components/DepartmentAnalytics';
-import AnalyticsFilters from '../components/AnalyticsFilters';
-import PredictiveInsights from '../components/PredictiveInsights';
-import ExportPanel from '../components/ExportPanel';
+import MetricsCard from './components/MetricsCard';
+import AttendanceTrendChart from './components/AttendanceTrendChart';
+import DepartmentAnalytics from './components/DepartmentAnalytics';
+import AnalyticsFilters from './components/AnalyticsFilters';
+import PredictiveInsights from './components/PredictiveInsights';
+import ExportPanel from './components/ExportPanel';
 
 const AttendanceAnalytics = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -17,12 +17,10 @@ const AttendanceAnalytics = () => {
   const [analyticsData, setAnalyticsData] = useState({});
 
   useEffect(() => {
-    // Simulate data fetching based on filters
     fetchAnalyticsData();
   }, [selectedPeriod, selectedDepartment]);
 
   const fetchAnalyticsData = () => {
-    // Mock data fetch - replace with actual API call
     setAnalyticsData({
       attendanceRate: 87.5,
       punctualityScore: 92.3,
@@ -105,9 +103,8 @@ const AttendanceAnalytics = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <Sidebar isCollapsed={sidebarCollapsed} onToggleCollapse={handleToggleSidebar} />
-      <main className={`transition-all duration-300 ${
-        sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'
-      } pt-16 pb-20 lg:pb-8`}>
+      <main className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'
+        } pt-16 pb-20 lg:pb-8`}>
         <div className="p-6 max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
@@ -118,10 +115,10 @@ const AttendanceAnalytics = () => {
                 Comprehensive workforce attendance insights and trend analysis for strategic decision-making.
               </p>
             </div>
-            
+
             <div className="flex items-center space-x-4 mt-4 lg:mt-0">
               <ExportPanel onExport={handleExportData} />
-              
+
               <button
                 onClick={fetchAnalyticsData}
                 className="flex items-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors duration-150"
@@ -157,7 +154,7 @@ const AttendanceAnalytics = () => {
 
           {/* Trend Analysis */}
           <div className="mb-8">
-            <AttendanceTrendChart 
+            <AttendanceTrendChart
               data={analyticsData?.trends || []}
               period={selectedPeriod}
             />
@@ -165,7 +162,7 @@ const AttendanceAnalytics = () => {
 
           {/* Department Analytics & Predictive Insights */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
-            <DepartmentAnalytics 
+            <DepartmentAnalytics
               data={analyticsData?.departmentStats || []}
               selectedDepartment={selectedDepartment}
             />

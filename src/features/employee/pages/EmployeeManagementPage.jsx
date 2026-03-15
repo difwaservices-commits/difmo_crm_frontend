@@ -172,6 +172,7 @@ const EmployeeManagement = () => {
         companyId: user?.company?.id || '',
         departmentId: employeeData.department || '',
         role: employeeData.roleIds?.[0] || '',
+        roleIds: employeeData.roleIds || [],
         hireDate: employeeData.hireDate || new Date().toISOString(),
         salary: employeeData.salary || '',
         manager: employeeData.manager || '',
@@ -181,7 +182,8 @@ const EmployeeManagement = () => {
         address: employeeData.address || '',
         emergencyContact: employeeData.emergencyContact || '',
         emergencyPhone: employeeData.emergencyPhone || '',
-        skills: employeeData.skills || []
+        skills: employeeData.skills || [],
+        permissionIds: employeeData.permissionIds || []
       };
 
       if (modalState.mode === 'add') {
@@ -235,7 +237,10 @@ const EmployeeManagement = () => {
           {error && (
             <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
               <p>{error}</p>
-              <button onClick={fetchEmployees} className="mt-2 text-sm underline">
+              <button
+                onClick={() => fetchEmployees(user?.company?.id, filters)}
+                className="mt-2 text-sm underline"
+              >
                 Try again
               </button>
             </div>

@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || 'https://difmo-crm-backend.vercel.app',
+    // https://difmo-crm-backend.vercel.app
+    baseURL: 'http://localhost:3000',
+    // baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000',
     headers: {
         'Content-Type': 'application/json',
     },
@@ -19,7 +21,6 @@ apiClient.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// Response interceptor: handle token expiration
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
@@ -30,7 +31,7 @@ apiClient.interceptors.response.use(
             if (!isLoginPage && !isLoginRequest) {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
-                
+
                 // Trigger logout event or redirect
                 window.dispatchEvent(new Event('auth:logout'));
                 window.location.href = '/login';

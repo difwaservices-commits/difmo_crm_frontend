@@ -48,10 +48,10 @@ const useAttendanceStore = create((set, get) => ({
                 }
             });
 
-            const mergedData = validEmployees.map(emp => {
+            const mergedData = validEmployees.map((emp, index) => {
                 const record = attendanceMap.get(emp.id);
                 return {
-                    id: record?.id || `temp-${emp.id}`,
+                    id: record?.id || `temp-${emp.id || index}`,
                     employeeId: emp.id,
                     employeeName: `${emp.user?.firstName} ${emp.user?.lastName}`,
                     department: emp.department?.name || 'N/A',

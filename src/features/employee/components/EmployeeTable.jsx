@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import apiClient from '../../../api/client';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
@@ -17,7 +18,7 @@ const EmployeeStatus = {
 
 const EmployeeTable = ({
   employees,
-  setEmployees, 
+  setEmployees,
   selectedEmployees,
   onSelectEmployee,
   onSelectAll,
@@ -35,22 +36,21 @@ const EmployeeTable = ({
   // NEW: Handler for your @Patch('verify/:id') controller
   const handlePermissionToggle = async (employeeId) => {
     const toastId = toast.loading("Updating verification...");
-    
+
     try {
-      const token = localStorage.getItem('token'); 
-      const response = await axios.patch(
-        `http://localhost:5001/employees/verify/${employeeId}`, 
-        {}, 
-        { headers: { Authorization: `Bearer ${token}` } }
+      const token = localStorage.getItem('token');
+      const response = await apiClient.patch(
+        `/employees/verify/${employeeId}`,
+        {}
       );
 
       // We assume the backend returns the updated employee object with a 'isVerified' field
       const updatedEmployee = response.data;
 
-      setEmployees((prevEmployees) => 
-        prevEmployees.map((emp) => 
-          (emp.id === employeeId || emp._id === employeeId) 
-            ? { ...emp, isVerified: updatedEmployee.isVerified } 
+      setEmployees((prevEmployees) =>
+        prevEmployees.map((emp) =>
+          (emp.id === employeeId || emp._id === employeeId)
+            ? { ...emp, isVerified: updatedEmployee.isVerified }
             : emp
         )
       );
@@ -65,17 +65,16 @@ const EmployeeTable = ({
   const handleStatusUpdate = async (employeeId, newStatus) => {
     const toastId = toast.loading(`Updating...`);
     try {
-      const token = localStorage.getItem('token'); 
-      const response = await axios.put(
-        `http://localhost:5001/employees/${employeeId}`, 
-        { status: newStatus }, 
-        { headers: { Authorization: `Bearer ${token}` } }
+      const token = localStorage.getItem('token');
+      const response = await apiClient.put(
+        `/employees/${employeeId}`,
+        { status: newStatus }
       );
 
-      setEmployees((prevEmployees) => 
-        prevEmployees.map((emp) => 
-          (emp.id === employeeId || emp._id === employeeId) 
-            ? { ...emp, status: response.data.status } 
+      setEmployees((prevEmployees) =>
+        prevEmployees.map((emp) =>
+          (emp.id === employeeId || emp._id === employeeId)
+            ? { ...emp, status: response.data.status }
             : emp
         )
       );
@@ -96,14 +95,12 @@ const EmployeeTable = ({
     return (
       <button
         onClick={() => handlePermissionToggle(employee.id || employee._id)}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${
-          isEnabled ? 'bg-success' : 'bg-slate-300'
-        }`}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${isEnabled ? 'bg-success' : 'bg-slate-300'
+          }`}
       >
         <span
-          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
-            isEnabled ? 'translate-x-6' : 'translate-x-1'
-          }`}
+          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${isEnabled ? 'translate-x-6' : 'translate-x-1'
+            }`}
         />
       </button>
     );
@@ -201,7 +198,7 @@ const EmployeeTable = ({
                 <td className="px-4 py-4 text-sm">{employee.department}</td>
                 <td className="px-4 py-4 text-sm">{employee.role}</td>
                 <td className="px-4 py-4">{renderStatusDropdown(employee)}</td>
-                
+
                 {/* PERMISSION TOGGLE CELL */}
                 <td className="px-4 py-4">
                   {renderPermissionToggle(employee)}
@@ -243,7 +240,7 @@ const EmployeeTable = ({
                 </div>
               </div>
               <div className="flex flex-col items-end gap-2">
-                 <Button variant="ghost" size="icon" onClick={() => onEditEmployee(employee)}><Icon name="Edit" size={14} /></Button>
+                <Button variant="ghost" size="icon" onClick={() => onEditEmployee(employee)}><Icon name="Edit" size={14} /></Button>
               </div>
             </div>
           </div>

@@ -4,6 +4,8 @@ import employeeService from '../services/employee.service';
 const transformEmployee = (emp) => ({
     id: emp.id,
     name: `${emp.user?.firstName || ''} ${emp.user?.lastName || ''}`.trim() || emp.user?.email,
+    firstName: emp.user?.firstName || '',
+    lastName: emp.user?.lastName || '',
     email: emp.user?.email,
     phone: emp.user?.phone,
     department: emp.department?.name || emp.departmentId,
@@ -20,9 +22,11 @@ const transformEmployee = (emp) => ({
     emergencyPhone: emp.emergencyPhone,
     skills: emp.skills || [],
     userId: emp.userId,
+    designationId: emp.designationId || emp.designation?.id,
     companyId: emp.companyId,
     departmentId: emp.department?.id || emp.departmentId,
-    roleIds: emp.user?.roles?.map(r => r.id) || []
+    roleIds: emp.user?.roles?.map(r => typeof r === 'string' ? r : (r?.id || r)) || [],
+    permissionIds: emp.user?.permissions?.map(p => typeof p === 'string' ? p : (p?.id || p)) || []
 });
 
 const useEmployeeStore = create((set, get) => ({
