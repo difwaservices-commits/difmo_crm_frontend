@@ -3,12 +3,12 @@ import Header from '../../../components/ui/Header';
 import Sidebar from '../../../components/ui/Sidebar';
 import BreadcrumbNavigation from '../../../components/ui/BreadcrumbNavigation';
 import Icon from '../../../components/AppIcon';
-import MetricsCard from './components/MetricsCard';
-import AttendanceTrendChart from './components/AttendanceTrendChart';
-import DepartmentAnalytics from './components/DepartmentAnalytics';
-import AnalyticsFilters from './components/AnalyticsFilters';
-import PredictiveInsights from './components/PredictiveInsights';
-import ExportPanel from './components/ExportPanel';
+import MetricsCard from '../components/MetricsCard';
+import AttendanceTrendChart from '../components/AttendanceTrendChart';
+import DepartmentAnalytics from '../components/DepartmentAnalytics';
+import AnalyticsFilters from '../components/AnalyticsFilters';
+import PredictiveInsights from '../components/PredictiveInsights';
+import ExportPanel from '../components/ExportPanel';
 
 const AttendanceAnalytics = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
