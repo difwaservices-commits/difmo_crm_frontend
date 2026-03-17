@@ -7,6 +7,7 @@ import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Select from '../../../components/ui/Select';
 import useAuthStore from '../../../store/useAuthStore';
+import axios from 'axios';
 
 const EmployeeModal = ({
   isOpen,
@@ -34,6 +35,7 @@ const EmployeeModal = ({
     emergencyPhone: '',
     skills: [],
     avatar: '',
+    profileImage:'',
     documents: [] // Added for document management
   });
 
@@ -73,7 +75,7 @@ const EmployeeModal = ({
         emergencyContact: employee?.emergencyContact || '',
         emergencyPhone: employee?.emergencyPhone || '',
         skills: employee?.skills || [],
-        avatar: employee?.avatar || '',
+        profileImage: employee?.profileImage || '',
         documents: employee?.documents || [] // Load existing docs
       });
     } else if (mode === 'add') {
@@ -96,6 +98,7 @@ const EmployeeModal = ({
         emergencyPhone: '',
         skills: [],
         avatar: '',
+        profileImage:'',
         documents: []
       });
     }
@@ -133,53 +136,63 @@ const EmployeeModal = ({
   }, [isOpen, currentUser]);
 
   //  File Handling Logic
-  const handleFileChange = async (e, type) => {
+ const handleFileChange = async (e, type) => {
   const files = Array.from(e.target.files);
   if (!files.length) return;
 
-  setIsLoading(true); // Show a loader while uploading
+  setIsLoading(true);
 
   try {
-    if (type === "avatar") {
-      const file = files[0];
-      const formDataUpload = new FormData();
-      formDataUpload.append("file", file);
-      
-      // Use your existing apiClient instead of raw axios
-      const res = await apiClient.post(API_ENDPOINTS.UPLOAD.IMAGE, formDataUpload);
-      
-      // Use the URL from your backend response
-      const imageUrl = res.data.url || res.data.secure_url;
-      handleInputChange("avatar", imageUrl);
-      
-    } else {
-      // Logic for multiple documents
-      const uploadPromises = files.map(async (file) => {
-        const docData = new FormData();
-        docData.append("file", file);
-        
-        const res = await apiClient.post(API_ENDPOINTS.UPLOAD.DOCUMENT, docData);
-        
-        return {
-          name: file.name,
-          size: (file.size / 1024).toFixed(1) + " KB",
-          type: file.type,
-          url: res.data.url, // The URL returned from your server
-        };
-      });
+    const file = files[0];
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", file); 
 
-      const uploadedDocs = await Promise.all(uploadPromises);
+    const res = await apiClient.post(API_ENDPOINTS.UPLOAD_IMAGE.IMAGE, formDataUpload, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
 
-      setFormData((prev) => ({
+    // --- NEW EXTRACTION LOGIC BASED ON YOUR LOG ---
+    // Layer 1: Axios wrapper (res.data)
+    // Layer 2: Interceptor wrapper (res.data.data)
+    // Layer 3: Controller wrapper (res.data.data.data)
+    
+    const interceptorData = res.data?.data;
+    const controllerData = interceptorData?.data;
+    const uploadedUrl = controllerData?.url;
+
+    console.log("Deeply nested URL check:", uploadedUrl);
+
+    if (!uploadedUrl) {
+      console.error("Structure check - res.data is:", res.data);
+      throw new Error("No URL returned from server");
+    }
+
+    if (type === "profileImage") {
+      setFormData(prev => ({
         ...prev,
-        documents: [...prev.documents, ...uploadedDocs],
+        profileImage: uploadedUrl,
+        avatar: uploadedUrl 
+      }));
+    } else if (type === "doc") {
+      const newDoc = {
+        name: file.name,
+        size: (file.size / 1024).toFixed(1) + ' KB',
+        url: uploadedUrl,
+        publicId: controllerData?.public_id
+      };
+      
+      setFormData(prev => ({
+        ...prev,
+        documents: [...prev.documents, newDoc]
       }));
     }
+
   } catch (error) {
-    console.error(`${type} upload failed:`, error);
-    // You should add a toast notification here
+    const errorMsg = error.response?.data?.message || error.message;
+    console.error(`${type} upload failed:`, errorMsg);
   } finally {
     setIsLoading(false);
+    if (e.target) e.target.value = null; 
   }
 };
 
@@ -332,7 +345,7 @@ const EmployeeModal = ({
                       ref={avatarInputRef}
                       hidden
                       accept="image/*"
-                      onChange={(e) => handleFileChange(e, 'avatar')}
+                      onChange={(e) => handleFileChange(e, 'profileImage')}
                     />
                     <Button
                       variant="outline"

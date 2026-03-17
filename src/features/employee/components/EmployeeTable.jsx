@@ -187,7 +187,7 @@ const EmployeeTable = ({
                 <td className="px-4 py-4">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full overflow-hidden bg-muted flex-shrink-0">
-                      <Image src={employee.avatar} alt={employee.name} className="w-full h-full object-cover" />
+                      <Image src={employee.profileImage} alt={employee.name} className="w-full h-full object-cover" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-foreground">{employee.name}</p>

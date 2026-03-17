@@ -47,5 +47,11 @@ export const API_ENDPOINTS = {
         BASE: '/access-control',
         ROLES: '/access-control/roles',
         PERMISSIONS: '/access-control/permissions',
+    },
+
+    UPLOAD_IMAGE: {
+        IMAGE: "/upload/image",
+        DOCUMENT: "/upload/document",
+        AVATAR: "/upload/profileImage"
     }
 };
