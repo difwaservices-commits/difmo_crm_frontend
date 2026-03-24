@@ -33,6 +33,7 @@ import FinanceDashboard from './features/finance/pages/FinanceDashboardPage';
 
 import Pricing from "features/landing/pages/Pricing";
 import FeaturesPage from "features/landing/pages/FeaturesPage";
+import { EmployeeModal } from "features/employee";
 
 const Routes = () => {
   return (
@@ -67,6 +68,11 @@ const Routes = () => {
           <Route path="/employee-management" element={
             <ProtectedRoute>
               <EmployeeManagement />
+            </ProtectedRoute>
+          } />
+          <Route path="/add-new-employee" element={
+            <ProtectedRoute>
+              <EmployeeModal />
             </ProtectedRoute>
           } />
           <Route path="/time-tracking" element={

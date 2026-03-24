@@ -53,5 +53,9 @@ export const API_ENDPOINTS = {
         IMAGE: "/upload/image",
         DOCUMENT: "/upload/document",
         AVATAR: "/upload/profileImage"
+    },
+    PRODUCTIVITY_ANALYTICS: {
+        GET_ANALYTICS: "/productivity"
+
     }
 };

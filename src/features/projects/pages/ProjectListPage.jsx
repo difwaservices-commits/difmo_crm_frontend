@@ -5,6 +5,7 @@ import Sidebar from "../../../components/ui/Sidebar";
 import { ProjectFilter, ActionDropdown, useProjectStore } from "features/projects";
 import useAuthStore from "../../../store/useAuthStore";
 import BreadcrumbNavigation from "../../../components/ui/BreadcrumbNavigation";
+import ProjectAnalyticsGraph from "./ProjectAnalyticsGraph";
 
 const Projects = () => {
   const [search, setSearch] = useState("");
@@ -70,19 +71,31 @@ const Projects = () => {
         <div className="p-6">
           <BreadcrumbNavigation items={breadcrumbItems} />
 
-          <div className="flex justify-between items-center mb-6">
-             <div>
-              <h1 className="text-3xl font-semibold text-foreground mb-2">Projects</h1>
-              <p className="text-muted-foreground">Manage and track your company projects and milestones.</p>
-            </div>
+          {/* Header Section */}
+<div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
 
-            <button
-              onClick={() => navigate("/add-project")}
-              className="bg-primary text-primary-foreground px-5 py-2 rounded-lg shadow hover:bg-primary/90 transition"
-            >
-              + Add Project
-            </button>
-          </div>
+  <div>
+    <h1 className="text-3xl font-semibold text-foreground mb-2">
+      Projects
+    </h1>
+    <p className="text-muted-foreground">
+      Manage and track your company projects and milestones.
+    </p>
+  </div>
+
+  <button
+    onClick={() => navigate("/add-project")}
+    className="bg-primary text-primary-foreground px-5 py-2 rounded-lg shadow hover:bg-primary/90 transition"
+  >
+    + Add Project
+  </button>
+
+</div>
+
+{/* Analytics Graph Section */}
+<div className="mb-8">
+  <ProjectAnalyticsGraph />
+</div>
 
           <div className="bg-card rounded-xl shadow-md overflow-hidden border border-border">
             <ProjectFilter

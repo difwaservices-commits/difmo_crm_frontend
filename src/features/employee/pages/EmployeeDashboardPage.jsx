@@ -17,6 +17,7 @@ import {
 import Icon from '../../../components/AppIcon';
 import { formatTime12h } from '../../../utils/dateUtils';
 import AttendanceHistoryModal from '../../attendance/components/AttendanceHistoryModal';
+import EmployeePayrollPage from 'features/payroll/pages/EmployeePayrollPage';
 
 const EmployeeDashboard = () => {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -192,6 +193,9 @@ const EmployeeDashboard = () => {
                             <p className="text-muted-foreground">
                                 Welcome back, {user?.firstName || 'Employee'}!
                             </p>
+                        </div>
+                        <div>
+                            <EmployeePayrollPage/>
                         </div>
 
                         <div className="flex items-center space-x-4 mt-4 lg:mt-0 bg-white p-3 rounded-lg shadow-sm border border-gray-100">
