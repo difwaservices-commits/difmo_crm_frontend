@@ -33,19 +33,29 @@ const AdminLeaveManagement = () => {
     // MAIN DECISION FUNCTION
    // AdminLeaveManagement.jsx
 const handleStatusUpdate = async (id, status) => {
+    // 🛠️ Check: Agar MongoDB hai toh use leave._id, warna leave.id
+    if (!id) return alert("Error: ID not found!");
+
     const note = adminNote[id] || ""; 
+    
     try {
-        // Service ko call karo
+        // Service call matches @Patch(':id/status')
         await financeService.updateLeaveStatus(id, status, note);
         
-        // UI update karo
+        // UI Update logic (Aapka original logic)
         setLeaves(prev => prev.map(l => 
-            (l._id === id || l.id === id) ? { ...l, status: status.toUpperCase(), adminComment: note } : l
+            (l._id === id || l.id === id) 
+                ? { ...l, status: status.toUpperCase(), adminComment: note } 
+                : l
         ));
+
         setExpandedRow(null);
-        alert(`Status updated to ${status}`);
+        alert(`Status updated to ${status}!`);
     } catch (err) {
-        alert("Update failed! Backend check karo.");
+        console.error("Handler Error:", err);
+        alert(err.response?.status === 404 
+            ? "404: Endpoint mismatch! Check if BASE is '/leaves'" 
+            : "Update failed!");
     }
 };
     const filteredLeaves = useMemo(() => {

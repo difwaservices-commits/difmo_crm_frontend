@@ -63,7 +63,7 @@ export const API_ENDPOINTS = {
     LEAVES: {
         BASE: '/leaves',
         BY_ID: (id) => `/leaves/${id}`,
-        // ✅ Add this line to match your @Patch(':id/status') controller
+        //  Add this line to match your @Patch(':id/status') controller
         UPDATE_STATUS: (id) => `/leaves/${id}/status`,
         BY_EMPLOYEE: (employeeId) => `/leaves/employee/${employeeId}`,
     },

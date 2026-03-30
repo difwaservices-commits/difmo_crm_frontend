@@ -1,17 +1,38 @@
 import { create } from 'zustand';
 import axios from 'axios';
 
+const API_URL = 'http://localhost:3000/api/clients';
+
 export const useClientStore = create((set) => ({
   clients: [],
   isLoading: false,
-  
+
   fetchClients: async () => {
     set({ isLoading: true });
     try {
-      const response = await axios.get('http://localhost:3000/api/clients');
-      // Fix: NestJS Interceptor ka wrapped data extract karein
-      const fetchedData = response.data?.data || response.data || [];
-      set({ clients: Array.isArray(fetchedData) ? fetchedData : [], isLoading: false });
+      const response = await axios.get(API_URL);
+      
+      console.log("1. Full Axios Response:", response);
+      console.log("2. response.data contents:", response.data);
+
+      // TRIPLE WRAP CHECK (Based on your console log)
+      // Structure: response.data -> .data -> .data (Array)
+      let finalArray = [];
+      
+      if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
+        finalArray = response.data.data.data; // Triple wrap case
+      } else if (response.data?.data && Array.isArray(response.data.data)) {
+        finalArray = response.data.data; // Double wrap case
+      } else if (Array.isArray(response.data)) {
+        finalArray = response.data; // Direct array case
+      }
+
+      console.log("3. Final Extracted Array for UI:", finalArray);
+
+      set({ 
+        clients: finalArray, 
+        isLoading: false 
+      });
     } catch (error) {
       console.error("Fetch Error:", error);
       set({ clients: [], isLoading: false });
@@ -19,34 +40,29 @@ export const useClientStore = create((set) => ({
   },
 
   addClient: async (clientData) => {
-    set({ isLoading: true });
     try {
-      const response = await axios.post('http://localhost:3000/api/clients', clientData);
+      const response = await axios.post(API_URL, clientData);
+      // Add client logic also needs to handle wrapping
+      const newClient = response.data?.data?.data || response.data?.data || response.data;
       
-      // Fix: Naya client extract karein
-      const newClient = response.data?.data || response.data;
-      
-      if (newClient) {
-        set((state) => ({ 
-          clients: [newClient, ...(Array.isArray(state.clients) ? state.clients : [])],
-          isLoading: false 
-        }));
-      }
+      set((state) => ({ 
+        clients: [newClient, ...state.clients]
+      }));
+      return true;
     } catch (error) {
-      console.error("Add Client Error:", error);
-      set({ isLoading: false });
-      // Duplicate error handle karne ke liye
-      if (error.response?.status === 500) {
-        alert("This email is already registered.");
-      }
+      throw error;
     }
   },
 
-  processInvoice: async (clientId, amount) => {
-    const response = await axios.post(
-      `http://localhost:3000/api/clients/${clientId}/send-invoice`, 
-      { amount }
-    );
-    return response.data;
-  },
+ // useClientStore.js mein check karo
+processInvoice: async (clientId, finalData) => {
+  try {
+    // URL dhyan se dekho: BASE_URL + /api/clients/ + ID + /send-invoice
+    const res = await axios.post(`http://localhost:3000/api/clients/${clientId}/send-invoice`, finalData);
+    return res.data;
+  } catch (err) {
+    console.error("API Error Details:", err.response); // Ye check karo terminal/browser console mein
+    throw err;
+  }
+}
 }));

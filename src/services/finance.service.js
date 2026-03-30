@@ -28,18 +28,27 @@ const financeService = {
         }
     },
 
-    updateLeaveStatus: async (leaveId, status) => {
+  updateLeaveStatus: async (leaveId, status, adminComment = "") => {
         try {
-            const response = await apiClient.patch(`${API_ENDPOINTS.LEAVES.BASE}/${leaveId}`, { 
-                status // 'APPROVED' or 'REJECTED'
+            if (!leaveId) throw new Error("Leave ID is missing!");
+
+            // ✅ FIX: Aapka naya endpoint logic use kar rahe hain
+            // Ye banna chahiye: /leaves/123-abc/status
+            const url = API_ENDPOINTS.LEAVES.UPDATE_STATUS(leaveId);
+            
+            console.log("🚀 Calling API:", url);
+
+            const response = await apiClient.patch(url, { 
+                status: status.toUpperCase(), 
+                adminComment: adminComment // Backend DTO mein ye hona chahiye
             });
+
             return response.data;
         } catch (error) {
-            console.error("Error in updateLeaveStatus Service:", error);
+            console.error("❌ Service Error (404/500):", error.response?.data || error.message);
             throw error;
         }
     },
-
     
     getExpenses: async (companyId) => {
         const response = await apiClient.get(`${API_ENDPOINTS.FINANCE.BASE}/expenses`, {
