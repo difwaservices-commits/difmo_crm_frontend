@@ -140,6 +140,8 @@ const Routes = () => {
               <CompanyProfile />
             </ProtectedRoute>
           } />
+
+          
           <Route path="/payroll" element={
             <ProtectedRoute>
               <PayrollPage />

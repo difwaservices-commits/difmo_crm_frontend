@@ -57,8 +57,15 @@ export const useClientStore = create((set) => ({
  // useClientStore.js mein check karo
 processInvoice: async (clientId, finalData) => {
   try {
+    const token = localStorage.getItem('token');
     // URL dhyan se dekho: BASE_URL + /api/clients/ + ID + /send-invoice
-    const res = await axios.post(`http://localhost:3000/api/clients/${clientId}/send-invoice`, finalData);
+    const res = await axios.post(`http://localhost:3000/api/clients/${clientId}/send-invoice`, finalData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}` // 👈 Pass the token here
+        }
+      }
+    );
     return res.data;
   } catch (err) {
     console.error("API Error Details:", err.response); // Ye check karo terminal/browser console mein
