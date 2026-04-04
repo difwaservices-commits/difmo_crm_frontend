@@ -6,6 +6,7 @@ import CompanyDetails from '../components/CompanyDetails';
 import DepartmentManager from '../components/DepartmentManager';
 import ManagerList from '../components/ManagerList';
 import Icon from '../../../components/AppIcon';
+import ComanyDocsGST from '../components/CompanyDOcsGST';
 
 const CompanyProfile = () => {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -19,7 +20,8 @@ const CompanyProfile = () => {
     const tabs = [
         { id: 'details', label: 'Company Details', icon: 'Building' },
         { id: 'departments', label: 'Departments', icon: 'Layers' },
-        { id: 'managers', label: 'Managers', icon: 'Users' }
+        { id: 'managers', label: 'Managers', icon: 'Users' },
+        { id: 'GST', label: 'CompanyDocsGst', icon: 'CompanyDocs' }
     ];
 
     return (
@@ -46,8 +48,8 @@ const CompanyProfile = () => {
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
                                         className={`flex items-center space-x-2 py-4 border-b-2 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === tab.id
-                                                ? 'border-primary text-primary'
-                                                : 'border-transparent text-muted-foreground hover:text-foreground'
+                                            ? 'border-primary text-primary'
+                                            : 'border-transparent text-muted-foreground hover:text-foreground'
                                             }`}
                                     >
                                         <Icon name={tab.icon} size={16} />
@@ -61,6 +63,8 @@ const CompanyProfile = () => {
                             {activeTab === 'details' && <CompanyDetails />}
                             {activeTab === 'departments' && <DepartmentManager />}
                             {activeTab === 'managers' && <ManagerList />}
+                            {activeTab === 'GST' && <ComanyDocsGST />}
+
                         </div>
                     </div>
                 </div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '../../../components/ui/Header';
 import Sidebar from '../../../components/ui/Sidebar';
@@ -14,12 +15,21 @@ import {
 } from 'features/dashboard';
 import useAuthStore from '../../../store/useAuthStore';
 import Icon from '../../../components/AppIcon';
+import { useNavigate } from 'react-router-dom';
+
+// ✅ IMPORT EMPLOYEE MODAL
+import { EmployeeModal } from 'features/employee';
 
 const Dashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  // ✅ MODAL STATE
+  const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
+
   const { user } = useAuthStore();
   const { metrics, loading, fetchMetrics, refreshDashboard } = useDashboardStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user?.company?.id) {
@@ -79,7 +89,9 @@ const Dashboard = () => {
       description: 'Register new team member with complete profile',
       icon: 'UserPlus',
       color: 'primary',
-      onClick: () => window.location.href = '/employee-management?action=add'
+
+      // ✅ NAVIGATION CHANGED → OPEN MODAL
+      onClick: () => setIsEmployeeModalOpen(true)
     },
     {
       title: 'Create Announcement',
@@ -116,14 +128,20 @@ const Dashboard = () => {
     setCurrentTime(new Date());
   };
 
+  // ✅ SAVE HANDLER FOR MODAL
+  const handleSaveEmployee = async (employeeData) => {
+    console.log('Employee Saved:', employeeData);
+    setIsEmployeeModalOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <Sidebar isCollapsed={sidebarCollapsed} onToggleCollapse={handleToggleSidebar} />
-      <main className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'
-        } pt-16 pb-20 lg:pb-8`}>
+
+      <main className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'} pt-16 pb-20 lg:pb-8`}>
         <div className="p-6 max-w-7xl mx-auto">
-          {/* Header Section */}
+
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
             <div>
               <BreadcrumbNavigation items={breadcrumbItems} />
@@ -162,7 +180,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Metrics Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {metricsData?.map((metric, index) => (
               <MetricsCard
@@ -177,15 +194,14 @@ const Dashboard = () => {
             ))}
           </div>
 
-          {/* Charts Section */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
             <AttendanceChart />
             <ProductivityChart />
           </div>
 
-          {/* Quick Actions */}
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {quickActions?.map((action, index) => (
                 <QuickActionCard
@@ -201,46 +217,27 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Bottom Section */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1">
-              <RecentActivityFeed />
-            </div>
-
-            <div className="lg:col-span-1">
-              <PendingApprovals />
-            </div>
-
-            <div className="lg:col-span-1">
-              <UpcomingEvents />
-            </div>
+            <RecentActivityFeed />
+            <PendingApprovals />
+            <UpcomingEvents />
           </div>
 
-          {/* Footer Stats */}
-          <div className="mt-8 pt-6 border-t border-border">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">
-              <div>
-                <p className="text-2xl font-semibold text-foreground">98.5%</p>
-                <p className="text-sm text-muted-foreground">System Uptime</p>
-              </div>
-              <div>
-                <p className="text-2xl font-semibold text-foreground">24/7</p>
-                <p className="text-sm text-muted-foreground">Support Available</p>
-              </div>
-              <div>
-                <p className="text-2xl font-semibold text-foreground">15</p>
-                <p className="text-sm text-muted-foreground">Active Departments</p>
-              </div>
-              <div>
-                <p className="text-2xl font-semibold text-foreground">3.2s</p>
-                <p className="text-sm text-muted-foreground">Avg Response Time</p>
-              </div>
-            </div>
-          </div>
         </div>
       </main>
+
+      {/* ✅ EMPLOYEE MODAL */}
+      <EmployeeModal
+        isOpen={isEmployeeModalOpen}
+        onClose={() => setIsEmployeeModalOpen(false)}
+        employee={null}
+        mode="add"
+        onSave={handleSaveEmployee}
+      />
+
     </div>
   );
 };
 
 export default Dashboard;
+

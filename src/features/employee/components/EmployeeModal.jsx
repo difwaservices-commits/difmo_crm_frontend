@@ -116,7 +116,7 @@ const EmployeeModal = ({
         ]);
 
         const rolesData = roleRes.data?.data || roleRes.data || [];
-        setRoles(rolesData); // Keep the whole object for permission lookup
+        setRoles(rolesData);
 
         const designsData = designRes.data?.data || designRes.data || [];
         setDesignations(designsData.map(d => ({ value: d.id, label: d.name })));
@@ -124,8 +124,24 @@ const EmployeeModal = ({
         const deptsData = deptRes.data?.data || deptRes.data || [];
         setDepartments(deptsData.map(d => ({ value: d.id, label: d.name })));
 
-        const permsData = permissionRes.data?.data || permissionRes.data || [];
-        setAvailablePermissions(permsData);
+        // --- DEDUPLICATION LOGIC ---
+        const rawPerms = permissionRes.data?.data || permissionRes.data || [];
+        const uniquePermissions = [];
+        const seen = new Set();
+
+        rawPerms.forEach(perm => {
+          // Combine resource and action to create a unique key
+          const identifier = `${perm.resource}:${perm.action}`;
+          
+          if (!seen.has(identifier)) {
+            seen.add(identifier);
+            uniquePermissions.push(perm);
+          }
+        });
+
+        // Set only the unique list to state
+        setAvailablePermissions(uniquePermissions);
+
       } catch (error) {
         console.error('Failed to fetch modal data:', error);
       } finally {

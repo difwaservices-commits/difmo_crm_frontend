@@ -21,6 +21,7 @@ export const API_ENDPOINTS = {
     PROJECTS: {
         BASE: '/projects',
         BY_ID: (id) => `/projects/${id}`,
+        CLIENTS: '/projects/clients'
     },
     DESIGNATIONS: {
         BASE: '/designations',
@@ -36,10 +37,11 @@ export const API_ENDPOINTS = {
     },
     FINANCE: {
         BASE: '/finance',
+        PAYROLL: '/finance/payroll',
+        PAYROLL_BY_ID: (id) => `/finance/payroll/${id}`
     },
-    PAYROLL: {
-        BASE: '/payroll',
-    },
+
+
     TIME_TRACKING: {
         BASE: '/time-tracking',
     },
@@ -53,5 +55,17 @@ export const API_ENDPOINTS = {
         IMAGE: "/upload/image",
         DOCUMENT: "/upload/document",
         AVATAR: "/upload/profileImage"
-    }
+    },
+    PRODUCTIVITY_ANALYTICS: {
+        GET_ANALYTICS: "/productivity"
+
+    },
+
+    LEAVES: {
+        BASE: '/leaves',
+        BY_ID: (id) => `/leaves/${id}`,
+        //  Add this line to match your @Patch(':id/status') controller
+        UPDATE_STATUS: (id) => `/leaves/${id}/status`,
+        BY_EMPLOYEE: (employeeId) => `/leaves/employee/${employeeId}`,
+    },
 };

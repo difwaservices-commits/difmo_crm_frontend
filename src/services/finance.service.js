@@ -15,6 +15,41 @@ const financeService = {
         const data = response.data.data || response.data;
         return Array.isArray(data) ? data : [];
     },
+
+    getAllLeaves: async () => {
+        try {
+            // Agar aapke endpoints file mein LEAVES.BASE: '/leaves' hai
+            const response = await apiClient.get(API_ENDPOINTS.LEAVES.BASE);
+            // NestJS aksar { data: [...] } bhejta hai, toh handle kar lo
+            return response.data?.data || response.data;
+        } catch (error) {
+            console.error("Error in getAllLeaves Service:", error);
+            throw error;
+        }
+    },
+
+  updateLeaveStatus: async (leaveId, status, adminComment = "") => {
+        try {
+            if (!leaveId) throw new Error("Leave ID is missing!");
+
+            // ✅ FIX: Aapka naya endpoint logic use kar rahe hain
+            // Ye banna chahiye: /leaves/123-abc/status
+            const url = API_ENDPOINTS.LEAVES.UPDATE_STATUS(leaveId);
+            
+            console.log("🚀 Calling API:", url);
+
+            const response = await apiClient.patch(url, { 
+                status: status.toUpperCase(), 
+                adminComment: adminComment // Backend DTO mein ye hona chahiye
+            });
+
+            return response.data;
+        } catch (error) {
+            console.error("❌ Service Error (404/500):", error.response?.data || error.message);
+            throw error;
+        }
+    },
+    
     getExpenses: async (companyId) => {
         const response = await apiClient.get(`${API_ENDPOINTS.FINANCE.BASE}/expenses`, {
             params: { companyId }
@@ -35,6 +70,27 @@ const financeService = {
         );
         return response.data.data || response.data;
     },
+
+   getEmployeePayrolls: async (employeeId) => {
+
+  const res = await apiClient.get("/finance/payroll", {
+    params: { employeeId }
+  });
+  console.log("USER ID", user.id)
+
+console.log("EMPLOYEE ID", employeeId)
+
+  return res.data.data || res.data;
+},
+
+ 
+  
+
+  getPayrollById: async (id) => {
+    const res = await apiClient.get(`/payroll/${id}`);
+    return res.data;
+  },
+  
 };
 
 export default financeService;

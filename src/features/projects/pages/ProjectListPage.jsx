@@ -5,21 +5,39 @@ import Sidebar from "../../../components/ui/Sidebar";
 import { ProjectFilter, ActionDropdown, useProjectStore } from "features/projects";
 import useAuthStore from "../../../store/useAuthStore";
 import BreadcrumbNavigation from "../../../components/ui/BreadcrumbNavigation";
+import ProjectAnalyticsGraph from "./ProjectAnalyticsGraph";
 
 const Projects = () => {
   const [search, setSearch] = useState("");
   const [phase, setPhase] = useState("");
+  const [budget, setBudget] = useState(""); 
+  const [deadlineStatus, setDeadlineStatus] = useState(""); 
+  const [sort, setSort] = useState("All"); 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  
+
   const { user, isAuthenticated } = useAuthStore();
-  const { projects, loading, fetchProjects, deleteProject } = useProjectStore();
+  
+  // FIX 1: Corrected "updatedproject" to "updateProject" to match your store
+  const { projects, loading, fetchProjects, deleteProject, updateProject } = useProjectStore();
   const navigate = useNavigate();
 
-  useEffect(() => {
+useEffect(() => {
+  const loadInitialData = async () => {
+    // Check karein ki user load ho chuka hai aur company ID hai
     if (isAuthenticated && user?.company?.id) {
-      fetchProjects(user.company.id);
+      console.log("Fetching projects for Admin with ID:", user.company.id);
+      
+      // Parallel fetch karein taaki time bache
+      await Promise.all([
+        fetchProjects(user.company.id),
+        fetchClients()
+      ]);
     }
-  }, [user, isAuthenticated, fetchProjects]);
+  };
+
+  loadInitialData();
+}, [isAuthenticated, user?.company?.id]);
+console.log("Projects Data in Store:", projects);
 
   const parsePeople = (str) => {
     if (!str) return [];
@@ -37,6 +55,22 @@ const Projects = () => {
     }));
   }, [projects]);
 
+  // FIX 2: Ensuring this function uses the correctly named 'updateProject'
+  const handleStatusChange = async (id, newPhase) => {
+    if (!user?.company?.id) {
+      alert("User session expired. Please log in again.");
+      return;
+    }
+
+    try {
+      await updateProject(id, { phase: newPhase }, user.company.id);
+      console.log(`Status updated to: ${newPhase}`);
+    } catch (err) {
+      console.error("Update Error:", err);
+      alert("Failed to update status. Please try again.");
+    }
+  };
+
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this project?")) {
       try {
@@ -49,12 +83,35 @@ const Projects = () => {
   };
 
   const filteredProjects = useMemo(() => {
-    return cleanProjects.filter((p) => {
-      const matchesSearch = p.projectName.toLowerCase().includes(search.toLowerCase());
-      const matchesPhase = phase === "" || p.phase === phase;
-      return matchesSearch && matchesPhase;
-    });
-  }, [cleanProjects, search, phase]);
+    return cleanProjects
+      .filter((p) => {
+        const matchesSearch = p.projectName.toLowerCase().includes(search.toLowerCase());
+        const matchesPhase = phase === "" || p.phase === phase;
+
+        const today = new Date();
+        const deadline = new Date(p.deadline); 
+        const diffDays = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+
+        let matchesDeadline = true;
+        if (deadlineStatus === "Overdue") matchesDeadline = diffDays < 0;
+        else if (deadlineStatus === "Due this week") matchesDeadline = diffDays >= 0 && diffDays <= 7;
+        else if (deadlineStatus === "Upcoming") matchesDeadline = diffDays > 7;
+
+        let matchesBudget = true;
+        if (budget === "Low Budget") matchesBudget = p.totalPayment < 50000;
+        else if (budget === "Medium Budget") matchesBudget = p.totalPayment >= 50000 && p.totalPayment <= 150000;
+        else if (budget === "High Budget") matchesBudget = p.totalPayment > 150000;
+
+        return matchesSearch && matchesPhase && matchesDeadline && matchesBudget;
+      })
+      .sort((a, b) => {
+        if (sort === "Recently Added") return new Date(b.assigningDate) - new Date(a.assigningDate);
+        if (sort === "Closest Deadline") return new Date(a.deadline) - new Date(b.deadline);
+        if (sort === "Price: Low to High") return a.totalPayment - b.totalPayment;
+        if (sort === "Price: High to Low") return b.totalPayment - a.totalPayment;
+        return 0;
+      });
+  }, [cleanProjects, search, phase, deadlineStatus, budget, sort]);
 
   const breadcrumbItems = [
     { label: "Dashboard", path: "/dashboard" },
@@ -70,12 +127,11 @@ const Projects = () => {
         <div className="p-6">
           <BreadcrumbNavigation items={breadcrumbItems} />
 
-          <div className="flex justify-between items-center mb-6">
-             <div>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+            <div>
               <h1 className="text-3xl font-semibold text-foreground mb-2">Projects</h1>
               <p className="text-muted-foreground">Manage and track your company projects and milestones.</p>
             </div>
-
             <button
               onClick={() => navigate("/add-project")}
               className="bg-primary text-primary-foreground px-5 py-2 rounded-lg shadow hover:bg-primary/90 transition"
@@ -84,12 +140,17 @@ const Projects = () => {
             </button>
           </div>
 
+          <div className="mb-8">
+            <ProjectAnalyticsGraph />
+          </div>
+
           <div className="bg-card rounded-xl shadow-md overflow-hidden border border-border">
             <ProjectFilter
-              search={search}
-              setSearch={setSearch}
-              phase={phase}
-              setPhase={setPhase}
+              search={search} setSearch={setSearch}
+              phase={phase} setPhase={setPhase}
+              budget={budget} setBudget={setBudget}
+              sort={sort} setSort={setSort}
+              deadlineStatus={deadlineStatus} setDeadlineStatus={setDeadlineStatus}
             />
 
             {loading ? (
@@ -116,7 +177,6 @@ const Projects = () => {
                       <th className="px-4 py-3 border-b text-center">Actions</th>
                     </tr>
                   </thead>
-
                   <tbody className="divide-y divide-border">
                     {filteredProjects.map((project, index) => (
                       <tr key={project?.id || `project-${index}`} className="hover:bg-muted/30 transition-colors text-sm">
@@ -126,8 +186,7 @@ const Projects = () => {
                         <td className="px-4 py-3">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             project.phase === 'Completed' ? 'bg-green-100 text-green-700' :
-                            project.phase === 'Development' ? 'bg-blue-100 text-blue-700' :
-                            'bg-gray-100 text-gray-700'
+                            project.phase === 'Development' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
                           }`}>
                             {project.phase}
                           </span>
@@ -145,6 +204,7 @@ const Projects = () => {
                             project={project}
                             onDelete={handleDelete}
                             onEdit={(id) => navigate(`/edit-project/${id}`)}
+                            onStatusChange={handleStatusChange}
                             onView={(id) => navigate(`/project-details/${id}`)}
                           />
                         </td>
