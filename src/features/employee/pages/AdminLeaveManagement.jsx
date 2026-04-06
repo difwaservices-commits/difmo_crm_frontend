@@ -20,6 +20,7 @@ const AdminLeaveManagement = () => {
         setLoading(true);
         try {
             const data = await financeService.getAllLeaves();
+            // Backend should return: { ..., employee: { user: { firstName, lastName } } }
             setLeaves(Array.isArray(data) ? data : []);
         } catch (err) {
             console.error("UI Fetch Error:", err);
@@ -30,38 +31,40 @@ const AdminLeaveManagement = () => {
 
     useEffect(() => { fetchAllLeaves(); }, []);
 
-    // MAIN DECISION FUNCTION
-   // AdminLeaveManagement.jsx
-const handleStatusUpdate = async (id, status) => {
-    // 🛠️ Check: Agar MongoDB hai toh use leave._id, warna leave.id
-    if (!id) return alert("Error: ID not found!");
-
-    const note = adminNote[id] || ""; 
-    
-    try {
-        // Service call matches @Patch(':id/status')
-        await financeService.updateLeaveStatus(id, status, note);
+    const handleStatusUpdate = async (id, status) => {
+        if (!id) return alert("Error: ID not found!");
+        const note = adminNote[id] || ""; 
         
-        // UI Update logic (Aapka original logic)
-        setLeaves(prev => prev.map(l => 
-            (l._id === id || l.id === id) 
-                ? { ...l, status: status.toUpperCase(), adminComment: note } 
-                : l
-        ));
+        try {
+            await financeService.updateLeaveStatus(id, status, note);
+            
+            setLeaves(prev => prev.map(l => 
+                (l._id === id || l.id === id) 
+                    ? { ...l, status: status.toUpperCase(), adminComment: note } 
+                    : l
+            ));
 
-        setExpandedRow(null);
-        alert(`Status updated to ${status}!`);
-    } catch (err) {
-        console.error("Handler Error:", err);
-        alert(err.response?.status === 404 
-            ? "404: Endpoint mismatch! Check if BASE is '/leaves'" 
-            : "Update failed!");
-    }
-};
+            setExpandedRow(null);
+            alert(`Status updated to ${status}!`);
+        } catch (err) {
+            console.error("Handler Error:", err);
+            alert("Update failed!");
+        }
+    };
+
+    // FIX: Search logic now checks nested employee name
     const filteredLeaves = useMemo(() => {
         return leaves.filter(l => {
             const statusMatch = filterStatus === "ALL" || l.status === filterStatus;
-            const nameMatch = (l.employeeName || "").toLowerCase().includes(searchTerm.toLowerCase());
+            
+            // Getting name from nested relation
+            const firstName = l.employee?.user?.firstName || "";
+            const lastName = l.employee?.user?.lastName || "";
+            const fullName = `${firstName} ${lastName}`.toLowerCase();
+            
+            const nameMatch = fullName.includes(searchTerm.toLowerCase()) || 
+                             (l.employee?.employeeCode || "").toLowerCase().includes(searchTerm.toLowerCase());
+            
             return statusMatch && nameMatch;
         });
     }, [leaves, filterStatus, searchTerm]);
@@ -69,7 +72,7 @@ const handleStatusUpdate = async (id, status) => {
     const stats = useMemo(() => ({
         pending: leaves.filter(l => l.status === "PENDING").length,
         approved: leaves.filter(l => l.status === "APPROVED").length,
-        onLeaveToday: leaves.filter(l => l.status === "APPROVED").length, // Example logic
+        onLeaveToday: leaves.filter(l => l.status === "APPROVED").length, 
     }), [leaves]);
 
     return (
@@ -97,12 +100,12 @@ const handleStatusUpdate = async (id, status) => {
 
                     {/* Filter Toolbar */}
                     <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                        <div className="flex bg-white p-1  border">
+                        <div className="flex bg-white p-1 border">
                             {["ALL", "PENDING", "APPROVED", "REJECTED"].map((s) => (
                                 <button
                                     key={s}
                                     onClick={() => setFilterStatus(s)}
-                                    className={`px-5 py-2  text-[11px] font-black transition-all ${
+                                    className={`px-5 py-2 text-[11px] font-black transition-all ${
                                         filterStatus === s ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200" : "text-slate-500 hover:text-slate-800"
                                     }`}
                                 >
@@ -115,8 +118,8 @@ const handleStatusUpdate = async (id, status) => {
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                                 <input 
                                     type="text" 
-                                    placeholder="Search by employee..." 
-                                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200  text-sm focus:ring-2  outline-none transition-all"
+                                    placeholder="Search by name or code..." 
+                                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 text-sm focus:ring-2 outline-none transition-all"
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                             </div>
@@ -124,7 +127,7 @@ const handleStatusUpdate = async (id, status) => {
                     </div>
 
                     {/* Decision Table */}
-                    <div className="bg-white border border-slate-200  overflow-hidden mb-10">
+                    <div className="bg-white border border-slate-200 overflow-hidden mb-10">
                         <table className="w-full text-left">
                             <thead className="bg-slate-50/80 border-b border-slate-100">
                                 <tr className="text-slate-400 text-[10px] uppercase font-black tracking-[0.15em]">
@@ -160,6 +163,12 @@ const handleStatusUpdate = async (id, status) => {
 
 const LeaveRow = ({ leave, onUpdate, isExpanded, onToggle, adminNote, setAdminNote }) => {
     const lId = leave._id || leave.id;
+    
+    // Extracting nested data safely
+    const firstName = leave.employee?.user?.firstName || "Unknown";
+    const lastName = leave.employee?.user?.lastName || "";
+    const fullName = `${firstName} ${lastName}`;
+    const empCode = leave.employee?.employeeCode || "N/A";
 
     return (
         <>
@@ -167,13 +176,18 @@ const LeaveRow = ({ leave, onUpdate, isExpanded, onToggle, adminNote, setAdminNo
                 <td className="px-8 py-5">
                     <div className="flex items-center gap-4">
                         <div className="w-11 h-11 bg-slate-800 text-white rounded-xl flex items-center justify-center font-black text-xs">
-                            {leave.employeeName?.substring(0, 2).toUpperCase()}
+                            {firstName.substring(0, 2).toUpperCase()}
                         </div>
-                        <p className="font-bold text-slate-900 text-sm leading-none">{leave.employeeName}</p>
+                        <div>
+                            <p className="font-bold text-slate-900 text-sm leading-none">{fullName}</p>
+                            <p className="text-[10px] text-slate-400 mt-1 font-bold">{empCode}</p>
+                        </div>
                     </div>
                 </td>
                 <td className="px-8 py-5 text-xs font-black text-slate-700 uppercase">{leave.leaveType}</td>
-                <td className="px-8 py-5 text-sm font-black text-slate-800">{leave.startDate}</td>
+                <td className="px-8 py-5 text-sm font-black text-slate-800">
+                    {new Date(leave.startDate).toLocaleDateString()}
+                </td>
                 <td className="px-8 py-5">
                     <span className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${
                         leave.status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
@@ -188,8 +202,6 @@ const LeaveRow = ({ leave, onUpdate, isExpanded, onToggle, adminNote, setAdminNo
                             <MessageSquare size={18}/>
                         </button>
                         <div className="h-8 w-[1px] bg-slate-200" />
-                        
-                        {/* APPROVE BUTTON */}
                         <button 
                             onClick={() => onUpdate(lId, 'APPROVED')}
                             className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"
@@ -197,8 +209,6 @@ const LeaveRow = ({ leave, onUpdate, isExpanded, onToggle, adminNote, setAdminNo
                         >
                             <Check size={20}/>
                         </button>
-                        
-                        {/* REJECT BUTTON */}
                         <button 
                             onClick={() => onUpdate(lId, 'REJECTED')}
                             className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
@@ -221,15 +231,14 @@ const LeaveRow = ({ leave, onUpdate, isExpanded, onToggle, adminNote, setAdminNo
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <h4 className="text-[10px] font-black text-slate-400 uppercase italic">Your Remark (Will be shown to employee)</h4>
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase italic">Your Remark</h4>
                                 <textarea 
-                                    placeholder="Write why you are approving/rejecting..."
+                                    placeholder="Write remark..."
                                     className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-sm"
                                     rows="3"
                                     value={adminNote[lId] || ""}
                                     onChange={(e) => setAdminNote({...adminNote, [lId]: e.target.value})}
                                 />
-                                <p className="text-[9px] text-slate-400">* Note is required for rejections to maintain transparency.</p>
                             </div>
                         </div>
                     </td>
@@ -239,6 +248,7 @@ const LeaveRow = ({ leave, onUpdate, isExpanded, onToggle, adminNote, setAdminNo
     );
 };
 
+// Sub-components (StatBox, SkeletonRows)
 const StatBox = ({ label, value, color, icon }) => (
     <div className={`bg-white border-l-4 border-${color}-500 px-4 py-2 min-w-[120px]`}>
         <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase">

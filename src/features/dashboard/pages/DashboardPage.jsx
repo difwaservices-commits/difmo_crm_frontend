@@ -17,14 +17,14 @@ import useAuthStore from '../../../store/useAuthStore';
 import Icon from '../../../components/AppIcon';
 import { useNavigate } from 'react-router-dom';
 
-// ✅ IMPORT EMPLOYEE MODAL
+//  IMPORT EMPLOYEE MODAL
 import { EmployeeModal } from 'features/employee';
 
 const Dashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // ✅ MODAL STATE
+  //  MODAL STATE
   const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
 
   const { user } = useAuthStore();

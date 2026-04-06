@@ -39,6 +39,8 @@ import LeaveForm from "features/employee/pages/LeaveForm";
 import EmployeePayrollPage from "features/payroll/pages/EmployeePayrollPage";
 import AdminLeaveManagement from "features/employee/pages/AdminLeaveManagement";
 import ClientAdmin from "components/ClientAdmin";
+import EmployeeAttendanceHistoryPage from "features/attendance/components/EmployeeAttandece";
+import IndividualEmployeeAttendance from "features/attendance/components/EmployeeAttandece";
 
 
 const Routes = () => {
@@ -125,6 +127,13 @@ const Routes = () => {
               <AttendanceManagement />
             </ProtectedRoute>
           } />
+
+           <Route path="/employee-attendance" element={
+            <ProtectedRoute>
+              <IndividualEmployeeAttendance />
+            </ProtectedRoute>
+          } />
+
           <Route path="/employee-check-in-check-out" element={
             <ProtectedRoute>
               <EmployeeCheckInCheckOut />

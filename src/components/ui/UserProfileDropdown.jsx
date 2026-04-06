@@ -10,7 +10,7 @@ const UserProfileDropdown = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
 
-  // Get user initials from name
+  // Get user initials (First + Last or just First)
   const getInitials = (firstName, lastName) => {
     if (firstName && lastName) {
       return (firstName[0] + lastName[0]).toUpperCase();
@@ -19,21 +19,15 @@ const UserProfileDropdown = () => {
     return 'U';
   };
 
-  // Get user's full name
   const getFullName = (user) => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName} ${user.lastName}`;
-    }
+    if (user?.firstName && user?.lastName) return `${user.firstName} ${user.lastName}`;
     if (user?.firstName) return user.firstName;
     if (user?.lastName) return user.lastName;
     return user?.email || 'User';
   };
 
-  // Get user's role name
   const getRoleName = (user) => {
-    if (user?.roles && Array.isArray(user.roles) && user.roles.length > 0) {
-      return user.roles[0].name || 'User';
-    }
+    if (user?.roles?.length > 0) return user.roles[0].name || 'User';
     return 'User';
   };
 
@@ -41,42 +35,36 @@ const UserProfileDropdown = () => {
     name: getFullName(user),
     email: user?.email || '',
     role: getRoleName(user),
-    avatar: user?.avatar || '/assets/images/avatar-placeholder.jpg',
+    avatar: user?.avatar, // Removed the hardcoded placeholder to trigger fallback
     initials: getInitials(user?.firstName, user?.lastName)
   };
 
-  const menuItems = [
-    {
-      label: 'View Profile',
-      icon: 'User',
-      action: () => handleNavigation('/profile'),
-      description: 'Manage your account settings'
-    },
-    {
-      label: 'Account Settings',
-      icon: 'Settings',
-      action: () => handleNavigation('/account-settings'),
-      description: 'Update preferences and security'
-    },
-    {
-      label: 'Notifications',
-      icon: 'Bell',
-      action: () => handleNavigation('/notifications'),
-      description: 'Configure notification preferences'
-    },
-    {
-      label: 'Help & Support',
-      icon: 'HelpCircle',
-      action: () => handleNavigation('/help'),
-      description: 'Get help and contact support'
-    },
-    {
-      label: 'Sign Out',
-      icon: 'LogOut',
-      action: handleSignOut,
-      description: 'Sign out of your account',
-      variant: 'destructive'
+  // Helper to render Avatar or Fallback Initials
+  const renderAvatar = (sizeClass = "w-8 h-8", textClass = "text-[10px]") => {
+    if (userProfile?.avatar && userProfile.avatar !== '/assets/images/avatar-placeholder.jpg') {
+      return (
+        <div className={`${sizeClass} rounded-full bg-muted flex items-center justify-center overflow-hidden border border-border`}>
+          <Image
+            src={userProfile?.avatar}
+            alt={userProfile?.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      );
     }
+    // Fallback UI
+    return (
+      <div className={`${sizeClass} rounded-full bg-indigo-600 flex items-center justify-center border border-indigo-700 shadow-sm`}>
+        <span className={`${textClass} font-black text-white tracking-tighter`}>
+          {userProfile?.initials}
+        </span>
+      </div>
+    );
+  };
+
+  const menuItems = [
+    { label: 'Notifications', icon: 'Bell', action: () => handleNavigation('/notifications'), description: 'Configure notification preferences' },
+    { label: 'Sign Out', icon: 'LogOut', action: handleSignOut, description: 'Sign out of your account', variant: 'destructive' }
   ];
 
   function handleNavigation(path) {
@@ -86,42 +74,18 @@ const UserProfileDropdown = () => {
 
   function handleSignOut() {
     setIsOpen(false);
-    // Use auth store logout
     logout();
-    // Redirect to login page
     navigate('/login');
   }
 
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
-  };
+  const toggleDropdown = () => setIsOpen(!isOpen);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef?.current && !dropdownRef?.current?.contains(event?.target)) {
-        setIsOpen(false);
-      }
+      if (dropdownRef?.current && !dropdownRef?.current?.contains(event?.target)) setIsOpen(false);
     };
-
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  // Close dropdown on escape key
-  useEffect(() => {
-    const handleEscapeKey = (event) => {
-      if (event?.key === 'Escape') {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('keydown', handleEscapeKey);
-    return () => {
-      document.removeEventListener('keydown', handleEscapeKey);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   return (
@@ -129,89 +93,66 @@ const UserProfileDropdown = () => {
       {/* Profile Button */}
       <button
         onClick={toggleDropdown}
-        className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-        aria-expanded={isOpen}
-        aria-haspopup="true"
+        className="flex items-center space-x-3 p-1.5 rounded-lg hover:bg-muted/50 transition-all duration-200 focus:outline-none"
       >
         <div className="relative">
-          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden">
-            <Image
-              src={userProfile?.avatar}
-              alt={`${userProfile?.name} profile picture`}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          {/* Online status indicator */}
-          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-success border-2 border-card rounded-full"></div>
+          {renderAvatar("w-9 h-9", "text-xs")}
+          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></div>
         </div>
 
         <div className="hidden sm:block text-left">
-          <p className="text-sm font-medium text-foreground">{userProfile?.name}</p>
-          <p className="text-xs text-muted-foreground">{userProfile?.role}</p>
+          <p className="text-xs font-bold text-slate-800 leading-none">{userProfile?.name}</p>
+          <p className="text-[10px] text-slate-400 font-medium mt-1">{userProfile?.role}</p>
         </div>
 
         <Icon
           name="ChevronDown"
-          size={16}
-          className={`text-muted-foreground transition-transform duration-150 ${isOpen ? 'rotate-180' : ''
-            }`}
+          size={14}
+          className={`text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
+
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-72 bg-popover border border-border rounded-lg dropdown-shadow z-50">
+        <div className="absolute top-full right-0 mt-2 w-72 bg-white border border-slate-200 rounded-xl shadow-xl shadow-slate-200/50 z-50 overflow-hidden">
           {/* User Info Header */}
-          <div className="p-4 border-b border-border">
+          <div className="p-4 bg-slate-50/50 border-b border-slate-100">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center overflow-hidden">
-                <Image
-                  src={userProfile?.avatar}
-                  alt={`${userProfile?.name} profile picture`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              {renderAvatar("w-12 h-12", "text-base")}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-popover-foreground truncate">
-                  {userProfile?.name}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {userProfile?.email}
-                </p>
-                <div className="flex items-center space-x-1 mt-1">
-                  <div className="w-2 h-2 bg-success rounded-full"></div>
-                  <span className="text-xs text-muted-foreground">Online</span>
-                </div>
+                <p className="text-sm font-bold text-slate-900 truncate">{userProfile?.name}</p>
+                <p className="text-[11px] text-slate-500 truncate font-medium">{userProfile?.email}</p>
               </div>
             </div>
           </div>
 
           {/* Menu Items */}
-          <div className="py-2">
+          <div className="py-1">
             {menuItems?.map((item, index) => (
               <button
                 key={index}
                 onClick={item?.action}
-                className={`w-full flex items-start space-x-3 px-4 py-3 text-left hover:bg-muted transition-colors duration-150 ${item?.variant === 'destructive' ? 'text-destructive hover:text-destructive' : 'text-popover-foreground'
-                  }`}
+                className={`w-full flex items-start space-x-3 px-4 py-3 text-left hover:bg-slate-50 transition-colors ${
+                  item?.variant === 'destructive' ? 'text-red-600' : 'text-slate-700'
+                }`}
               >
                 <Icon
                   name={item?.icon}
                   size={16}
-                  className={`mt-0.5 ${item?.variant === 'destructive' ? 'text-destructive' : 'text-muted-foreground'
-                    }`}
+                  className={`mt-0.5 ${item?.variant === 'destructive' ? 'text-red-500' : 'text-slate-400'}`}
                 />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium">{item?.label}</p>
-                  <p className="text-xs text-muted-foreground">{item?.description}</p>
+                <div className="flex-1">
+                  <p className="text-xs font-bold">{item?.label}</p>
+                  <p className="text-[10px] text-slate-400 font-medium">{item?.description}</p>
                 </div>
               </button>
             ))}
           </div>
 
           {/* Footer */}
-          <div className="p-3 border-t border-border bg-muted/50">
-            <p className="text-xs text-muted-foreground text-center">
-              Last login: Today at 9:15 AM
+          <div className="p-3 border-t border-slate-100 bg-slate-50/30">
+            <p className="text-[10px] text-slate-400 text-center font-bold uppercase tracking-widest">
+              CRM Systems • 2026
             </p>
           </div>
         </div>
