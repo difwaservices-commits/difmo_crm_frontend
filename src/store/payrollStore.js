@@ -1,43 +1,44 @@
 import apiClient from "api/client";
-import financeService from "services/finance.service"; // Service name fix kiya
+import financeService from "services/finance.service";
 import { create } from "zustand";
 
 export const usePayrollStore = create((set) => ({
   payrolls: [],
   selectedPayroll: null,
   loading: false,
-  error: null, // Error state add ki
+  error: null,
 
-  // usePayrollStore.js
-  fetchEmployeePayrolls: async (employeeId) => {
+  fetchEmployeePayrolls: async (filters) => {
+    // Agar filters string hai (sirf ID), toh object bana do
+    const params = typeof filters === 'string' ? { employeeId: filters } : filters;
 
-  try {
+    if (!params || Object.keys(params).length === 0) {
+      console.warn("fetchEmployeePayrolls: Filters missing.");
+      return;
+    }
 
-    console.log("Sending employeeId:", employeeId);
+    set({ loading: true, error: null });
 
-    const res = await apiClient.get("/finance/payroll", {
-      params: { employeeId }
-    });
+    try {
+      // NestJS backend usually expects month/year as numbers
+      const res = await apiClient.get("/finance/payroll", { params });
 
-    console.log("FULL API RESPONSE:", res.data);
+      // Aapka interceptor data wrap kar raha hai (logs ke according)
+      const payrollData = res.data?.data || res.data || [];
 
-    set({
-      payrolls: res.data?.data || [],
-      loading: false
-    });
-
-  } catch (error) {
-
-    console.error("Payroll API Error:", error);
-
-    set({
-      payrolls: [],
-      loading: false
-    });
-
-  }
-
+      set({
+        payrolls: Array.isArray(payrollData) ? payrollData : [payrollData],
+        loading: false
+      });
+    } catch (error) {
+      set({
+        payrolls: [],
+        error: error.response?.data?.message || "Failed to fetch payroll",
+        loading: false
+      });
+    }
 },
+  
 
   fetchPayrollById: async (id) => {
     set({ loading: true, error: null });
@@ -52,6 +53,5 @@ export const usePayrollStore = create((set) => ({
     }
   },
 
-  // State clear karne ke liye helper (Useful for logouts or tab switch)
-  clearSelectedPayroll: () => set({ selectedPayroll: null })
+  clearSelectedPayroll: () => set({ selectedPayroll: null, error: null })
 }));

@@ -8,8 +8,8 @@ export const useLeaveStore = create((set, get) => ({
   isLoading: false,
   error: null,
 
-  // ✅ Fixed Function Name to match your component
-  fetchEmployeeLeaves: async (employeeId) => {
+  //  Fixed Function Name to match your component
+  fetchEmployeeLeaves: async (employeeId:any) => {
     set({ isLoading: true });
     try {
       // API call with params for specific employee
@@ -30,7 +30,7 @@ export const useLeaveStore = create((set, get) => ({
     }
   },
 
-  submitLeave: async (data) => {
+  submitLeave: async (data:any) => {
     set({ isLoading: true, error: null });
     try {
       const response = await apiClient.post(API_ENDPOINTS.LEAVES.BASE, data);
@@ -38,7 +38,7 @@ export const useLeaveStore = create((set, get) => ({
       // Backend se return hone wala naya leave object
       const newLeave = response.data.data || response.data;
       
-      set((state) => ({ 
+      set((state:any) => ({ 
         leaves: [newLeave, ...state.leaves], 
         isLoading: false 
       }));

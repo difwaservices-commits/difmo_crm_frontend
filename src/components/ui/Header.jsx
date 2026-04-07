@@ -52,12 +52,13 @@ const Header = () => {
         {/* Logo Section */}
         <div className="flex items-center">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Icon name="Building2" size={20} color="white" />
+            <div className=" bg-primary rounded-lg flex items-center justify-center">
             </div>
-            <div className="hidden sm:block">
-              <h1 className="text-lg font-semibold text-foreground">CRM HRM</h1>
-              <p className="text-xs text-muted-foreground -mt-1">Productivity System</p>
+            <div className="hidden  sm:block">
+              {/* <h1 className="text-lg font-semibold text-foreground">CRM HRM</h1> */}
+              <img className='font-semibold h-20 w-40 ' src="https://tse3.mm.bing.net/th/id/OIP.gVbcFQ5WNdo2VRntRihUSwHaFo?pid=ImgDet&w=194&h=147&c=7&o=7&rm=3" alt="" />
+
+              {/* <p className="text-xs text-muted-foreground -mt-1">Productivity System</p> */}
             </div>
           </div>
         </div>

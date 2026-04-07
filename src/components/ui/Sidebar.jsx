@@ -124,7 +124,7 @@ const Sidebar = ({ isCollapsed = false, onToggleCollapse }) => {
       },
       {
         label: 'Attendance',
-        path: '/attendance-management',
+        path: '/employee-attendance',
         icon: 'CalendarCheck',
         tooltip: 'My daily attendance'
       },

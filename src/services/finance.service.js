@@ -32,11 +32,11 @@ const financeService = {
         try {
             if (!leaveId) throw new Error("Leave ID is missing!");
 
-            // ✅ FIX: Aapka naya endpoint logic use kar rahe hain
+            //  FIX: Aapka naya endpoint logic use kar rahe hain
             // Ye banna chahiye: /leaves/123-abc/status
             const url = API_ENDPOINTS.LEAVES.UPDATE_STATUS(leaveId);
             
-            console.log("🚀 Calling API:", url);
+            console.log(" Calling API:", url);
 
             const response = await apiClient.patch(url, { 
                 status: status.toUpperCase(), 
@@ -57,6 +57,8 @@ const financeService = {
         const data = response.data.data || response.data;
         return Array.isArray(data) ? data : [];
     },
+
+    
     createExpense: async (data) => {
         const response = await apiClient.post(`${API_ENDPOINTS.FINANCE.BASE}/expenses`, data);
         return response.data;
