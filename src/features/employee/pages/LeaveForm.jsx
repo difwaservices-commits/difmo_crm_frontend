@@ -35,6 +35,7 @@ const LeaveDashboard = ({ employeeId: propEmployeeId }) => {
       setFormData({ startDate: '', endDate: '', type: 'casual', reason: '' });
       fetchEmployeeLeaves(activeId);
     }
+    alert(success ? "Leave application submitted successfully!" : "Failed to submit leave application. Please try again.");
   };
 
   return (
