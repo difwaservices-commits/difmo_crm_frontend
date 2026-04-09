@@ -104,11 +104,11 @@ const LandingPage = () => {
             {showNotification && (
                 <div className="bg-blue-600 text-white py-2 px-4 text-center text-sm relative">
                     <p className="animate-pulse inline-flex items-center gap-2">
-                        <Zap className="w-4 h-4" /> 
-                        <span className="font-medium">Live Demo Available:</span> See how DIFMO CRM handles 10,000+ concurrent users with 99.9% uptime. 
+                        <Zap className="w-4 h-4" />
+                        <span className="font-medium">Live Demo Available:</span> See how DIFMO CRM handles 10,000+ concurrent users with 99.9% uptime.
                         <button className="underline font-bold ml-2 hover:text-blue-200">Join Live Demo →</button>
                     </p>
-                    <button 
+                    <button
                         onClick={() => setShowNotification(false)}
                         className="absolute right-4 top-2 text-white/80 hover:text-white"
                     >
@@ -130,7 +130,7 @@ const LandingPage = () => {
                                 {/* <span className="text-2xl font-light text-gray-400">/</span> */}
                                 <span className="text-2xl font-extrabold text-gray-700">CRM</span>
                             </Link>
-                            
+
                             {/* Desktop Navigation */}
                             <div className="hidden md:flex space-x-1">
                                 <Link to="/features" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">Features</Link>
@@ -155,14 +155,14 @@ const LandingPage = () => {
                             {/* User Menu */}
                             {isAuthenticated ? (
                                 <div className="flex items-center gap-3">
-                                    <Link 
-                                        to="/dashboard" 
+                                    <Link
+                                        to="/dashboard"
                                         className="hidden md:flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
                                     >
                                         <User className="h-4 w-4 text-gray-600" />
                                         <span className="text-sm font-medium text-gray-700">{getFullName()}</span>
                                     </Link>
-                                    <button 
+                                    <button
                                         onClick={handleLogout}
                                         className="bg-red-50 text-red-600 p-2 rounded-lg hover:bg-red-100 transition flex items-center gap-2"
                                         title="Logout"
@@ -172,14 +172,14 @@ const LandingPage = () => {
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-3">
-                                    <Link 
-                                        to="/login" 
+                                    <Link
+                                        to="/login"
                                         className="text-gray-600 hover:text-gray-900 font-medium text-sm px-4 py-2 hover:bg-gray-100 rounded-lg transition"
                                     >
                                         Log in
                                     </Link>
-                                    <Link 
-                                        to="/company-registration" 
+                                    <Link
+                                        to="/company-registration"
                                         className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all text-sm font-semibold flex items-center gap-2"
                                     >
                                         Start Free Trial <ArrowRight className="w-4 h-4" />
@@ -188,7 +188,7 @@ const LandingPage = () => {
                             )}
 
                             {/* Mobile Menu Button */}
-                            <button 
+                            <button
                                 className="md:hidden p-2 rounded-lg hover:bg-gray-100"
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                             >
@@ -224,7 +224,7 @@ const LandingPage = () => {
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                             <div>
                                 <h1 className="text-2xl font-bold mb-2">
-                                    Welcome back, {getFullName()}! 
+                                    Welcome back, {getFullName()}!
                                     <span className="ml-2 text-sm bg-white/20 px-3 py-1 rounded-full">
                                         {userRole?.label}
                                     </span>
@@ -233,8 +233,8 @@ const LandingPage = () => {
                                     {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                                 </p>
                             </div>
-                            <Link 
-                                to="/dashboard" 
+                            <Link
+                                to="/dashboard"
                                 className="mt-4 md:mt-0 bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-blue-50 transition flex items-center gap-2 w-fit"
                             >
                                 Go to Dashboard <ArrowRight className="w-4 h-4" />
@@ -280,7 +280,7 @@ const LandingPage = () => {
             <header className="relative pt-16 pb-24 overflow-hidden">
                 {/* Background Pattern */}
                 <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-                
+
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
                     <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-center">
                         <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
@@ -295,16 +295,16 @@ const LandingPage = () => {
 
                             <h1 className="text-5xl tracking-tight font-black text-gray-900 sm:text-6xl lg:text-7xl">
                                 {isAuthenticated ? (
- <>Grow Your Bussiness <br />
-                                <span className="text-blue-600">With Us</span></>
+                                    <>Grow Your Bussiness <br />
+                                        <span className="text-blue-600">With Us</span></>
                                 ) : (
- <>Scale your business <br />
-                                <span className="text-blue-600">faster than ever</span></>
+                                    <>Scale your business <br />
+                                        <span className="text-blue-600">faster than ever</span></>
                                 )}
                             </h1>
-                            
+
                             <p className="mt-6 text-lg text-gray-600 leading-relaxed max-w-xl">
-                                {isAuthenticated 
+                                {isAuthenticated
                                     ? "Pick up right where you stopped. Your team, projects, and analytics are waiting for you."
                                     : "The first CRM built for modern Indian teams. Unified projects, automated payroll, and deep analytics—all in one place. No more switching tabs."}
                             </p>
@@ -324,21 +324,21 @@ const LandingPage = () => {
                             {/* CTA Buttons */}
                             <div className="mt-10 flex flex-col sm:flex-row gap-4 sm:justify-center lg:justify-start">
                                 {isAuthenticated ? (
-                                    <Link 
-                                        to="/dashboard" 
+                                    <Link
+                                        to="/dashboard"
                                         className="flex items-center justify-center px-8 py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-xl shadow-blue-100 group"
                                     >
                                         Go to Dashboard <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
                                     </Link>
                                 ) : (
                                     <>
-                                        <Link 
-                                            to="/company-registration" 
+                                        <Link
+                                            to="/company-registration"
                                             className="flex items-center justify-center px-8 py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-xl shadow-blue-100 group"
                                         >
                                             Start 14-day Trial <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
                                         </Link>
-                                        <button 
+                                        <button
                                             onClick={() => {
                                                 const demoSection = document.getElementById('demo-video');
                                                 demoSection?.scrollIntoView({ behavior: 'smooth' });
@@ -354,7 +354,7 @@ const LandingPage = () => {
                             {/* Social Proof */}
                             <div className="mt-10 flex items-center gap-4">
                                 <div className="flex -space-x-2">
-                                    {[1,2,3,4].map((i) => (
+                                    {[1, 2, 3, 4].map((i) => (
                                         <img
                                             key={i}
                                             className="w-8 h-8 rounded-full border-2 border-white"
@@ -384,18 +384,18 @@ const LandingPage = () => {
                             <div className="relative mx-auto w-full">
                                 {/* Main Image */}
                                 <div className="relative rounded-2xl shadow-2xl overflow-hidden border-8 border-white">
-                                    <img 
-                                        className="w-full object-cover" 
-                                        src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80" 
+                                    <img
+                                        className="w-full object-cover"
+                                        src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80"
                                         alt="Dashboard Preview"
                                     />
-                                    
+
                                     {/* Floating Stats */}
                                     <div className="absolute top-4 left-4 bg-white/90 backdrop-blur rounded-lg px-4 py-2 shadow-lg">
                                         <div className="text-sm font-medium text-gray-600">Active Sessions</div>
                                         <div className="text-lg font-bold text-green-600">1,847 online</div>
                                     </div>
-                                    
+
                                     <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur rounded-lg px-4 py-2 shadow-lg">
                                         <div className="text-sm font-medium text-gray-600">Response Time</div>
                                         <div className="text-lg font-bold text-blue-600">89ms</div>
@@ -419,10 +419,10 @@ const LandingPage = () => {
                         <h2 className="text-4xl font-black text-gray-900">See DIFMO CRM in Action</h2>
                         <p className="text-gray-600 mt-4">Watch how teams are transforming their workflow</p>
                     </div>
-                    
+
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-video max-w-4xl mx-auto">
-                        <img 
-                            src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80" 
+                        <img
+                            src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80"
                             alt="Video Thumbnail"
                             className="w-full h-full object-cover"
                         />
@@ -431,13 +431,13 @@ const LandingPage = () => {
                                 <Play className="w-8 h-8 text-blue-600 ml-1" />
                             </button>
                         </div>
-                        
+
                         {/* Video Stats */}
                         <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur text-white px-4 py-2 rounded-lg text-sm">
                             <span className="font-medium">12,847 views</span> • <span>2 days ago</span>
                         </div>
                     </div>
-                    
+
                     <div className="flex justify-center gap-8 mt-8 text-sm text-gray-500">
                         <span>⚡ 5-min setup</span>
                         <span>🔒 Enterprise security</span>
@@ -468,7 +468,7 @@ const LandingPage = () => {
                             <span className="text-xs text-gray-400">Broking</span>
                         </div>
                     </div>
-                    
+
                     {/* Rating Badge */}
                     <div className="mt-8 inline-flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full">
                         <Award className="w-4 h-4 text-green-600" />
@@ -544,8 +544,8 @@ const LandingPage = () => {
 
                     {/* Live Demo CTA */}
                     <div className="mt-16 text-center">
-                        <Link 
-                            to="/company-registration" 
+                        <Link
+                            to="/company-registration"
                             className="inline-flex items-center gap-2 bg-gray-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-gray-800 transition group"
                         >
                             Start your 14-day free trial <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
@@ -747,8 +747,8 @@ const LandingPage = () => {
                         ].map((testimonial, idx) => (
                             <div key={idx} className="bg-gray-50 p-8 rounded-2xl border border-gray-200 hover:border-blue-200 transition group">
                                 <div className="flex items-center gap-4 mb-6">
-                                    <img 
-                                        src={testimonial.image} 
+                                    <img
+                                        src={testimonial.image}
                                         alt={testimonial.name}
                                         className="w-12 h-12 rounded-full object-cover border-2 border-white group-hover:border-blue-400 transition"
                                     />
@@ -794,7 +794,7 @@ const LandingPage = () => {
                 <div className="max-w-7xl mx-auto px-4 text-center">
                     <h2 className="text-4xl font-black text-gray-900 mb-4">Simple, Transparent Pricing</h2>
                     <p className="text-gray-500 mb-12 max-w-2xl mx-auto">Start free, scale as you grow. No hidden fees, no surprises.</p>
-                    
+
                     <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
                         {/* Free Plan */}
                         <div className="bg-white p-8 rounded-2xl border border-gray-200 hover:shadow-xl transition">
@@ -857,9 +857,9 @@ const LandingPage = () => {
                             Get product updates, CRM tips, and industry insights delivered to your inbox.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-                            <input 
-                                type="email" 
-                                placeholder="Enter your email" 
+                            <input
+                                type="email"
+                                placeholder="Enter your email"
                                 className="flex-1 px-6 py-3 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white"
                             />
                             <button className="bg-white text-blue-600 px-6 py-3 rounded-xl font-bold hover:bg-gray-100 transition whitespace-nowrap">
@@ -968,7 +968,7 @@ const LandingPage = () => {
             </div>
 
             {/* Cookie Consent (Simplified) */}
-            {/* <div className="fixed bottom-6 left-6 bg-white rounded-lg shadow-2xl p-4 max-w-sm border border-gray-200 z-50 hidden md:block">
+            <div className="fixed bottom-6 left-6 bg-white rounded-lg shadow-2xl p-4 max-w-sm border border-gray-200 z-50 hidden md:block">
                 <p className="text-sm text-gray-600 mb-3">
                     We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.
                 </p>
@@ -980,7 +980,7 @@ const LandingPage = () => {
                         Decline
                     </button>
                 </div>
-            </div> */}
+            </div>
         </div>
     );
 };
