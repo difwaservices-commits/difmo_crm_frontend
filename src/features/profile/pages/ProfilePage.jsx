@@ -87,7 +87,7 @@ const Profile = () => {
       if (!formData.company?.id) return;
 
       await axios.patch(
-        `http://localhost:5001/company/${formData.company.id}`,
+        `https://difmo-crm-backend.vercel.app/company/${formData.company.id}`,
         formData.company,
         { headers: { Authorization: `Bearer ${token}` } }
       );

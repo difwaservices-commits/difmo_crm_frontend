@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/api/clients';
+const API_URL = 'https://difmo-crm-backend.vercel.app/api/clients';
 
 export const useClientStore = create((set) => ({
   clients: [],
@@ -59,7 +59,7 @@ processInvoice: async (clientId, finalData) => {
   try {
     const token = localStorage.getItem('token');
     // URL dhyan se dekho: BASE_URL + /api/clients/ + ID + /send-invoice
-    const res = await axios.post(`http://localhost:3000/api/clients/${clientId}/send-invoice`, finalData,
+    const res = await axios.post(`https://difmo-crm-backend.vercel.app/api/clients/${clientId}/send-invoice`, finalData,
       {
         headers: {
           Authorization: `Bearer ${token}` // 👈 Pass the token here
