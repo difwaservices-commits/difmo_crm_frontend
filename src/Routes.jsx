@@ -51,9 +51,9 @@ const Routes = () => {
         <RouterRoutes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
-          <Route path="/privacypolicy" element={<PrivacyPolicy/>}/>
-          <Route path="/pricing" element={<Pricing/>}/>
-          <Route path="/features" element={<FeaturesPage/>}/>
+          <Route path="/privacypolicy" element={<PrivacyPolicy />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/features" element={<FeaturesPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/company-registration" element={<CompanyRegistration />} />
 
@@ -71,15 +71,15 @@ const Routes = () => {
           } />
           <Route path="/employee/leaves" element={
             <ProtectedRoute>
-              <LeaveForm/>
+              <LeaveForm />
             </ProtectedRoute>
-          }/>
+          } />
 
-           <Route path="/employee/payroll" element={
+          <Route path="/employee/payroll" element={
             <ProtectedRoute>
-              <EmployeePayrollPage/>
+              <EmployeePayrollPage />
             </ProtectedRoute>
-          }/>
+          } />
 
           <Route path="/task-management" element={
             <ProtectedRoute>
@@ -92,7 +92,7 @@ const Routes = () => {
             </ProtectedRoute>
           } />
 
-           <Route path="/employee-leave" element={
+          <Route path="/employee-leave" element={
             <ProtectedRoute>
               <AdminLeaveManagement />
             </ProtectedRoute>
@@ -104,7 +104,7 @@ const Routes = () => {
             </ProtectedRoute>
           } />
 
-          
+
 
 
           <Route path="/add-new-employee" element={
@@ -128,7 +128,7 @@ const Routes = () => {
             </ProtectedRoute>
           } />
 
-           <Route path="/employee-attendance" element={
+          <Route path="/employee-attendance" element={
             <ProtectedRoute>
               <IndividualEmployeeAttendance />
             </ProtectedRoute>
@@ -150,7 +150,7 @@ const Routes = () => {
             </ProtectedRoute>
           } />
 
-          
+
           <Route path="/payroll" element={
             <ProtectedRoute>
               <PayrollPage />
@@ -164,15 +164,15 @@ const Routes = () => {
 
           <Route path="/projects" element={
             <ProtectedRoute>
-              <Project/>
+              <Project />
             </ProtectedRoute>
           }
           />
           <Route path="/add-project" element={
             <ProtectedRoute>
-              <AddProject/>
+              <AddProject />
             </ProtectedRoute>
-          }/>
+          } />
           <Route path="/profile" element={
             <ProtectedRoute>
               <Profile />
@@ -181,14 +181,14 @@ const Routes = () => {
 
           <Route path="/project-details/:id" element={
             <ProtectedRoute>
-              <ProjectDetails/>
+              <ProjectDetails />
             </ProtectedRoute>
 
-          }/>
+          } />
 
           <Route path="/edit-project/:id" element={
             <ProtectedRoute>
-              <ProjectEdit/>
+              <ProjectEdit />
             </ProtectedRoute>
           }
           />
@@ -197,7 +197,7 @@ const Routes = () => {
               <FinanceDashboard />
             </ProtectedRoute>
           } />
-          
+
           <Route path="*" element={<NotFound />} />
         </RouterRoutes>
       </ErrorBoundary>

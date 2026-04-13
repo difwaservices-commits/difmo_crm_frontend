@@ -35,7 +35,7 @@ const EmployeeModal = ({
     emergencyPhone: '',
     skills: [],
     avatar: '',
-    profileImage:'',
+    profileImage: '',
     documents: [] // Added for document management
   });
 
@@ -98,7 +98,7 @@ const EmployeeModal = ({
         emergencyPhone: '',
         skills: [],
         avatar: '',
-        profileImage:'',
+        profileImage: '',
         documents: []
       });
     }
@@ -132,7 +132,7 @@ const EmployeeModal = ({
         rawPerms.forEach(perm => {
           // Combine resource and action to create a unique key
           const identifier = `${perm.resource}:${perm.action}`;
-          
+
           if (!seen.has(identifier)) {
             seen.add(identifier);
             uniquePermissions.push(perm);
@@ -152,65 +152,65 @@ const EmployeeModal = ({
   }, [isOpen, currentUser]);
 
   //  File Handling Logic
- const handleFileChange = async (e, type) => {
-  const files = Array.from(e.target.files);
-  if (!files.length) return;
+  const handleFileChange = async (e, type) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
 
-  setIsLoading(true);
+    setIsLoading(true);
 
-  try {
-    const file = files[0];
-    const formDataUpload = new FormData();
-    formDataUpload.append("file", file); 
+    try {
+      const file = files[0];
+      const formDataUpload = new FormData();
+      formDataUpload.append("file", file);
 
-    const res = await apiClient.post(API_ENDPOINTS.UPLOAD_IMAGE.IMAGE, formDataUpload, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+      const res = await apiClient.post(API_ENDPOINTS.UPLOAD_IMAGE.IMAGE, formDataUpload, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
 
-    // --- NEW EXTRACTION LOGIC BASED ON YOUR LOG ---
-    // Layer 1: Axios wrapper (res.data)
-    // Layer 2: Interceptor wrapper (res.data.data)
-    // Layer 3: Controller wrapper (res.data.data.data)
-    
-    const interceptorData = res.data?.data;
-    const controllerData = interceptorData?.data;
-    const uploadedUrl = controllerData?.url;
+      // --- NEW EXTRACTION LOGIC BASED ON YOUR LOG ---
+      // Layer 1: Axios wrapper (res.data)
+      // Layer 2: Interceptor wrapper (res.data.data)
+      // Layer 3: Controller wrapper (res.data.data.data)
 
-    console.log("Deeply nested URL check:", uploadedUrl);
+      const interceptorData = res.data?.data;
+      const controllerData = interceptorData?.data;
+      const uploadedUrl = controllerData?.url;
 
-    if (!uploadedUrl) {
-      console.error("Structure check - res.data is:", res.data);
-      throw new Error("No URL returned from server");
+      console.log("Deeply nested URL check:", uploadedUrl);
+
+      if (!uploadedUrl) {
+        console.error("Structure check - res.data is:", res.data);
+        throw new Error("No URL returned from server");
+      }
+
+      if (type === "profileImage") {
+        setFormData(prev => ({
+          ...prev,
+          profileImage: uploadedUrl,
+          avatar: uploadedUrl
+        }));
+      } else if (type === "doc") {
+        const newDoc = {
+          name: file.name,
+          size: (file.size / 1024).toFixed(1) + ' KB',
+          url: uploadedUrl,
+          publicId: controllerData?.public_id
+        };
+
+        setFormData(prev => ({
+          ...prev,
+          documents: [...prev.documents, newDoc]
+        }));
+      }
+
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || error.message;
+      console.error(`${type} upload failed:`, errorMsg);
+    } finally {
+      setIsLoading(false);
+      if (e.target) e.target.value = null;
     }
-
-    if (type === "profileImage") {
-      setFormData(prev => ({
-        ...prev,
-        profileImage: uploadedUrl,
-        avatar: uploadedUrl 
-      }));
-    } else if (type === "doc") {
-      const newDoc = {
-        name: file.name,
-        size: (file.size / 1024).toFixed(1) + ' KB',
-        url: uploadedUrl,
-        publicId: controllerData?.public_id
-      };
-      
-      setFormData(prev => ({
-        ...prev,
-        documents: [...prev.documents, newDoc]
-      }));
-    }
-
-  } catch (error) {
-    const errorMsg = error.response?.data?.message || error.message;
-    console.error(`${type} upload failed:`, errorMsg);
-  } finally {
-    setIsLoading(false);
-    if (e.target) e.target.value = null; 
-  }
-};
+  };
 
   const removeDocument = (index) => {
     setFormData(prev => ({
@@ -496,10 +496,10 @@ const EmployeeModal = ({
                             <label
                               key={perm.id}
                               className={`flex items-center p-2 rounded-lg border transition-all cursor-pointer ${isInherited
-                                  ? 'bg-primary/5 border-primary/20 cursor-not-allowed opacity-80'
-                                  : isDirect
-                                    ? 'bg-primary/10 border-primary/40'
-                                    : 'hover:bg-muted/50 border-transparent'
+                                ? 'bg-primary/5 border-primary/20 cursor-not-allowed opacity-80'
+                                : isDirect
+                                  ? 'bg-primary/10 border-primary/40'
+                                  : 'hover:bg-muted/50 border-transparent'
                                 }`}
                             >
                               <div className="relative flex items-center">
