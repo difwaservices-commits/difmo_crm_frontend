@@ -8,7 +8,7 @@ const apiClient = axios.create({
     },
 });
 
-// Request interceptor
+// Request interceptor take token from local storage and add it to the request headers
 apiClient.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
