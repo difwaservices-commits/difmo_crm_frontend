@@ -34,7 +34,7 @@ const TaskAnalytics = ({ tasks = [] }) => {
       {/* Industrial Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
-          <div key={stat.label} className="bg-white border-2 border-slate-900 p-6 shadow-[8px_8px_0px_rgba(15,23,42,0.1)] group hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-default">
+          <div key={stat.label} className="bg-white border border-slate-200 p-6 transition-all cursor-default hover:bg-slate-50 group">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-slate-900 text-white rounded-none">
                 <Icon name={stat.icon} size={18} />
@@ -53,8 +53,8 @@ const TaskAnalytics = ({ tasks = [] }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Status Distribution */}
-        <div className="bg-white border-2 border-slate-900 p-8 shadow-[12px_12px_0px_rgba(15,23,42,0.05)]">
-          <div className="flex items-center space-x-3 mb-8 pb-4 border-b-2 border-slate-900">
+        <div className="bg-white border border-slate-200 p-8">
+          <div className="flex items-center space-x-3 mb-8 pb-4 border-b border-slate-100">
              <div className="w-2 h-6 bg-slate-900"></div>
              <h3 className="text-sm font-black uppercase tracking-[0.2em] text-slate-900">OPERATIONAL_STATUS_MATRIX</h3>
           </div>
@@ -86,8 +86,8 @@ const TaskAnalytics = ({ tasks = [] }) => {
         </div>
 
         {/* Priority Analysis */}
-        <div className="bg-white border-2 border-slate-900 p-8 shadow-[12px_12px_0px_rgba(15,23,42,0.05)]">
-          <div className="flex items-center space-x-3 mb-8 pb-4 border-b-2 border-slate-900">
+        <div className="bg-white border border-slate-200 p-8">
+          <div className="flex items-center space-x-3 mb-8 pb-4 border-b border-slate-100">
              <div className="w-2 h-6 bg-red-600"></div>
              <h3 className="text-sm font-black uppercase tracking-[0.2em] text-slate-900">CRITICALITY_VECTOR_ANALYSIS</h3>
           </div>
@@ -120,8 +120,8 @@ const TaskAnalytics = ({ tasks = [] }) => {
       </div>
 
       {/* Industrial Quick Insights */}
-      <div className="bg-white border-2 border-slate-900 p-8 shadow-[12px_12px_0px_rgba(15,23,42,0.05)]">
-         <div className="flex items-center space-x-3 mb-8 pb-4 border-b-2 border-slate-900">
+      <div className="bg-white border border-slate-200 p-8">
+         <div className="flex items-center space-x-3 mb-8 pb-4 border-b border-slate-100">
              <Icon name="Zap" size={20} className="text-slate-900" />
              <h3 className="text-sm font-black uppercase tracking-[0.2em] text-slate-900">SYSTEM_DIAGNOSTICS_OVERVIEW</h3>
          </div>
@@ -156,7 +156,7 @@ const TaskAnalytics = ({ tasks = [] }) => {
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-slate-900 border-l-4 border-white p-3 shadow-xl">
+      <div className="bg-slate-900 p-3 shadow-xl">
         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">DATA_POINT</p>
         <p className="text-xs font-black text-white uppercase tracking-tighter">
           {`${payload[0].name} : ${payload[0].value} RECORDS`}
@@ -168,7 +168,7 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 const InsightModule = ({ label, value, subtitle, icon, color }) => (
-  <div className="p-6 bg-slate-50 border-2 border-slate-200 hover:border-slate-900 transition-colors">
+  <div className="p-6 bg-slate-50 border border-slate-200 hover:border-slate-400 transition-colors">
     <div className="flex items-center space-x-3 mb-4">
       <Icon name={icon} size={16} className={color} />
       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</span>

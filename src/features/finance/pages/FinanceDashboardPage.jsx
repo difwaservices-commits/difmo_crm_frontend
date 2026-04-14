@@ -51,7 +51,7 @@ const FinanceDashboardPage = () => {
     const [editingExpense, setEditingExpense] = useState(null);
     const [viewingExpense, setViewingExpense] = useState(null);
     const { user } = useAuthStore();
-    const [selectedCurrency, setSelectedCurrency] = useState('INR');
+    const [selectedCurrency] = useState('INR');
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState('All');
     const [startDate, setStartDate] = useState('');
@@ -64,7 +64,7 @@ const FinanceDashboardPage = () => {
         if (user?.company?.id) {
             fetchFinanceData();
         }
-    }, [user, selectedCurrency]);
+    }, [user]);
 
     const fetchFinanceData = async () => {
         setIsLoading(true);
@@ -107,7 +107,7 @@ const FinanceDashboardPage = () => {
 
             // Compute Chart Data dynamically
             const categoryMap = {};
-            const colors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#0ea5e9', '#ec4899'];
+            const colors = ['#0f172a', '#334155', '#475569', '#64748b', '#94a3b8', '#cbd5e1', '#e2e8f0'];
             let colorIdx = 0;
 
             (expensesData || []).forEach(exp => {
@@ -178,7 +178,7 @@ const FinanceDashboardPage = () => {
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('en-IN', {
             style: 'currency',
-            currency: selectedCurrency,
+            currency: 'INR',
             maximumFractionDigits: 0
         }).format(amount || 0);
     };
@@ -221,7 +221,7 @@ const FinanceDashboardPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-background text-foreground">
+        <div className="min-h-screen bg-[#F8FAFC]">
             <Header />
             <Sidebar
                 isCollapsed={sidebarCollapsed}
@@ -229,165 +229,141 @@ const FinanceDashboardPage = () => {
             />
 
             <main className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'} pt-16 pb-12 flex flex-col min-h-screen`}>
-                <div className="p-6 max-w-7xl mx-auto w-full">
+                <div className="p-8 max-w-[1600px] mx-auto w-full space-y-8">
                     <BreadcrumbNavigation items={breadcrumbItems} />
 
-                    {/* Industrial Header Block */}
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-8 bg-blue-800 text-white border-b-4 border-blue-900 shadow-[12px_12px_0px_rgba(15,23,42,0.1)] group mb-10">
-                        <div className="space-y-3">
-                            <div className="flex items-center space-x-3 text-[10px] font-black uppercase tracking-[0.4em] text-blue-200">
-                                <span className="w-8 h-px bg-blue-600"></span>
-                                <span>FINANCE_PROTOCOL: OVERWATCH_ACTIVE</span>
-                            </div>
-                            <h1 className="text-5xl font-black uppercase tracking-tighter leading-none">
-                                Financial_Unit
-                            </h1>
-                            <p className="text-blue-100/60 text-xs font-bold uppercase tracking-[0.2em] max-w-xl">
-                                Comprehensive vector analysis of company solvency and expense allocation logs
-                            </p>
+                    {/* Modern Header Section */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-4">
+                        <div className="space-y-1">
+                            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Finance Management</h1>
+                            <p className="text-slate-500 text-sm">Real-time financial activity, expense auditing, and company solvency tracking</p>
                         </div>
                         
-                        <div className="flex items-center gap-4 mt-8 lg:mt-0">
-                            <div className="flex flex-col">
-                                <label className="text-[9px] font-black uppercase tracking-[0.2em] mb-2 text-blue-200 pl-1">Currency_Vector</label>
-                                <select
-                                    value={selectedCurrency}
-                                    onChange={(e) => setSelectedCurrency(e.target.value)}
-                                    className="bg-blue-900/40 border-2 border-blue-700/50 text-white rounded-none px-4 py-3 text-xs font-black uppercase tracking-widest focus:outline-none focus:border-white transition-all cursor-pointer appearance-none min-w-[120px]"
-                                >
-                                    <option value="INR">INR (₹)</option>
-                                    <option value="USD">USD ($)</option>
-                                    <option value="EUR">EUR (€)</option>
-                                    <option value="GBP">GBP (£)</option>
-                                </select>
-                            </div>
+                        <div className="flex items-center gap-4">
                             <button 
                                 onClick={() => {
                                     setEditingExpense(null);
                                     setIsExpenseModalOpen(true);
                                 }}
-                                className="inline-flex items-center gap-4 px-8 py-4 bg-white text-blue-950 font-black uppercase tracking-[0.2em] text-[10px] shadow-[8px_8px_0px_rgba(255,255,255,0.1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all active:scale-95 border-b-4 border-blue-200 self-end"
+                                className="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl text-sm shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95"
                             >
                                 <Plus size={18} strokeWidth={3} />
-                                Initiate_Expense_Entry
+                                New Expense Entry
                             </button>
                         </div>
                     </div>
 
-                    {/* Diagnostic Bar */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 bg-white border-2 border-slate-900 shadow-[8px_8px_0px_rgba(15,23,42,0.05)] divide-y md:divide-y-0 md:divide-x-2 divide-slate-900 mb-10">
+                    {/* Diagnostic Bar (Modern Cards) */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {/* Overall Balance / Revenue */}
-                        <div className="p-8 flex items-center justify-between group hover:bg-slate-50 transition-colors">
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Est._Turnover</p>
-                                <h3 className="text-3xl font-black text-slate-900 font-mono italic">{formatCurrency(summary?.turnover || 0)}</h3>
-                                <div className="flex items-center text-[9px] font-black text-emerald-600 uppercase tracking-widest mt-2">
-                                    <ArrowUpRight size={14} className="mr-1" /> +12.5% [FLOW:POSITIVE]
+                        <div className="bg-white p-6  border border-slate-100 shadow-sm hover:shadow-md transition-all group flex items-center justify-between">
+                            <div>
+                                <p className="text-[11px] font-bold text-blue-600 uppercase tracking-wider mb-2">Est. Turnover</p>
+                                <h3 className="text-3xl font-bold text-slate-800 tracking-tight leading-none mb-2">{formatCurrency(summary?.turnover || 0)}</h3>
+                                <div className="flex items-center text-[10px] font-bold text-emerald-600 uppercase tracking-tight">
+                                    <ArrowUpRight size={14} className="mr-1" /> +12.5% vs Last Month
                                 </div>
                             </div>
-                            <div className="p-3 bg-slate-900 text-white rounded-none shadow-[4px_4px_0px_rgba(15,23,42,0.1)]">
+                            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
                                 <TrendingUp size={24} />
                             </div>
                         </div>
 
                         {/* Total Expenses */}
-                        <div className="p-8 flex items-center justify-between group hover:bg-slate-50 transition-colors">
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Total_Expenses</p>
-                                <h3 className="text-3xl font-black text-slate-900 font-mono italic">{formatCurrency(summary?.totalExpenses || 0)}</h3>
-                                <div className="flex items-center text-[9px] font-black text-rose-600 uppercase tracking-widest mt-2">
-                                    <ArrowUpRight size={14} className="mr-1" /> +5.2% [VECTOR:RISING]
+                        <div className="bg-white p-6  border border-slate-100 shadow-sm hover:shadow-md transition-all group flex items-center justify-between">
+                            <div>
+                                <p className="text-[11px] font-bold text-rose-600 uppercase tracking-wider mb-2">Total Expenses</p>
+                                <h3 className="text-3xl font-bold text-slate-800 tracking-tight leading-none mb-2">{formatCurrency(summary?.totalExpenses || 0)}</h3>
+                                <div className="flex items-center text-[10px] font-bold text-rose-600 uppercase tracking-tight">
+                                    <TrendingDown size={14} className="mr-1" /> 5.2% Consumption
                                 </div>
                             </div>
-                            <div className="p-3 bg-slate-900 text-white rounded-none shadow-[4px_4px_0px_rgba(15,23,42,0.1)]">
-                                <TrendingDown size={24} />
+                            <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600">
+                                <Receipt size={24} />
                             </div>
                         </div>
 
                         {/* Payroll Total */}
-                        <div className="p-8 flex items-center justify-between group hover:bg-slate-50 transition-colors">
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Total_Payroll</p>
-                                <h3 className="text-3xl font-black text-slate-900 font-mono italic">{formatCurrency(summary?.totalPayroll || 0)}</h3>
-                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-2 border border-slate-200 px-2 py-0.5 inline-block">Cycle: CURRENT_MONTH</p>
+                        <div className="bg-white p-6  border border-slate-100 shadow-sm hover:shadow-md transition-all group flex items-center justify-between">
+                            <div>
+                                <p className="text-[11px] font-bold text-amber-600 uppercase tracking-wider mb-2">Total Payroll</p>
+                                <h3 className="text-3xl font-bold text-slate-800 tracking-tight leading-none mb-2">{formatCurrency(summary?.totalPayroll || 0)}</h3>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight mt-1 border border-slate-100 px-2 py-0.5 rounded inline-block">Active Cycle</p>
                             </div>
-                            <div className="p-3 bg-slate-900 text-white rounded-none shadow-[4px_4px_0px_rgba(15,23,42,0.1)]">
+                            <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
                                 <Wallet size={24} />
                             </div>
                         </div>
 
                         {/* Net Margin/Profit */}
-                        <div className="p-8 flex items-center justify-between group bg-slate-900 transition-colors">
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">Net_Profit_Vector</p>
-                                <h3 className="text-3xl font-black text-emerald-400 font-mono italic">
+                        <div className="bg-emerald-600 p-6  shadow-lg shadow-emerald-600/20 group flex items-center justify-between">
+                            <div>
+                                <p className="text-[11px] font-bold text-emerald-100 uppercase tracking-wider mb-2">Net Profit</p>
+                                <h3 className="text-3xl font-bold text-white tracking-tight leading-none mb-2">
                                     {formatCurrency((summary?.turnover || 0) - (summary?.totalExpenses || 0) - (summary?.totalPayroll || 0))}
                                 </h3>
-                                <div className="flex items-center text-[9px] font-black text-emerald-500 uppercase tracking-widest mt-2">
-                                    <span className="w-1.5 h-1.5 bg-emerald-500 mr-2 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-                                    STATUS: HEALTHY
+                                <div className="flex items-center text-[10px] font-bold text-emerald-100 uppercase tracking-tight">
+                                    <span className="w-2 h-2 bg-emerald-200 mr-2 rounded-full animate-pulse"></span>
+                                    Status: Healthy
                                 </div>
                             </div>
-                            <div className="p-3 bg-white text-slate-900 rounded-none shadow-[4px_4px_0px_rgba(255,255,255,0.1)]">
-                                <FaRupeeSign size={24} />
+                            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-white">
+                                <DollarSign size={24} />
                             </div>
                         </div>
                     </div>
 
                     {/* Integrated Intelligence Center (Charts) */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-10">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Revenue vs Expenses Chart */}
-                        <div className="lg:col-span-2 bg-white border-2 border-slate-900 shadow-[12px_12px_0px_rgba(15,23,42,0.05)] overflow-hidden group">
-                            <div className="px-8 pt-8 pb-4 border-b border-slate-100 flex justify-between items-start">
+                        <div className="lg:col-span-2 bg-white p-8 rounded-none border border-slate-100">
+                            <div className="flex justify-between items-start mb-8">
                                 <div className="space-y-1">
-                                    <div className="flex items-center space-x-2">
-                                        <span className="w-1.5 h-6 bg-slate-900"></span>
-                                        <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter">Growth_Vector</h3>
-                                    </div>
-                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest pl-3.5">Analysis: SOLVENCY_TRENDS</p>
+                                    <h3 className="text-xl font-bold text-slate-900 tracking-tight">Growth Analysis</h3>
+                                    <p className="text-slate-500 text-xs">Monthly revenue tracking vs operational burn rate</p>
                                 </div>
-                                <div className="flex items-center gap-6 text-[9px] font-black uppercase tracking-[0.2em]">
-                                    <div className="flex items-center gap-2 text-blue-800">
-                                        <div className="w-2.5 h-2.5 bg-blue-800" /> Revenue
+                                <div className="flex items-center gap-6 text-[10px] font-bold uppercase tracking-wider">
+                                    <div className="flex items-center gap-2 text-blue-600">
+                                        <div className="w-3 h-3 bg-blue-600 rounded-full" /> Revenue
                                     </div>
-                                    <div className="flex items-center gap-2 text-slate-400">
-                                        <div className="w-2.5 h-2.5 bg-slate-200" /> Expenses
+                                    <div className="flex items-center gap-2 text-slate-300">
+                                        <div className="w-3 h-3 bg-slate-200 rounded-full" /> Expenses
                                     </div>
                                 </div>
                             </div>
-                            <div className="p-8 h-[340px] w-full bg-slate-50/30">
+                            <div className="h-[340px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <AreaChart data={trendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                         <defs>
                                             <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#1e40af" stopOpacity={0.1} />
-                                                <stop offset="95%" stopColor="#1e40af" stopOpacity={0} />
+                                                <stop offset="5%" stopColor="#2563eb" stopOpacity={0.15} />
+                                                <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
                                             </linearGradient>
                                         </defs>
-                                        <CartesianGrid strokeDasharray="0" vertical={false} stroke="#e2e8f0" />
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                         <XAxis
                                             dataKey="month"
-                                            axisLine={{ stroke: '#0f172a', strokeWidth: 1 }}
+                                            axisLine={false}
                                             tickLine={false}
-                                            tick={{ fill: '#64748b', fontSize: 10, fontWeight: 900 }}
+                                            tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 600 }}
                                             dy={10}
                                         />
                                         <YAxis
-                                            axisLine={{ stroke: '#0f172a', strokeWidth: 1 }}
+                                            axisLine={false}
                                             tickLine={false}
-                                            tick={{ fill: '#64748b', fontSize: 10, fontWeight: 900 }}
+                                            tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 600 }}
                                             tickFormatter={(val) => `₹${val / 1000}K`}
                                         />
                                         <Tooltip
                                             content={({ active, payload, label }) => {
                                                 if (active && payload && payload.length) {
                                                     return (
-                                                        <div className="bg-slate-900 p-4 shadow-[8px_8px_0px_rgba(15,23,42,0.1)]">
-                                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">{label}_CHRONO_POINT</p>
+                                                        <div className="bg-white p-4 shadow-xl border border-slate-50 rounded-xl">
+                                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{label}</p>
                                                             {payload.map((entry, index) => (
                                                                 <div key={index} className="flex items-center justify-between gap-8 mt-1">
-                                                                    <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">{entry.name}</span>
-                                                                    <span className="text-sm font-black text-white font-mono italic">{formatCurrency(entry.value)}</span>
+                                                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{entry.name}</span>
+                                                                    <span className="text-sm font-bold text-slate-900">{formatCurrency(entry.value)}</span>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -395,24 +371,27 @@ const FinanceDashboardPage = () => {
                                                 }
                                                 return null;
                                             }}
-                                            cursor={{ stroke: '#0f172a', strokeWidth: 1 }}
                                         />
                                         <Area 
                                             type="monotone" 
                                             dataKey="revenue" 
-                                            stroke="#1e3a8a" 
+                                            stroke="#2563eb" 
                                             strokeWidth={3} 
                                             fillOpacity={1} 
                                             fill="url(#colorRev)" 
-                                            activeDot={{ r: 4, strokeWidth: 4, stroke: '#ffffff', fill: '#1e3a8a' }}
+                                            activeDot={{ r: 6, strokeWidth: 4, stroke: '#ffffff', fill: '#2563eb' }}
+                                            animationDuration={1500}
+                                            animationEasing="ease-in-out"
                                         />
                                         <Area 
                                             type="monotone" 
                                             dataKey="expenses" 
-                                            stroke="#94a3b8" 
+                                            stroke="#cbd5e1" 
                                             strokeWidth={2} 
                                             fill="transparent"
                                             strokeDasharray="5 5"
+                                            animationDuration={1500}
+                                            animationEasing="ease-in-out"
                                         />
                                     </AreaChart>
                                 </ResponsiveContainer>
@@ -420,26 +399,25 @@ const FinanceDashboardPage = () => {
                         </div>
 
                         {/* Expense Distribution */}
-                        <div className="bg-white border-2 border-slate-900 shadow-[12px_12px_0px_rgba(15,23,42,0.05)] overflow-hidden">
-                            <div className="px-8 pt-8 pb-4 border-b border-slate-100 mb-6">
-                                <div className="flex items-center space-x-2">
-                                    <span className="w-1.5 h-6 bg-slate-900"></span>
-                                    <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter">Cost_Split</h3>
-                                </div>
-                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest pl-3.5">Metrics: CATEGORY_ALLOCATION</p>
+                        <div className="bg-white p-8 rounded-none border border-slate-100 flex flex-col">
+                            <div className="mb-8">
+                                <h3 className="text-xl font-bold text-slate-900 tracking-tight">Expense Allocation</h3>
+                                <p className="text-slate-500 text-xs">Burn rate split by category</p>
                             </div>
                             
-                            <div className="px-8 flex flex-col items-center">
+                            <div className="flex-1 flex flex-col items-center justify-center">
                                 <div className="h-[220px] w-full mb-8">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <RePieChart>
                                             <Pie
                                                 data={categoryData}
-                                                innerRadius={65}
-                                                outerRadius={85}
-                                                paddingAngle={4}
+                                                innerRadius={70}
+                                                outerRadius={95}
+                                                paddingAngle={5}
                                                 dataKey="value"
                                                 stroke="none"
+                                                animationDuration={1500}
+                                                animationEasing="ease-in-out"
                                             >
                                                 {categoryData.map((entry, index) => (
                                                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -450,9 +428,9 @@ const FinanceDashboardPage = () => {
                                                     if (active && payload && payload.length) {
                                                         const data = payload[0].payload;
                                                         return (
-                                                            <div className="bg-slate-900 p-3 shadow-[8px_8px_0px_rgba(15,23,42,0.1)]">
-                                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">{data.name}_ALLOCATION</p>
-                                                                <p className="text-lg font-black text-white font-mono italic">{formatCurrency(data.value)}</p>
+                                                            <div className="bg-white p-3 shadow-xl border border-slate-50 rounded-xl">
+                                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{data.name}</p>
+                                                                <p className="text-lg font-bold text-slate-900">{formatCurrency(data.value)}</p>
                                                             </div>
                                                         );
                                                     }
@@ -463,180 +441,137 @@ const FinanceDashboardPage = () => {
                                     </ResponsiveContainer>
                                 </div>
                                 
-                                <div className="w-full space-y-2 pb-8">
+                                <div className="w-full space-y-2">
                                     {categoryData.slice(0, 4).map((item, id) => (
-                                        <div key={id} className="flex items-center justify-between p-3 bg-slate-50 border-l-4" style={{ borderColor: item.color }}>
-                                            <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{item.name}</span>
-                                            <span className="text-[10px] font-black font-mono italic text-slate-900">{formatCurrency(item.value)}</span>
+                                        <div key={id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                                                <span className="text-[11px] font-bold text-slate-700 uppercase tracking-tight">{item.name}</span>
+                                            </div>
+                                            <span className="text-[11px] font-bold text-slate-900">{formatCurrency(item.value)}</span>
                                         </div>
                                     ))}
-                                    {categoryData.length > 4 && (
-                                        <p className="text-[8px] font-black text-slate-400 text-center uppercase tracking-widest pt-2">+{categoryData.length - 4}_MIN_CHANNELS_REMAINING</p>
-                                    )}
                                 </div>
                             </div>
                         </div>
                     </div>
-                    {/* Transaction Audit Grid */}
-                    <div className="bg-white border-2 border-slate-900 shadow-[12px_12px_0px_rgba(15,23,42,0.05)] overflow-hidden transition-all duration-300">
-                        <div className="p-8 border-b-2 border-slate-900 bg-slate-50 flex flex-col xl:flex-row xl:items-center justify-between gap-8">
-                            <div className="space-y-1">
-                                <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Transaction_Audit_Log</h3>
-                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Sequence: REALTIME_FINANCIAL_STREAM</p>
+
+                    {/* Transaction Audit Table */}
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                        <div className="p-8 border-b border-slate-50 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900 tracking-tight">Transaction Log</h3>
+                                <p className="text-slate-500 text-xs">Detailed audit of all incoming and outgoing capital</p>
                             </div>
                             
-                            <div className="flex flex-wrap items-end gap-6">
-                                <div className="flex flex-col">
-                                    <label className="text-[9px] font-black uppercase tracking-[0.2em] mb-2 text-slate-400 pl-1">Search_Criteria</label>
-                                    <div className="relative">
-                                        <Icon name="Search" size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                                        <input
-                                            type="text"
-                                            placeholder="SCAN_RECORDS..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            className="bg-white border-2 border-slate-200 rounded-none pl-12 pr-6 py-3 text-xs font-mono uppercase w-full sm:w-64 focus:outline-none focus:border-slate-900 transition-colors"
-                                        />
-                                    </div>
+                            <div className="flex flex-wrap items-center gap-4">
+                                <div className="relative">
+                                    <Icon name="Search" size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search records..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="bg-slate-50 border-none rounded-xl pl-12 pr-6 py-2.5 text-sm w-full sm:w-64 focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                                    />
                                 </div>
 
-                                <div className="flex flex-col">
-                                    <label className="text-[9px] font-black uppercase tracking-[0.2em] mb-2 text-slate-400 pl-1">Category_Filter</label>
-                                    <select
-                                        value={filterCategory}
-                                        onChange={(e) => setFilterCategory(e.target.value)}
-                                        className="bg-white border-2 border-slate-200 rounded-none px-4 py-3 text-xs font-black uppercase tracking-widest focus:outline-none focus:border-slate-900 transition-all cursor-pointer appearance-none min-w-[160px]"
-                                    >
-                                        <option value="All">ALL_CATEGORIES</option>
-                                        <option value="Operating">OPERATING</option>
-                                        <option value="Salaries">SALARIES</option>
-                                        <option value="Marketing">MARKETING</option>
-                                        <option value="Infrastructure">INFRASTRUCTURE</option>
-                                        <option value="Maintenance">MAINTENANCE</option>
-                                        <option value="Tax">TAX</option>
-                                        <option value="Misc">MISC</option>
-                                    </select>
-                                </div>
+                                <select
+                                    value={filterCategory}
+                                    onChange={(e) => setFilterCategory(e.target.value)}
+                                    className="bg-slate-50 border-none rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer"
+                                >
+                                    <option value="All">All Categories</option>
+                                    <option value="Operating">Operating</option>
+                                    <option value="Salaries">Salaries</option>
+                                    <option value="Marketing">Marketing</option>
+                                    <option value="Infrastructure">Infrastructure</option>
+                                    <option value="Maintenance">Maintenance</option>
+                                    <option value="Tax">Tax</option>
+                                    <option value="Misc">Misc</option>
+                                </select>
 
-                                <div className="flex flex-col">
-                                    <label className="text-[9px] font-black uppercase tracking-[0.2em] mb-2 text-slate-400 pl-1">Temporal_Range</label>
-                                    <div className="flex items-center gap-2 bg-white border-2 border-slate-200 px-4 py-2.5 rounded-none">
-                                        <Calendar size={14} className="text-slate-400" />
-                                        <input
-                                            type="date"
-                                            value={startDate}
-                                            onChange={(e) => setStartDate(e.target.value)}
-                                            className="bg-transparent text-[10px] font-mono uppercase focus:outline-none"
-                                        />
-                                        <span className="text-slate-300 text-[10px] font-black mx-1 inline-block select-none font-mono">::</span>
-                                        <input
-                                            type="date"
-                                            value={endDate}
-                                            onChange={(e) => setEndDate(e.target.value)}
-                                            className="bg-transparent text-[10px] font-mono uppercase focus:outline-none"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-4">
-                                    {(searchTerm || filterCategory !== 'All' || startDate || endDate) && (
-                                        <button
-                                            onClick={resetFilters}
-                                            className="text-[9px] font-black text-rose-500 uppercase tracking-[0.2em] hover:text-rose-700 hover:underline transition-colors pb-3"
-                                        >
-                                            Reset_Filters
-                                        </button>
-                                    )}
-                                    <button className="p-3 bg-slate-900 text-white rounded-none hover:bg-slate-800 transition-colors shadow-[4px_4px_0px_rgba(15,23,42,0.1)] mb-1">
-                                        <Download size={18} />
-                                    </button>
-                                </div>
+                                <button className="p-2.5 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100 transition-all">
+                                    <Download size={20} />
+                                </button>
                             </div>
                         </div>
 
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
+                            <table className="w-full text-left">
                                 <thead>
-                                    <tr className="bg-slate-50 border-b-2 border-slate-900">
-                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Transaction_identity</th>
-                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Vector_Type</th>
-                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 text-center">Protocol_Date</th>
-                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 text-center">Status</th>
-                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 text-right">Metric_Value</th>
-                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 text-center">Exec_Actions</th>
+                                    <tr className="bg-slate-50/50 border-b border-slate-50">
+                                        <th className="px-8 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-400">Transaction</th>
+                                        <th className="px-8 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-400">Category</th>
+                                        <th className="px-8 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center">Date</th>
+                                        <th className="px-8 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center">Status</th>
+                                        <th className="px-8 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-400 text-right">Amount</th>
+                                        <th className="px-8 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100">
+                                <tbody className="divide-y divide-slate-50">
                                     {isLoading ? (
                                         <tr>
-                                            <td colSpan="6" className="px-8 py-20 text-center">
-                                                <div className="flex flex-col items-center gap-4">
-                                                    <div className="w-10 h-1 bg-slate-100 overflow-hidden relative">
-                                                        <div className="absolute inset-0 bg-slate-900 animate-[loading-bar_1.5s_infinite]"></div>
-                                                    </div>
-                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">INITIALIZING_AUDIT_STREAM...</p>
+                                            <td colSpan="6" className="px-8 py-12 text-center">
+                                                <div className="flex flex-col items-center gap-3">
+                                                    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Loading Records...</p>
                                                 </div>
                                             </td>
                                         </tr>
                                     ) : filteredExpenses.length === 0 ? (
                                         <tr>
-                                            <td colSpan="6" className="px-8 py-20 text-center">
-                                                <div className="flex flex-col items-center opacity-40 grayscale">
-                                                    <Receipt size={64} strokeWidth={1} className="mb-6 text-slate-300" />
-                                                    <p className="text-[10px] font-black text-slate-900 uppercase tracking-[0.4em]">NO_DATA_INTERCEPTED</p>
-                                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-2">Check filter parameters or temporal range</p>
-                                                </div>
+                                            <td colSpan="6" className="px-8 py-12 text-center">
+                                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No matching records found</p>
                                             </td>
                                         </tr>
                                     ) : (
                                         filteredExpenses.map((expense, idx) => (
-                                            <tr key={expense.id || idx} className="hover:bg-slate-50/50 transition-all duration-200 group">
-                                                <td className="px-8 py-6 border-l-4 border-transparent group-hover:border-slate-900">
-                                                    <div className="flex items-center gap-5">
-                                                        <div className={`p-3 rounded-none shadow-[4px_4px_0px_rgba(15,23,42,0.05)] ${expense.type === 'credit' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
-                                                            {expense.type === 'credit' ? <ArrowDownRight size={20} strokeWidth={3} /> : <CreditCard size={20} strokeWidth={2.5} />}
+                                            <tr key={expense.id || idx} className="hover:bg-slate-50/50 transition-colors">
+                                                <td className="px-8 py-5">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className={`p-2.5 rounded-xl ${expense.type === 'credit' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                                                            {expense.type === 'credit' ? <ArrowDownRight size={20} /> : <CreditCard size={20} />}
                                                         </div>
                                                         <div>
-                                                            <p className="text-[11px] font-black text-slate-900 uppercase tracking-widest">{expense.title}</p>
-                                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1 italic">{expense.employee?.user?.firstName || 'SYSTEM_CORE'}</p>
+                                                            <p className="text-sm font-bold text-slate-900 tracking-tight">{expense.title}</p>
+                                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{expense.employee?.user?.firstName || 'System'}</p>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-8 py-6">
-                                                    <span className="text-[9px] font-black bg-slate-100 border border-slate-200 px-3 py-1 text-slate-600 uppercase tracking-widest">
-                                                        {expense.category || 'MAINTENANCE'}
+                                                <td className="px-8 py-5">
+                                                    <span className="text-[10px] font-bold bg-slate-100 px-3 py-1 rounded-full text-slate-600 uppercase tracking-tight">
+                                                        {expense.category || 'Misc'}
                                                     </span>
                                                 </td>
-                                                <td className="px-8 py-6 text-[10px] font-black font-mono text-slate-500 uppercase text-center">
-                                                    {format(new Date(expense.date), 'yyyy.MM.dd')}
+                                                <td className="px-8 py-5 text-[11px] font-bold text-slate-500 text-center">
+                                                    {format(new Date(expense.date), 'MMM dd, yyyy')}
                                                 </td>
-                                                <td className="px-8 py-6 text-center">
-                                                    <span className={`inline-flex items-center px-4 py-1 border-2 text-[9px] font-black uppercase tracking-widest ${
+                                                <td className="px-8 py-5 text-center">
+                                                    <span className={`inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-tight ${
                                                         expense.status === 'approved' 
-                                                        ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-[4px_4px_0px_rgba(16,185,129,0.1)]' 
-                                                        : 'bg-amber-50 border-amber-500 text-amber-700 shadow-[4px_4px_0px_rgba(245,158,11,0.1)]'
+                                                        ? 'bg-emerald-50 text-emerald-600' 
+                                                        : 'bg-amber-50 text-amber-600'
                                                     }`}>
-                                                        {expense.status === 'approved' ? '[ VERIFIED ]' : '[ PENDING ]'}
+                                                        {expense.status === 'approved' ? 'Verified' : 'Pending'}
                                                     </span>
                                                 </td>
-                                                <td className={`px-8 py-6 text-sm font-black font-mono italic text-right ${expense.type === 'credit' ? 'text-emerald-600' : 'text-slate-900'}`}>
+                                                <td className={`px-8 py-5 text-sm font-bold text-right ${expense.type === 'credit' ? 'text-emerald-600' : 'text-slate-900'}`}>
                                                     {expense.type === 'credit' ? '+' : '-'}{formatCurrency(expense.amount)}
                                                 </td>
-                                                <td className="px-8 py-6">
-                                                    <div className="flex items-center justify-center gap-3">
+                                                <td className="px-8 py-5">
+                                                    <div className="flex items-center justify-center gap-2">
                                                         <button
                                                             onClick={() => handleViewExpense(expense)}
-                                                            className="p-2.5 text-blue-800 hover:bg-blue-50 border border-blue-100 transition-all uppercase text-[9px] font-black tracking-widest shadow-[3px_3px_0px_rgba(30,64,175,0.05)]"
-                                                            title="INSPECT_ENTRY"
+                                                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                                                         >
-                                                            Inspect
+                                                            <Icon name="Eye" size={16} />
                                                         </button>
                                                         <button
                                                             onClick={() => handleEditExpense(expense)}
-                                                            className="p-2.5 text-slate-900 hover:bg-slate-900 hover:text-white border border-slate-900 transition-all shadow-[3px_3px_0px_rgba(15,23,42,0.1)]"
-                                                            title="MODIFY_ENTITY"
+                                                            className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all"
                                                         >
-                                                            <Edit2 size={14} strokeWidth={3} />
+                                                            <Edit2 size={16} />
                                                         </button>
                                                     </div>
                                                 </td>

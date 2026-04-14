@@ -141,112 +141,106 @@ const AttendanceManagement = () => {
       <Header />
       <Sidebar isCollapsed={sidebarCollapsed} onToggleCollapse={handleToggleSidebar} />
       <main className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'} pt-16 pb-20 lg:pb-8`}>
-        <div className="p-8 max-w-[1600px] mx-auto space-y-12">
+        <div className="p-8 max-w-[1600px] mx-auto space-y-10">
           
-          {/* Industrial Header Block */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-8 bg-blue-900 text-white border-b-4 border-slate-700 shadow-[8px_8px_0px_rgba(15,23,42,0.1)]">
-            <div className="space-y-2">
-              <div className="flex items-center space-x-3 text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">
-                <span className="w-8 h-px bg-slate-700"></span>
-                <Icon name="UserCheck" size={14} />
-                <span>COMMAND_MODULE: ATTENDANCE_TERMINAL_V4</span>
-              </div>
-              <h1 className="text-4xl font-black uppercase tracking-tighter">
-                Attendance Management
-              </h1>
-              <div className="flex items-center space-x-4 pt-2">
-                <div className="flex items-center space-x-2 px-3 py-1 bg-white/10 text-[10px] font-black uppercase tracking-widest border border-white/10">
-                  <span className="w-2 h-2 bg-emerald-500 animate-pulse"></span>
-                  <span>Oversight Mode Active</span>
-                </div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-2 border-l border-white/10">
-                   Comprehensive workforce oversight and policy management
-                </p>
-              </div>
+          {/* Header Section */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
+            <div>
+              <BreadcrumbNavigation items={breadcrumbItems} />
+              <h1 className="text-3xl font-bold text-slate-900 tracking-tight mt-3">Attendance Management</h1>
+              <p className="text-sm font-medium text-slate-500 mt-1">Track daily presence, check-ins, and productivity metrics.</p>
             </div>
-
-            <div className="flex items-center space-x-3 mt-6 lg:mt-0">
-               <button
-                  onClick={() => setShowAnalytics(!showAnalytics)}
-                  className={`p-3 border transition-all active:translate-y-0.5 group ${
-                    showAnalytics ? 'bg-white text-slate-900 border-white' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'
-                  }`}
-                  title="Toggle Analytics Matrix"
-                >
-                  <Icon name="BarChart3" size={18} className="group-hover:scale-110 transition-transform" strokeWidth={3} />
-                </button>
-                <button
-                  onClick={fetchAttendanceData}
-                  className="p-3 bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all active:translate-y-0.5 group"
-                  title="Sync Local Data"
-                >
-                  <Icon name="RefreshCw" size={18} className={loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'} />
-                </button>
+            <div className="flex items-center space-x-3">
+              <button 
+                onClick={() => setShowAnalytics(!showAnalytics)} 
+                className={`flex items-center space-x-2 px-4 py-2 text-xs font-bold rounded-xl transition-all border ${
+                  showAnalytics 
+                  ? 'bg-blue-50 border-blue-100 text-blue-600 shadow-sm' 
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                <Icon name="BarChart2" size={16} />
+                <span>{showAnalytics ? 'Hide Analytics' : 'Show Analytics'}</span>
+              </button>
             </div>
           </div>
 
-          {/* Diagnostic Bar (Quick Stats) */}
-          <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-0 border border-slate-900 shadow-[12px_12px_0px_rgba(15,23,42,0.05)] bg-slate-50">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
             {/* Total Records */}
-            <div className="p-4 border-r border-slate-200 space-y-2">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Total_Manifest</p>
-                <div className="flex items-baseline space-x-2">
-                    <span className="text-2xl font-black text-slate-900 tracking-tighter font-mono">{attendanceStats?.totalEmployees}</span>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase">UNIT</span>
+            <div className="bg-slate-50 border border-slate-100 p-5   hover:shadow-md transition-all group">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3 ml-1">Total Team</p>
+                <div className="flex items-center justify-between">
+                    <span className="text-3xl font-bold text-slate-900 tracking-tight leading-none">{attendanceStats?.totalEmployees}</span>
+                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-400 group-hover:scale-110 transition-transform">
+                      <Icon name="Users" size={20} />
+                    </div>
                 </div>
             </div>
 
             {/* Present */}
-            <div className="p-4 border-r border-slate-200 space-y-2 bg-emerald-50/50">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-600">Active_Units</p>
-                <div className="flex items-baseline space-x-2">
-                    <span className="text-2xl font-black text-emerald-700 tracking-tighter font-mono">{attendanceStats?.presentToday}</span>
-                    <Icon name="UserCheck" size={12} className="text-emerald-500" />
+            <div className="bg-emerald-50 border border-emerald-100 p-5  hover:shadow-md transition-all group">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-600/70 mb-3 ml-1">Present Today</p>
+                <div className="flex items-center justify-between">
+                    <span className="text-3xl font-bold text-emerald-700 tracking-tight leading-none">{attendanceStats?.presentToday}</span>
+                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-all border border-emerald-100/50">
+                      <Icon name="UserCheck" size={20} />
+                    </div>
                 </div>
             </div>
 
-            {/* Absent */}
-            <div className="p-4 border-r border-slate-200 space-y-2 bg-rose-50/50">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-rose-600">Inactive_Units</p>
-                <div className="flex items-baseline space-x-2">
-                    <span className="text-2xl font-black text-rose-700 tracking-tighter font-mono">{attendanceStats?.absentToday}</span>
-                    <Icon name="UserX" size={12} className="text-rose-500" />
+            {/* Inactive */}
+            <div className="bg-rose-50 border border-rose-100 p-5  hover:shadow-md transition-all group">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-rose-600/70 mb-3 ml-1">Absent</p>
+                <div className="flex items-center justify-between">
+                    <span className="text-3xl font-bold text-rose-700 tracking-tight leading-none">{attendanceStats?.absentToday}</span>
+                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-rose-600 group-hover:scale-110 transition-all border border-rose-100/50">
+                      <Icon name="UserX" size={20} />
+                    </div>
                 </div>
             </div>
 
             {/* Late */}
-            <div className="p-4 border-r border-slate-200 space-y-2">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-600">Late_Arrive</p>
-                <div className="flex items-baseline space-x-2">
-                    <span className="text-2xl font-black text-amber-700 tracking-tighter font-mono">{attendanceStats?.lateArrivals}</span>
-                    <Icon name="Clock" size={12} className="text-amber-500" />
+            <div className="bg-amber-50 border border-amber-100 p-5  hover:shadow-md transition-all group">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-amber-600/70 mb-3 ml-1">Late Arrivals</p>
+                <div className="flex items-center justify-between">
+                    <span className="text-3xl font-bold text-amber-700 tracking-tight leading-none">{attendanceStats?.lateArrivals}</span>
+                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-amber-600 group-hover:scale-110 transition-all border border-amber-100/50">
+                      <Icon name="Clock" size={20} />
+                    </div>
                 </div>
             </div>
 
             {/* Early Out */}
-            <div className="p-4 border-r border-slate-200 space-y-2">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-orange-600">Early_Departure</p>
-                <div className="flex items-baseline space-x-2">
-                    <span className="text-2xl font-black text-orange-700 tracking-tighter font-mono">{attendanceStats?.earlyDepartures}</span>
-                    <Icon name="LogOut" size={12} className="text-orange-500" />
+            <div className="bg-orange-50 border border-orange-100 p-5  hover:shadow-md transition-all group">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-orange-600/70 mb-3 ml-1">Early Out</p>
+                <div className="flex items-center justify-between">
+                    <span className="text-3xl font-bold text-orange-700 tracking-tight leading-none">{attendanceStats?.earlyDepartures}</span>
+                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-orange-600 group-hover:scale-110 transition-all border border-orange-100/50">
+                      <Icon name="LogOut" size={20} />
+                    </div>
                 </div>
             </div>
 
             {/* Early In */}
-            <div className="p-4 border-r border-slate-200 space-y-2">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-sky-600">Early_Incursion</p>
-                <div className="flex items-baseline space-x-2">
-                    <span className="text-2xl font-black text-sky-700 tracking-tighter font-mono">{attendanceStats?.earlyCheckins}</span>
-                    <Icon name="Sun" size={12} className="text-sky-500" />
+            <div className="bg-sky-50 border border-sky-100 p-5 hover:shadow-md transition-all group">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-sky-600/70 mb-3 ml-1">Early In</p>
+                <div className="flex items-center justify-between">
+                    <span className="text-3xl font-bold text-sky-700 tracking-tight leading-none">{attendanceStats?.earlyCheckins}</span>
+                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-sky-600 group-hover:scale-110 transition-all border border-sky-100/50">
+                      <Icon name="Sun" size={20} />
+                    </div>
                 </div>
             </div>
 
             {/* Checked Out */}
-            <div className="p-4 space-y-2">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Archive_Complete</p>
-                <div className="flex items-baseline space-x-2">
-                    <span className="text-2xl font-black text-slate-700 tracking-tighter font-mono">{attendanceStats?.checkedOutTotal}</span>
-                    <Icon name="LogOut" size={12} className="text-slate-400" />
+            <div className="bg-slate-100/50 border border-slate-200 p-5  hover:shadow-md transition-all group">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-3 ml-1">Checked Out</p>
+                <div className="flex items-center justify-between">
+                    <span className="text-3xl font-bold text-slate-700 tracking-tight leading-none">{attendanceStats?.checkedOutTotal}</span>
+                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-500 group-hover:scale-110 transition-all border border-slate-200/50">
+                      <Icon name="LogOut" size={20} />
+                    </div>
                 </div>
             </div>
           </div>

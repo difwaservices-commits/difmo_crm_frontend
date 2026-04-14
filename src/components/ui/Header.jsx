@@ -52,7 +52,7 @@ const Header = () => {
         {/* Logo Section */}
         <div className="flex items-center">
           <div className="flex items-center space-x-3">
-            <div className=" bg-primary rounded-lg flex items-center justify-center">
+            <div className=" bg-primary flex items-center justify-center">
             </div>
             <div className="hidden  sm:block">
               {/* <h1 className="text-lg font-semibold text-foreground">CRM HRM</h1> */}

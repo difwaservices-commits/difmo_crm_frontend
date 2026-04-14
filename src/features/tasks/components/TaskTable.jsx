@@ -63,9 +63,9 @@ const TaskTable = ({ tasks, onTaskSelect, onBulkAction, selectedTasks, onTaskCli
   };
 
   return (
-    <div className="bg-white border-2 border-slate-900 rounded-none overflow-hidden shadow-[12px_12px_0px_rgba(15,23,42,0.05)]">
+    <div className="bg-white border border-slate-200 rounded-none overflow-hidden mb-12">
       {/* Table Header / Bulk Actions */}
-      <div className="px-6 py-4 border-b-2 border-slate-900 bg-slate-50 flex items-center justify-between">
+      <div className="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="relative flex items-center">
             <input
@@ -73,7 +73,7 @@ const TaskTable = ({ tasks, onTaskSelect, onBulkAction, selectedTasks, onTaskCli
               checked={isAllSelected}
               ref={el => el && (el.indeterminate = isIndeterminate)}
               onChange={handleSelectAll}
-              className="w-5 h-5 border-2 border-slate-900 rounded-none cursor-pointer accent-slate-900"
+              className="w-5 h-5 border border-slate-300 rounded-none cursor-pointer accent-slate-900"
             />
           </div>
           <div className="space-y-0.5">
@@ -119,13 +119,13 @@ const TaskTable = ({ tasks, onTaskSelect, onBulkAction, selectedTasks, onTaskCli
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-slate-900 text-white">
+            <tr className="bg-blue-900 text-boldtext-white">
               <th className="w-12 px-6 py-4"></th>
-              <TableHead label="TASK_IDENTIFIER" onSort={() => handleSort('title')} sortKey="title" currentSort={sortConfig} />
-              <TableHead label="ASSIGNEE_UNIT" onSort={() => handleSort('assignee')} sortKey="assignee" currentSort={sortConfig} />
+              <TableHead label="TASK" onSort={() => handleSort('title')} sortKey="title" currentSort={sortConfig} />
+              <TableHead label="ASSIGNED_TO" onSort={() => handleSort('assignee')} sortKey="assignee" currentSort={sortConfig} />
               <TableHead label="CRITICALITY" onSort={() => handleSort('priority')} sortKey="priority" currentSort={sortConfig} />
-              <TableHead label="OPERATIONAL_STATUS" onSort={() => handleSort('status')} sortKey="status" currentSort={sortConfig} />
-              <TableHead label="TEMPORAL_TARGET" onSort={() => handleSort('dueDate')} sortKey="dueDate" currentSort={sortConfig} />
+              <TableHead label="STATUS" onSort={() => handleSort('status')} sortKey="status" currentSort={sortConfig} />
+              <TableHead label="DUE_DATE" onSort={() => handleSort('dueDate')} sortKey="dueDate" currentSort={sortConfig} />
               <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Completion_Vector</th>
               <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Controls</th>
             </tr>
@@ -267,4 +267,4 @@ const ActionButton = ({ icon, onClick, variant = 'default' }) => (
   </button>
 );
 
-export default TaskTable;
+export default TaskTable;

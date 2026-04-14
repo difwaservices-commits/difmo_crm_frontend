@@ -87,11 +87,11 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, employees = [] }) => 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 font-sans italic selection:bg-blue-100">
-      <div className="bg-white border-4 border-slate-900 rounded-none w-full max-w-3xl shadow-[32px_32px_0px_rgba(15,23,42,0.1)] overflow-hidden animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 font-sans italic selection:bg-blue-100">
+      <div className="bg-white border border-slate-200 rounded-none w-full max-w-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
         
         {/* Command Header */}
-        <div className="bg-blue-900 p-6 border-b-4 border-slate-900 flex items-center justify-between">
+        <div className="bg-blue-900 p-6 border-b border-slate-800 flex items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center space-x-2 text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">
               <span className="w-6 h-px bg-slate-600"></span>
@@ -112,7 +112,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, employees = [] }) => 
         {/* Diagnostic Form */}
         <form onSubmit={handleSubmit} className="p-10 space-y-10 max-h-[70vh] overflow-y-auto industrial-scrollbar">
           {errors?.submit && (
-            <div className="p-4 bg-red-50 border-2 border-red-600 flex items-center space-x-3">
+            <div className="p-4 bg-red-50 border border-red-600 flex items-center space-x-3">
               <Icon name="AlertTriangle" size={18} className="text-red-600" />
               <p className="text-[10px] font-black uppercase tracking-widest text-red-600">{errors?.submit}</p>
             </div>
@@ -128,7 +128,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, employees = [] }) => 
                 placeholder="INPUT_CORE_TASK_IDENTIFIER..."
                 value={formData?.title}
                 onChange={(e) => setFormData({...formData, title: e.target.value})}
-                className={`w-full px-5 py-4 bg-slate-50 border-2 ${errors.title ? 'border-red-600' : 'border-slate-200'} focus:border-slate-900 focus:bg-white outline-none text-sm font-bold uppercase transition-all rounded-none`}
+                className={`w-full px-5 py-4 bg-slate-50 border ${errors.title ? 'border-red-600' : 'border-slate-200'} focus:border-blue-500 focus:bg-white outline-none text-sm font-bold uppercase transition-all rounded-none`}
               />
               {errors.title && <p className="text-[9px] font-black text-red-600 uppercase tracking-widest">{errors.title}</p>}
             </div>
@@ -142,7 +142,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, employees = [] }) => 
                 rows="3"
                 value={formData?.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
-                className={`w-full px-5 py-4 bg-slate-50 border-2 ${errors.description ? 'border-red-600' : 'border-slate-200'} focus:border-slate-900 focus:bg-white outline-none text-sm font-bold transition-all rounded-none resize-none`}
+                className={`w-full px-5 py-4 bg-slate-50 border ${errors.description ? 'border-red-600' : 'border-slate-200'} focus:border-blue-500 focus:bg-white outline-none text-sm font-bold transition-all rounded-none resize-none`}
               />
                {errors.description && <p className="text-[9px] font-black text-red-600 uppercase tracking-widest">{errors.description}</p>}
             </div>
@@ -172,7 +172,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, employees = [] }) => 
                 type="date"
                 value={formData.dueDate}
                 onChange={(e) => setFormData({...formData, dueDate: e.target.value})}
-                className={`w-full px-5 py-4 bg-slate-50 border-2 ${errors.dueDate ? 'border-red-600' : 'border-slate-200'} focus:border-slate-900 outline-none text-xs font-bold font-mono tracking-tighter`}
+                className={`w-full px-5 py-4 bg-slate-50 border ${errors.dueDate ? 'border-red-600' : 'border-slate-200'} focus:border-blue-500 outline-none text-xs font-bold font-mono tracking-tighter`}
                />
                {errors.dueDate && <p className="text-[9px] font-black text-red-600 uppercase tracking-widest">{errors.dueDate}</p>}
             </div>
@@ -184,12 +184,12 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, employees = [] }) => 
                 placeholder="0.00"
                 value={formData.estimatedHours}
                 onChange={(e) => setFormData({...formData, estimatedHours: e.target.value})}
-                className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-200 focus:border-slate-900 outline-none text-xs font-bold font-mono tracking-tighter"
+                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 focus:border-blue-500 outline-none text-xs font-bold font-mono tracking-tighter"
                />
             </div>
           </div>
 
-          <div className="space-y-4 pt-10 border-t-2 border-slate-100">
+          <div className="space-y-4 pt-10 border-t border-slate-100">
              <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
                  <Icon name="Upload" size={14} /> Attach_Manifest
              </label>
@@ -200,7 +200,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, employees = [] }) => 
           </div>
 
           {/* Modal Actions */}
-          <div className="flex items-center justify-end space-x-6 pt-12 border-t-2 border-slate-900">
+          <div className="flex items-center justify-end space-x-6 pt-12 border-t border-slate-100">
             <button
                type="button"
                onClick={onClose}
@@ -211,7 +211,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, employees = [] }) => 
             <button
               type="submit"
               disabled={isLoading}
-              className="px-10 py-5 bg-slate-900 text-white text-[11px] font-black uppercase tracking-[0.3em] shadow-[8px_8px_0px_rgba(15,23,42,0.1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all flex items-center gap-3 disabled:opacity-50"
+              className="px-10 py-5 bg-slate-900 text-white text-[11px] font-black uppercase tracking-[0.3em] hover:bg-slate-800 transition-all flex items-center gap-3 disabled:opacity-50"
             >
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white animate-spin"></div>
@@ -233,7 +233,7 @@ const IndustrialSelect = ({ label, value, options, onChange, error }) => (
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`w-full px-5 py-4 bg-slate-50 border-2 ${error ? 'border-red-600' : 'border-slate-200'} focus:border-slate-900 outline-none text-xs font-bold uppercase cursor-pointer appearance-none rounded-none`}
+      className={`w-full px-5 py-4 bg-slate-50 border ${error ? 'border-red-600' : 'border-slate-200'} focus:border-blue-500 outline-none text-xs font-bold uppercase cursor-pointer appearance-none rounded-none`}
       style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'currentColor\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1.25rem center', backgroundSize: '1rem' }}
     >
       <option value="">SELECT_OPTION</option>

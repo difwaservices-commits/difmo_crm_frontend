@@ -7,6 +7,7 @@ import BreadcrumbNavigation from '../../../components/ui/BreadcrumbNavigation';
 import useAuthStore from '../../../store/useAuthStore';
 import financeService from '../../../services/finance.service';
 import { employeeService } from '../../../services/employee.service';
+import PayrollDetailsModal from '../components/PayrollDetailsModal';
 
 const PayrollPage = () => {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -18,7 +19,8 @@ const PayrollPage = () => {
 
     // ========== NEW: Search filter state ==========
     const [searchTerm, setSearchTerm] = useState('');
-    const [expandedRowId, setExpandedRowId] = useState(null);
+    const [selectedPayroll, setSelectedPayroll] = useState(null);
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
     // ========== NEW: Manual payroll modal state ==========
     const [isManualModalOpen, setIsManualModalOpen] = useState(false);
@@ -349,40 +351,16 @@ const PayrollPage = () => {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <button 
-                                                        onClick={() => setExpandedRowId(expandedRowId === record.id ? null : record.id)}
-                                                        className={`text-primary hover:text-primary/80 transition-colors ${expandedRowId === record.id ? 'bg-primary/10 rounded p-1' : 'p-1'}`}
+                                                        onClick={() => {
+                                                            setSelectedPayroll(record);
+                                                            setIsDetailsModalOpen(true);
+                                                        }}
+                                                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                                                     >
-                                                        <Icon name={expandedRowId === record.id ? "ChevronUp" : "Eye"} size={18} />
+                                                        <Icon name="Eye" size={18} />
                                                     </button>
                                                 </td>
                                             </tr>
-                                            {expandedRowId === record.id && (
-                                                <tr key={`expanded-${record.id}`} className="bg-muted/30 border-b border-border">
-                                                    <td colSpan="7" className="px-6 py-4">
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-in slide-in-from-top-2 duration-300">
-                                                            <div className="bg-white p-3 rounded shadow-sm border border-border">
-                                                                <p className="text-xs text-muted-foreground font-semibold uppercase mb-1">Overtime Pay</p>
-                                                                <p className="text-sm font-medium text-foreground">₹{record.overtime || 0}</p>
-                                                            </div>
-                                                            <div className="bg-white p-3 rounded shadow-sm border border-border">
-                                                                <p className="text-xs text-muted-foreground font-semibold uppercase mb-1">Generated Date</p>
-                                                                <p className="text-sm font-medium text-foreground">{new Date(record.createdAt || Date.now()).toLocaleDateString()}</p>
-                                                            </div>
-                                                            {record.notes && (
-                                                                <div className="bg-white p-3 rounded shadow-sm border border-border md:col-span-2 lg:col-span-2">
-                                                                    <p className="text-xs text-muted-foreground font-semibold uppercase mb-1">Manager Notes</p>
-                                                                    <p className="text-sm font-medium text-foreground">{record.notes}</p>
-                                                                </div>
-                                                            )}
-                                                            {!record.notes && (
-                                                                <div className="bg-white p-3 rounded shadow-sm border border-border md:col-span-2 lg:col-span-2 flex items-center justify-center">
-                                                                    <p className="text-xs text-muted-foreground italic">No additional notes provided.</p>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            )}
                                             </React.Fragment>
                                         ))
                                     )}
@@ -550,6 +528,12 @@ const PayrollPage = () => {
                     </div>
                 </div>
             )}
+
+            <PayrollDetailsModal
+                isOpen={isDetailsModalOpen}
+                onClose={() => setIsDetailsModalOpen(false)}
+                payroll={selectedPayroll}
+            />
         </div>
     );
 };

@@ -312,42 +312,42 @@ const EmployeeModal = ({
   const modalTitle = mode === 'add' ? 'Add New Employee' : mode === 'edit' ? 'Edit Employee' : 'Employee Details';
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white border border-slate-900 rounded-none w-full max-w-5xl max-h-[95vh] flex flex-col overflow-hidden text-slate-900 shadow-[20px_20px_0px_rgba(15,23,42,0.1)]">
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+      <div className="bg-white rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden text-slate-900 shadow-2xl border border-slate-100">
         {/* Header */}
-        <div className="flex items-center justify-between p-8 bg-slate-900 text-white">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-none bg-white/10 flex items-center justify-center border border-white/20">
-              <Icon name="User" size={24} className="text-white" />
+        <div className="flex items-center justify-between px-8 py-6 bg-white border-b border-slate-100">
+          <div className="flex items-center space-x-5">
+            <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center border border-blue-100">
+              <Icon name="User" size={24} className="text-blue-600" />
             </div>
             <div>
-              <h2 className="text-xl font-black uppercase tracking-widest">{modalTitle}</h2>
-              {employee && <p className="text-[10px] font-bold text-slate-400 tracking-[0.2em] mt-1 italic">OBJECT_REFERENCE: {employee?.id || employee?._id}</p>}
+              <h2 className="text-xl font-bold text-slate-900 tracking-tight">{modalTitle}</h2>
+              {employee && <p className="text-xs font-semibold text-slate-400 mt-0.5">ID: {employee?.id || employee?._id}</p>}
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/10 transition-colors rounded-none border border-transparent hover:border-white/20">
-            <Icon name="X" size={24} />
+          <button onClick={onClose} className="p-2.5 bg-slate-50 text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-all rounded-xl border border-slate-100">
+            <Icon name="X" size={20} />
           </button>
         </div>
 
         <div className="flex flex-1 overflow-hidden">
-          {/* Side Tabs - Industrial Style */}
-          <div className="w-64 bg-slate-50 border-r border-slate-200 flex flex-col">
-            <div className="p-4 border-b border-slate-200 bg-slate-100/50">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Navigation Layers</p>
+          {/* Side Tabs - Modern Style */}
+          <div className="w-64 bg-slate-50/50 border-r border-slate-100 flex flex-col">
+            <div className="p-5 border-b border-slate-100">
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Information Sections</p>
             </div>
-            <nav className="flex-1">
+            <nav className="flex-1 p-3 space-y-1">
               {tabs?.map((tab) => (
                 <button
                   key={tab?.id}
                   onClick={() => setActiveTab(tab?.id)}
-                  className={`w-full flex items-center space-x-3 px-6 py-4 text-left text-xs font-black uppercase tracking-widest transition-all border-b border-slate-100 ${
+                  className={`w-full flex items-center space-x-3 px-4 py-3 text-left text-sm font-semibold rounded-xl transition-all ${
                     activeTab === tab?.id 
-                    ? 'bg-white border-r-4 border-r-slate-900 text-slate-900 shadow-sm' 
-                    : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600'
+                    ? 'bg-blue-50 text-blue-700 shadow-sm' 
+                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
                   }`}
                 >
-                  <Icon name={tab?.icon} size={14} />
+                  <Icon name={tab?.icon} size={18} />
                   <span>{tab?.label}</span>
                 </button>
               ))}
@@ -361,71 +361,71 @@ const EmployeeModal = ({
                 <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <div className="flex items-start space-x-8 pb-10 border-b border-slate-100">
                     <div className="relative group">
-                      <div className="w-32 h-32 rounded-none overflow-hidden bg-slate-100 flex-shrink-0 border-2 border-slate-900 p-1">
-                        <div className="w-full h-full border border-slate-200 overflow-hidden">
+                      <div className="w-32 h-32 rounded-full overflow-hidden bg-slate-50 flex-shrink-0 border-4 border-white shadow-md ring-1 ring-slate-200 p-1">
+                        <div className="w-full h-full rounded-full overflow-hidden">
                            <img
                             src={formData?.profileImage || formData?.avatar || 'https://via.placeholder.com/150'}
                             alt="Profile"
-                            className="w-full h-full object-cover grayscale"
+                            className="w-full h-full object-cover"
                           />
                         </div>
                       </div>
                       {!isReadOnly && (
                          <button 
                           onClick={() => avatarInputRef.current.click()}
-                          className="absolute -bottom-2 -right-2 bg-slate-900 text-white p-2 rounded-none hover:bg-slate-800 transition-all border border-white"
+                          className="absolute -bottom-1 -right-1 bg-blue-600 text-white p-2.5 rounded-full hover:bg-blue-700 transition-all border-2 border-white shadow-lg"
                          >
-                           <Icon name="Camera" size={14} />
+                           <Icon name="Camera" size={16} />
                          </button>
                       )}
                     </div>
                     <div>
-                      <h3 className="text-sm font-black uppercase tracking-widest text-slate-400 mb-4">Identity Configuration</h3>
+                      <h3 className="text-sm font-bold text-slate-800 mb-4">Profile Picture</h3>
                       {!isReadOnly && (
                         <div className="space-y-3">
                           <input type="file" ref={avatarInputRef} hidden accept="image/*" onChange={(e) => handleFileChange(e, 'profileImage')} />
                           <button
                             onClick={() => avatarInputRef.current.click()}
-                            className="px-4 py-2 bg-slate-100 border border-slate-200 text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-colors"
+                            className="px-5 py-2 bg-white border border-slate-200 text-xs font-semibold rounded-xl hover:bg-slate-50 transition-all shadow-sm"
                           >
-                            Upload New Manifest
+                            Upload Photo
                           </button>
-                          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">Supported formats: RAW, JPG, PNG (Max 2MB)</p>
+                          <p className="text-[11px] text-slate-400 font-medium tracking-tight">JPG, PNG or GIF. Max size of 2MB.</p>
                         </div>
                       )}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">First Name</label>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-500 ml-1">First Name</label>
                       <input 
-                        className="w-full px-4 py-2.5 bg-white border border-slate-200 text-sm font-bold focus:ring-1 focus:ring-slate-900 outline-none rounded-none"
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 text-sm font-semibold rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all"
                         value={formData?.firstName} onChange={(e) => handleInputChange('firstName', e?.target?.value)} disabled={isReadOnly} 
                       />
-                      {errors?.firstName && <p className="text-[10px] text-rose-600 font-bold uppercase">{errors.firstName}</p>}
+                      {errors?.firstName && <p className="text-xs text-rose-500 font-medium ml-1">{errors.firstName}</p>}
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Last Name</label>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-500 ml-1">Last Name</label>
                       <input 
-                         className="w-full px-4 py-2.5 bg-white border border-slate-200 text-sm font-bold focus:ring-1 focus:ring-slate-900 outline-none rounded-none"
+                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 text-sm font-semibold rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all"
                          value={formData?.lastName} onChange={(e) => handleInputChange('lastName', e?.target?.value)} disabled={isReadOnly} 
                       />
-                      {errors?.lastName && <p className="text-[10px] text-rose-600 font-bold uppercase">{errors.lastName}</p>}
+                      {errors?.lastName && <p className="text-xs text-rose-500 font-medium ml-1">{errors.lastName}</p>}
                     </div>
-                    <div className="space-y-1.5 overflow-hidden">
-                       <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Email</label>
+                    <div className="space-y-2">
+                       <label className="text-xs font-semibold text-slate-500 ml-1">Email Address</label>
                        <input 
                         type="email"
-                        className="w-full px-4 py-2.5 bg-white border border-slate-200 text-sm font-mono focus:ring-1 focus:ring-slate-900 outline-none rounded-none"
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 text-sm font-medium rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all"
                         value={formData?.email} onChange={(e) => handleInputChange('email', e?.target?.value)} disabled={isReadOnly} 
                       />
                     </div>
-                    <div className="space-y-1.5">
-                       <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Phone Number</label>
+                    <div className="space-y-2">
+                       <label className="text-xs font-semibold text-slate-500 ml-1">Phone Number</label>
                        <input 
                         type="tel"
-                        className="w-full px-4 py-2.5 bg-white border border-slate-200 text-sm font-mono focus:ring-1 focus:ring-slate-900 outline-none rounded-none"
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 text-sm font-medium rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all"
                         value={formData?.phone} onChange={(e) => handleInputChange('phone', e?.target?.value)} disabled={isReadOnly} 
                       />
                     </div>
@@ -433,10 +433,10 @@ const EmployeeModal = ({
 
                   {/* Skills Section */}
                   <div className="pt-6 border-t border-slate-100">
-                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2 block">Skills & Competencies</label>
+                    <label className="text-xs font-semibold text-slate-500 ml-1 mb-2 block">Skills & Competencies</label>
                     <textarea
                       placeholder="Enter skills separated by commas..."
-                      className="w-full px-4 py-3 bg-white border border-slate-200 text-sm font-bold focus:ring-1 focus:ring-slate-900 outline-none rounded-none min-h-[80px] resize-none"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 text-sm font-medium rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all min-h-[100px] resize-none"
                       value={formData?.skills?.join(', ')}
                       onChange={(e) => handleInputChange('skills', e.target.value.split(',').map(s => s.trim()))}
                       disabled={isReadOnly}
@@ -456,17 +456,17 @@ const EmployeeModal = ({
                         { label: 'Branch', key: 'branch', options: branchOptions },
                         { label: 'Manager', key: 'manager', options: managerOptions }
                       ].map((f, i) => (
-                        <div key={i} className="space-y-1.5">
-                           <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{f.label}</label>
+                        <div key={i} className="space-y-2">
+                           <label className="text-xs font-semibold text-slate-500 ml-1">{f.label}</label>
                            <div className="relative">
                              <select
                                value={formData[f.key]}
                                onChange={(e) => handleInputChange(f.key, e.target.value)}
                                disabled={isReadOnly}
-                               className="w-full appearance-none px-4 py-2.5 bg-white border border-slate-200 text-xs font-bold uppercase tracking-wider focus:ring-1 focus:ring-slate-900 outline-none rounded-none"
+                               className="w-full appearance-none px-4 py-2.5 bg-slate-50 border border-slate-200 text-xs font-semibold rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all cursor-pointer"
                              >
-                               <option value="">SELECT {f.label.toUpperCase()}</option>
-                               {f.options.map(opt => <option key={opt.value} value={opt.value}>{opt.label.toUpperCase()}</option>)}
+                               <option value="">Select {f.label}</option>
+                               {f.options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                              </select>
                              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                                <Icon name="ChevronDown" size={14} />
@@ -474,24 +474,24 @@ const EmployeeModal = ({
                            </div>
                         </div>
                       ))}
-                      <div className="space-y-1.5">
-                         <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Hire Date</label>
-                         <input type="date" value={formData?.hireDate} onChange={(e) => handleInputChange('hireDate', e?.target?.value)} disabled={isReadOnly} className="w-full px-4 py-2.5 bg-white border border-slate-200 text-sm font-mono focus:ring-1 focus:ring-slate-900 outline-none rounded-none" />
+                      <div className="space-y-2">
+                         <label className="text-xs font-semibold text-slate-500 ml-1">Hire Date</label>
+                         <input type="date" value={formData?.hireDate} onChange={(e) => handleInputChange('hireDate', e?.target?.value)} disabled={isReadOnly} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 text-sm font-medium rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all" />
                       </div>
-                      <div className="space-y-1.5">
-                         <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Salary</label>
+                      <div className="space-y-2">
+                         <label className="text-xs font-semibold text-slate-500 ml-1">Salary</label>
                          <div className="relative">
                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">INR</span>
-                            <input type="number" value={formData?.salary} onChange={(e) => handleInputChange('salary', e?.target?.value)} disabled={isReadOnly} className="w-full pl-12 pr-4 py-2.5 bg-white border border-slate-200 text-sm font-mono focus:ring-1 focus:ring-slate-900 outline-none rounded-none" />
+                            <input type="number" value={formData?.salary} onChange={(e) => handleInputChange('salary', e?.target?.value)} disabled={isReadOnly} className="w-full pl-12 pr-4 py-2.5 bg-slate-50 border border-slate-200 text-sm font-medium rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all" />
                          </div>
                       </div>
 
                       {/* Employee Type & WFH */}
-                      <div className="space-y-1.5">
-                         <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Employee Type</label>
-                         <div className="flex space-x-4 pt-2">
+                      <div className="space-y-2">
+                         <label className="text-xs font-semibold text-slate-500 ml-1">Work Setting</label>
+                         <div className="flex space-x-4 pt-1">
                            {['office', 'field', 'remote'].map((type) => (
-                             <label key={type} className="flex items-center space-x-2 cursor-pointer">
+                             <label key={type} className="flex items-center space-x-2 cursor-pointer group">
                                <input 
                                  type="radio" 
                                  name="employeeType" 
@@ -499,41 +499,32 @@ const EmployeeModal = ({
                                  checked={formData.employeeType === type}
                                  onChange={(e) => handleInputChange('employeeType', e.target.value)}
                                  disabled={isReadOnly}
-                                 className="rounded-none border-slate-400 text-slate-900 focus:ring-0" 
+                                 className="w-4 h-4 border-slate-300 text-blue-600 focus:ring-blue-100 transition-all" 
                                />
-                               <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">{type}</span>
+                               <span className="text-xs font-semibold capitalize text-slate-600 group-hover:text-slate-900">{type}</span>
                              </label>
                            ))}
                          </div>
                       </div>
 
-                      <div className="space-y-1.5">
-                         <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Work From Home</label>
-                         <div className="flex items-center space-x-3 pt-2">
+                      <div className="space-y-2">
+                         <label className="text-xs font-semibold text-slate-500 ml-1">Work From Home</label>
+                         <div className="flex items-center space-x-3 pt-1">
                            <button
                              disabled={isReadOnly}
                              onClick={() => handleInputChange('workFromHome', !formData.workFromHome)}
-                             className={`relative inline-flex h-5 w-11 items-center rounded-none transition-all duration-300 border ${formData.workFromHome ? 'bg-slate-900 border-slate-900' : 'bg-slate-100 border-slate-300'}`}
+                             className={`relative inline-flex h-5 w-10 items-center rounded-full transition-all duration-300 ${formData.workFromHome ? 'bg-blue-600' : 'bg-slate-200'}`}
                            >
-                              <span className={`inline-block h-3 w-3 transform rounded-none transition-transform duration-300 ${formData.workFromHome ? 'translate-x-6 bg-white' : 'translate-x-1.5 bg-slate-400'}`} />
+                              <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform duration-300 shadow-sm ${formData.workFromHome ? 'translate-x-5.5' : 'translate-x-1'}`} />
                            </button>
-                           <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">{formData.workFromHome ? 'Enabled' : 'Disabled'}</span>
+                           <span className="text-xs font-semibold text-slate-600">{formData.workFromHome ? 'Enabled' : 'Disabled'}</span>
                          </div>
                       </div>
-
-                      {formData.checkInTime && (
-                        <div className="space-y-1.5">
-                           <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Last Check-in</label>
-                           <div className="p-2.5 bg-slate-50 border border-slate-200 text-[10px] font-mono font-bold text-slate-600">
-                             {new Date(formData.checkInTime).toLocaleString()}
-                           </div>
-                        </div>
-                      )}
                    </div>
 
-                   {/* System Roles - MultiSelect Hardened */}
+                   {/* System Roles */}
                    <div className="pt-6 border-t border-slate-100">
-                      <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4 block">System Authorization Roles</label>
+                      <label className="text-xs font-semibold text-slate-500 ml-1 mb-4 block">System Authorization Roles</label>
                       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
                          {roles.map(role => {
                            const isSelected = formData.roleIds.includes(role.id);
@@ -545,12 +536,16 @@ const EmployeeModal = ({
                                  const newRoles = isSelected ? formData.roleIds.filter(id => id !== role.id) : [...formData.roleIds, role.id];
                                  handleInputChange('roleIds', newRoles);
                                }}
-                               className={`flex items-center space-x-3 p-3 border transition-all rounded-none text-left ${
-                                 isSelected ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400'
+                               className={`flex items-center space-x-3 p-4 border transition-all rounded-xl text-left ${
+                                 isSelected 
+                                 ? 'bg-blue-50 border-blue-200 ring-1 ring-blue-100' 
+                                 : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50/50'
                                }`}
                              >
-                                 <div className={`w-3 h-3 rounded-none border ${isSelected ? 'bg-white border-white' : 'bg-transparent border-slate-300'}`}></div>
-                                 <span className="text-[10px] font-black uppercase tracking-widest">{role.name}</span>
+                                 <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${isSelected ? 'bg-blue-600 border-blue-600' : 'bg-transparent border-slate-300'}`}>
+                                   {isSelected && <Icon name="Check" size={10} className="text-white" />}
+                                 </div>
+                                 <span className={`text-[11px] font-bold ${isSelected ? 'text-blue-700' : 'text-slate-600'}`}>{role.name}</span>
                              </button>
                            );
                          })}
@@ -561,14 +556,14 @@ const EmployeeModal = ({
 
               {activeTab === 'permissions' && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                   <div className="flex items-center justify-between p-6 bg-slate-900 text-white border-none mb-6">
+                   <div className="flex items-center justify-between p-6 bg-slate-900 text-white rounded-2xl shadow-lg border border-slate-800 mb-6 group hover:shadow-xl transition-all">
                       <div>
-                        <h4 className="text-xs font-black uppercase tracking-[0.3em]">Access Privilege Matrix</h4>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Direct system overrides and role-inherited permissions</p>
+                        <h4 className="text-sm font-bold tracking-tight">Access Privilege Matrix</h4>
+                        <p className="text-xs text-slate-400 font-medium mt-1">Direct system overrides and inherited permissions</p>
                       </div>
-                      <div className="bg-white/10 px-4 py-2 border border-white/20">
-                         <span className="text-xl font-black font-mono tracking-tighter">{formData.permissionIds.length.toString().padStart(2, '0')}</span>
-                         <span className="text-[9px] font-black uppercase ml-2 text-slate-400">Manual Overrides</span>
+                      <div className="bg-white/10 px-5 py-2.5 rounded-xl border border-white/10 flex items-center space-x-3">
+                         <span className="text-2xl font-bold font-mono text-blue-400">{formData.permissionIds.length.toString().padStart(2, '0')}</span>
+                         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Overrides</span>
                       </div>
                    </div>
 
@@ -587,12 +582,14 @@ const EmployeeModal = ({
                           .map(p => p.id);
 
                         return (
-                          <div key={idx} className="border border-slate-200 bg-slate-50 overflow-hidden rounded-none shadow-sm hover:shadow-md transition-shadow">
-                            <div className="px-4 py-2 bg-slate-100 border-b border-slate-200 flex justify-between items-center">
-                              <span className="text-[10px] font-black uppercase text-slate-900 tracking-widest">{resource} LAYER</span>
-                              <Icon name="Database" size={12} className="text-slate-400" />
+                          <div key={idx} className="border border-slate-200 bg-slate-50/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group">
+                            <div className="px-5 py-3 bg-white border-b border-slate-100 flex justify-between items-center">
+                              <span className="text-xs font-bold text-slate-800 tracking-tight uppercase">{resource}</span>
+                              <div className="p-1.5 bg-slate-50 rounded-lg group-hover:bg-blue-50 transition-colors">
+                                <Icon name="Database" size={14} className="text-slate-400 group-hover:text-blue-500" />
+                              </div>
                             </div>
-                            <div className="p-4 grid grid-cols-2 gap-2">
+                            <div className="p-4 grid grid-cols-2 gap-2.5">
                               {perms.sort((a, b) => a.action.localeCompare(b.action)).map((perm) => {
                                 const isInherited = inheritedPermIds.includes(perm.id);
                                 const isDirect = formData.permissionIds.includes(perm.id);
@@ -604,14 +601,15 @@ const EmployeeModal = ({
                                       const newPerms = isDirect ? formData.permissionIds.filter(id => id !== perm.id) : [...formData.permissionIds, perm.id];
                                       handleInputChange('permissionIds', newPerms);
                                     }}
-                                    className={`flex items-center space-x-2 px-2 py-1.5 border transition-all text-left ${
-                                      isInherited ? 'bg-emerald-50 border-emerald-100 opacity-80' : 
-                                      isDirect ? 'bg-slate-900 border-slate-900 text-white' : 
-                                      'bg-white border-slate-200 grayscale text-slate-400 hover:grayscale-0 hover:border-slate-400'
+                                    className={`flex items-center space-x-2.5 px-3 py-2 border transition-all rounded-lg text-left ${
+                                      isInherited ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 
+                                      isDirect ? 'bg-blue-600 border-blue-600 text-white shadow-sm ring-2 ring-blue-100' : 
+                                      'bg-white border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600'
                                     }`}
                                   >
-                                    <div className={`w-1.5 h-1.5 ${isInherited ? 'bg-emerald-500' : isDirect ? 'bg-white' : 'bg-slate-300'}`}></div>
-                                    <span className="text-[9px] font-black uppercase tracking-widest">{perm.action}</span>
+                                    <div className={`w-1.5 h-1.5 rounded-full ${isInherited ? 'bg-emerald-500' : isDirect ? 'bg-white' : 'bg-slate-300'}`}></div>
+                                    <span className="text-[10px] font-bold capitalize">{perm.action}</span>
+                                    {isInherited && <Icon name="Shield" size={10} className="ml-auto opacity-40 text-emerald-600" />}
                                   </button>
                                 );
                               })}
@@ -625,22 +623,22 @@ const EmployeeModal = ({
 
               {activeTab === 'contact' && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                   <div className="space-y-1.5">
-                      <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Address</label>
+                   <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-500 ml-1">Home Address</label>
                       <textarea 
-                        className="w-full px-4 py-3 bg-white border border-slate-200 text-sm font-bold focus:ring-1 focus:ring-slate-900 outline-none rounded-none min-h-[100px] resize-none"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 text-sm font-medium rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all min-h-[100px] resize-none"
                         value={formData?.address} onChange={(e) => handleInputChange('address', e?.target?.value)} disabled={isReadOnly} 
-                        placeholder="ENTER FULL STREET, CITY, AND ZIP CODE..."
+                        placeholder="Enter full street, city, and zip code..."
                       />
                    </div>
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t border-slate-100">
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Emergency Contact</label>
-                         <input className="w-full px-4 py-2.5 bg-white border border-slate-200 text-sm font-bold focus:ring-1 focus:ring-slate-900 outline-none rounded-none" value={formData?.emergencyContact} onChange={(e) => handleInputChange('emergencyContact', e?.target?.value)} disabled={isReadOnly} />
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-500 ml-1">Emergency Contact Person</label>
+                         <input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 text-sm font-semibold rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all" value={formData?.emergencyContact} onChange={(e) => handleInputChange('emergencyContact', e?.target?.value)} disabled={isReadOnly} />
                       </div>
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Emergency Phone</label>
-                         <input className="w-full px-4 py-2.5 bg-white border border-slate-200 text-sm font-mono focus:ring-1 focus:ring-slate-900 outline-none rounded-none" value={formData?.emergencyPhone} onChange={(e) => handleInputChange('emergencyPhone', e?.target?.value)} disabled={isReadOnly} />
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-500 ml-1">Emergency Phone Number</label>
+                         <input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 text-sm font-medium rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all" value={formData?.emergencyPhone} onChange={(e) => handleInputChange('emergencyPhone', e?.target?.value)} disabled={isReadOnly} />
                       </div>
                    </div>
                 </div>
@@ -651,35 +649,37 @@ const EmployeeModal = ({
                    {!isReadOnly && (
                       <div 
                         onClick={() => docInputRef.current.click()}
-                        className="border-2 border-dashed border-slate-200 bg-slate-50 p-12 text-center group cursor-pointer hover:bg-slate-100 hover:border-slate-900 transition-all"
+                        className="border-2 border-dashed border-slate-200 bg-slate-50 rounded-2xl p-12 text-center group cursor-pointer hover:bg-blue-50/50 hover:border-blue-400 transition-all"
                       >
                          <input type="file" multiple hidden ref={docInputRef} onChange={(e) => handleFileChange(e, 'doc')} />
-                         <Icon name="UploadCloud" size={48} className="mx-auto mb-4 text-slate-300 group-hover:text-slate-900 transition-colors" />
-                         <span className="block text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 group-hover:text-slate-900">Upload Documents</span>
-                         <p className="text-[9px] text-slate-300 font-bold uppercase mt-2 group-hover:text-slate-500">MAX 10MB PER FILE</p>
+                         <div className="w-16 h-16 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-slate-300 mx-auto mb-4 shadow-sm group-hover:text-blue-500 group-hover:scale-110 transition-all">
+                           <Icon name="UploadCloud" size={32} />
+                         </div>
+                         <span className="block text-sm font-bold text-slate-800 tracking-tight transition-colors">Upload Documents</span>
+                         <p className="text-xs text-slate-400 font-medium mt-2">PDF, DOCX or Images up to 10MB per file</p>
                       </div>
                    )}
 
                    <div className="space-y-4">
-                      <div className="flex items-center justify-between border-b-2 border-slate-900 pb-2">
-                        <span className="text-[10px] font-black uppercase tracking-widest">ARCHIVED RECORDINGS ({formData.documents.length})</span>
-                        <Icon name="Files" size={14} className="text-slate-900" />
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-1">Attached Files ({formData.documents.length})</span>
+                        <Icon name="Files" size={16} className="text-slate-300" />
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                          {formData.documents.map((doc, idx) => (
-                           <div key={idx} className="flex items-center justify-between p-4 bg-white border border-slate-200 hover:shadow-lg transition-shadow group">
+                           <div key={idx} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl hover:shadow-md transition-all group">
                               <div className="flex items-center space-x-4 overflow-hidden">
-                                 <div className="w-10 h-10 bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-colors">
+                                 <div className="w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all">
                                     <Icon name="FileText" size={18} />
                                  </div>
                                  <div className="truncate">
-                                    <p className="text-[10px] font-black uppercase text-slate-900 truncate tracking-tight">{doc.name}</p>
-                                    <p className="text-[9px] font-bold text-slate-400 uppercase">{doc.size} | READY_FOR_SYNC</p>
+                                    <p className="text-xs font-bold text-slate-900 truncate tracking-tight">{doc.name}</p>
+                                    <p className="text-[10px] font-semibold text-slate-400 uppercase">{doc.size}</p>
                                  </div>
                               </div>
-                              <div className="flex space-x-1">
-                                 <button onClick={() => window.open(doc.url)} className="p-2 border border-slate-100 hover:bg-slate-900 hover:text-white transition-all"><Icon name="Download" size={12} /></button>
-                                 {!isReadOnly && <button onClick={() => removeDocument(idx)} className="p-2 border border-slate-100 text-rose-600 hover:bg-rose-600 hover:text-white transition-all"><Icon name="Trash2" size={12} /></button>}
+                              <div className="flex space-x-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                 <button onClick={() => window.open(doc.url)} className="p-2 border border-slate-100 rounded-lg hover:bg-slate-50 transition-all text-slate-500"><Icon name="Download" size={14} /></button>
+                                 {!isReadOnly && <button onClick={() => removeDocument(idx)} className="p-2 border border-rose-50 rounded-lg text-rose-500 hover:bg-rose-50 transition-all"><Icon name="Trash2" size={14} /></button>}
                               </div>
                            </div>
                          ))}
@@ -689,25 +689,29 @@ const EmployeeModal = ({
               )}
             </div>
 
-            {/* Sharp Footer */}
-            <div className="p-8 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-               <div className="flex items-center space-x-2">
-                  <span className="w-2 h-2 bg-emerald-500 animate-pulse"></span>
-                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">SESSION_ACTIVE: SYSTEM_ADMIN_ENCRYPTED</span>
+            {/* Modern Footer */}
+            <div className="px-8 py-6 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+               <div className="flex items-center space-x-3">
+                  <div className="flex -space-x-1">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="w-6 h-6 rounded-full border-2 border-slate-50 bg-slate-200" />
+                    ))}
+                  </div>
+                  <span className="text-[11px] font-semibold text-slate-400">Collaborating with the HR team</span>
                </div>
-               <div className="flex space-x-4">
+               <div className="flex space-x-3">
                   <button 
                   onClick={onClose}
-                  className="px-6 py-2.5 bg-white border border-slate-300 text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all active:translate-y-0.5"
+                  className="px-6 py-2.5 bg-white border border-slate-200 text-sm font-bold text-slate-600 rounded-xl hover:bg-slate-50 transition-all shadow-sm active:scale-95"
                   >
-                    DISCARD CHANGES
+                    Cancel
                   </button>
                   {!isReadOnly && (
                     <button 
                       onClick={handleSave}
-                      className="px-8 py-2.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-[4px_4px_0px_rgba(15,23,42,0.2)] active:translate-y-0.5 active:shadow-none"
+                      className="px-8 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 active:scale-95"
                     >
-                      COMMIT TO MANIFEST
+                      Save Changes
                     </button>
                   )}
                </div>

@@ -624,42 +624,42 @@ const ClientAdmin = () => {
           {/* Stats Cards with Enhanced Design */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {/* Network Entities Card */}
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200 p-6 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100  border border-blue-200 p-6 shadow-sm hover:shadow-md transition-all duration-300">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold text-blue-600 mb-2 uppercase tracking-wide">Network Entities</p>
                   <p className="text-3xl font-bold text-blue-900">{totalEntities}</p>
                   <p className="text-xs text-blue-600 mt-1">Clients & Projects</p>
                 </div>
-                <div className="w-14 h-14 bg-blue-500 rounded-xl flex items-center justify-center shadow-lg">
+                <div className="w-14 h-14 bg-blue-500  flex items-center justify-center shadow-lg">
                   <Users size={24} className="text-white" />
                 </div>
               </div>
             </div>
 
             {/* Estimated Revenue Card */}
-            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl border border-emerald-200 p-6 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100  border border-emerald-200 p-6 shadow-sm hover:shadow-md transition-all duration-300">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold text-emerald-600 mb-2 uppercase tracking-wide">Revenue (MTD)</p>
                   <p className="text-3xl font-bold text-emerald-900">₹{estimatedRevenue.toLocaleString()}</p>
                   <p className="text-xs text-emerald-600 mt-1">From Invoices</p>
                 </div>
-                <div className="w-14 h-14 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
+                <div className="w-14 h-14 bg-emerald-500  flex items-center justify-center shadow-lg">
                   <FaRupeeSign size={24} className="text-white" />
                 </div>
               </div>
             </div>
 
             {/* Active Workflows Card */}
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl border border-purple-200 p-6 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100  border border-purple-200 p-6 shadow-sm hover:shadow-md transition-all duration-300">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold text-purple-600 mb-2 uppercase tracking-wide">Active Workflows</p>
                   <p className="text-3xl font-bold text-purple-900">{activeWorkflows}</p>
                   <p className="text-xs text-purple-600 mt-1">Running Projects</p>
                 </div>
-                <div className="w-14 h-14 bg-purple-500 rounded-xl flex items-center justify-center shadow-lg">
+                <div className="w-14 h-14 bg-purple-500  flex items-center justify-center shadow-lg">
                   <TrendingUp size={24} className="text-white" />
                 </div>
               </div>
@@ -694,7 +694,7 @@ const ClientAdmin = () => {
 
           {/* List Section with Enhanced Cards */}
           {combinedData.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+            <div className="bg-white  border border-gray-200 p-12 text-center">
               <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
                 <Users size={32} className="text-gray-400" />
               </div>
@@ -712,7 +712,7 @@ const ClientAdmin = () => {
               {combinedData.map((item) => (
                 <div
                   key={item.id}
-                  className={`bg-white rounded-2xl border-2 transition-all duration-300 cursor-pointer hover:shadow-lg ${expandedId === item.id ? 'border-blue-500 shadow-lg' : 'border-gray-200 hover:border-gray-300 shadow-sm'
+                  className={`bg-white  border-2 transition-all duration-300 cursor-pointer hover:shadow-lg ${expandedId === item.id ? 'border-blue-500 shadow-lg' : 'border-gray-200 hover:border-gray-300 shadow-sm'
                     }`}
                 >
                   <div className="p-5 flex items-center justify-between" onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}>

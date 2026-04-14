@@ -65,8 +65,8 @@ const TaskFilters = ({ onFiltersChange, totalTasks, filteredTasks }) => {
   const hasActiveFilters = Object.values(filters)?.some(value => value !== '');
 
   return (
-    <div className="bg-white border-2 border-slate-900 rounded-none mb-12 shadow-[8px_8px_0px_rgba(15,23,42,0.1)]">
-      <div className="flex items-center justify-between p-4 border-b-2 border-slate-900 bg-slate-50">
+    <div className="bg-white border border-slate-200 rounded-none mb-12">
+      <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50">
         <div className="flex items-center space-x-4">
           <div className="p-2 bg-slate-900 text-white">
             <Icon name="Filter" size={16} />

@@ -15,10 +15,10 @@ const ProductivityChart = ({ data, loading }) => {
 
   if (loading) {
     return (
-      <div className="bg-card border border-border/50 rounded-none p-6 h-[450px] animate-pulse">
-        <div className="h-6 w-48 bg-muted rounded-none mb-2"></div>
-        <div className="h-4 w-64 bg-muted rounded-none mb-8"></div>
-        <div className="h-64 w-full bg-muted/50 rounded-none"></div>
+      <div className="bg-white rounded-2xl p-6 h-[450px] animate-pulse">
+        <div className="h-6 w-48 bg-slate-100 rounded-lg mb-2"></div>
+        <div className="h-4 w-64 bg-slate-50 rounded-lg mb-8"></div>
+        <div className="h-64 w-full bg-slate-50/50 rounded-lg"></div>
       </div>
     );
   }
@@ -30,93 +30,85 @@ const ProductivityChart = ({ data, loading }) => {
       chartData.length || 0;
 
   return (
-    <div className="bg-white border border-slate-200 p-8 transition-all duration-300 hover:shadow-[12px_12px_0px_rgba(15,23,42,0.03)] group h-full flex flex-col">
-      <div className="flex items-center justify-between mb-10">
+    <div className="bg-white h-full flex flex-col">
+      <div className="flex items-center justify-between mb-8">
         <div className="space-y-1">
-          <div className="flex items-center space-x-2">
-            <span className="w-1.5 h-6 bg-slate-900"></span>
-            <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter">Productivity Index</h3>
-          </div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-3.5">Analysis_Feed: PERFORMANCE_VECTORS</p>
+          <h3 className="text-xl font-bold text-slate-800 tracking-tight">Productivity Index</h3>
+          <p className="text-xs text-slate-400 font-medium">Performance vector analysis</p>
         </div>
 
         <div className="flex items-center space-x-2">
           <button 
             onClick={() => setChartType(prev => prev === 'area' ? 'line' : 'area')}
-            className="p-2 border border-slate-200 text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-all active:translate-y-0.5"
+            className="p-2 bg-slate-50 border border-slate-100 text-slate-400 hover:text-blue-600 hover:bg-white rounded-xl transition-all shadow-sm"
             title="Toggle Protocol"
           >
-            <Icon name={chartType === "area" ? "TrendingUp" : "AreaChart"} size={16} strokeWidth={3} />
-          </button>
-          <button className="p-2 border border-slate-200 text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-all active:translate-y-0.5" title="Archival Export">
-            <Icon name="Download" size={16} strokeWidth={3} />
+            <Icon name={chartType === "area" ? "TrendingUp" : "AreaChart"} size={18} strokeWidth={2.5} />
           </button>
         </div>
       </div>
 
-      <div className="h-72 relative">
+      <div className="flex-1 min-h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="colorProd" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#0f172a" stopOpacity={0.1}/>
-                <stop offset="95%" stopColor="#0f172a" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.2}/>
+                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="0" vertical={false} stroke="#e2e8f0" />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
             <XAxis 
               dataKey="date" 
-              axisLine={{ stroke: '#0f172a', strokeWidth: 1 }}
+              axisLine={false}
               tickLine={false}
-              tick={{ fill: '#64748b', fontSize: 10, fontWeight: 900 }}
+              tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 600 }}
               dy={10}
             />
             <YAxis 
-              axisLine={{ stroke: '#0f172a', strokeWidth: 1 }}
+              axisLine={false}
               tickLine={false}
-              tick={{ fill: '#64748b', fontSize: 10, fontWeight: 900 }}
+              tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 600 }}
               domain={[0, 100]}
             />
             <Tooltip
-              cursor={{ stroke: '#0f172a', strokeWidth: 1 }}
               contentStyle={{
-                backgroundColor: '#0f172a',
-                border: 'none',
-                borderRadius: '0px',
+                backgroundColor: '#fff',
+                border: '1px solid #f1f5f9',
+                borderRadius: '12px',
                 padding: '12px',
-                boxShadow: '8px 8px 0px rgba(15,23,42,0.1)'
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
               }}
-              labelStyle={{ color: '#94a3b8', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '10px', marginBottom: '8px' }}
-              itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: '900', textTransform: 'uppercase' }}
+              labelStyle={{ color: '#64748b', fontWeight: '700', fontSize: '11px', marginBottom: '4px' }}
+              itemStyle={{ color: '#1e293b', fontSize: '13px', fontWeight: '600' }}
             />
             <Area 
               type="monotone" 
               dataKey="value" 
-              name="Productivity_Units"
-              stroke="#0f172a" 
+              stroke="#8b5cf6" 
               strokeWidth={3}
               fillOpacity={1} 
               fill="url(#colorProd)" 
-              animationDuration={1200}
+              animationDuration={1500}
             />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="flex items-center justify-between mt-10 pt-6 border-t border-slate-100">
+      <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-50">
         <div className="flex flex-col">
-          <span className="text-[10px] uppercase tracking-widest text-slate-400 font-black mb-1">AGGREGATE_EFFICIENCY</span>
+          <span className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">AGGREGATE_EFFICIENCY</span>
           <div className="flex items-center space-x-3">
-            <span className="text-3xl font-black text-slate-900 tracking-tighter font-mono">{avgProductivity.toFixed(1)}%</span>
-            <div className="flex items-center bg-emerald-900 text-white text-[9px] font-black px-2 py-0.5 shadow-[4px_4px_0px_rgba(5,150,105,0.1)]">
-              <Icon name="TrendingUp" size={10} className="mr-1" strokeWidth={4} />
+            <span className="text-3xl font-bold text-slate-800 tracking-tight">{avgProductivity.toFixed(1)}%</span>
+            <div className="flex items-center bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2 py-1 rounded-lg">
+              <Icon name="TrendingUp" size={10} className="mr-1" strokeWidth={3} />
               +2.4%
             </div>
           </div>
         </div>
-        <button className="text-[10px] font-black text-slate-900 group flex items-center hover:opacity-70 transition-opacity uppercase tracking-[0.2em] border-b-2 border-slate-900 pb-0.5">
-          Decrypt Analysis
-          <Icon name="ChevronRight" size={12} className="ml-1 transition-transform group-hover:translate-x-1" />
+        <button className="text-xs font-bold text-slate-800 hover:text-blue-600 transition-colors flex items-center gap-1 group">
+          Detailed Analysis
+          <Icon name="ArrowRight" size={14} className="transition-transform group-hover:translate-x-1" />
         </button>
       </div>
     </div>

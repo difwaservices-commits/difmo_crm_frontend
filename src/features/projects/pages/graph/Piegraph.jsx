@@ -7,11 +7,8 @@ import {
     ResponsiveContainer,
     Sector,
 } from "recharts";
-import { TbAlarmAverage } from "react-icons/tb";
-import { MdOutlinePending } from "react-icons/md";
 import useProjectStore from "store/useProjectStore";
 
-// Custom active shape for hover effect (Stable outside component)
 const renderActiveShape = (props) => {
     const {
         cx, cy, innerRadius, outerRadius, startAngle, endAngle,
@@ -20,36 +17,35 @@ const renderActiveShape = (props) => {
 
     return (
         <g>
-            <text x={cx} y={cy} dy={-25} textAnchor="middle" fill="#0f172a" className="text-[10px] font-black uppercase tracking-widest">
+            <text x={cx} y={cy} dy={-15} textAnchor="middle" fill="#64748b" className="text-[11px] font-bold">
                 {payload.name}
             </text>
-            <text x={cx} y={cy} dy={5} textAnchor="middle" fill="#0f172a" className="text-2xl font-black font-mono italic">
+            <text x={cx} y={cy} dy={15} textAnchor="middle" fill="#1e293b" className="text-2xl font-black">
                 {`${(percent * 100).toFixed(0)}%`}
             </text>
             <Sector
                 cx={cx} cy={cy}
                 innerRadius={innerRadius}
-                outerRadius={outerRadius + 4}
+                outerRadius={outerRadius + 6}
                 startAngle={startAngle}
                 endAngle={endAngle}
                 fill={fill}
+                stroke="#fff"
+                strokeWidth={2}
             />
         </g>
     );
 };
 
-// Custom tooltip with industrial styling
-const CustomTooltip = ({ active, payload, total }) => {
+const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
         const data = payload[0].payload;
         return (
-            <div className="bg-slate-900 p-3 shadow-[8px_8px_0px_rgba(15,23,42,0.1)]">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">{data.name}_ALLOCATION</p>
+            <div className="bg-white border border-slate-100 p-3 rounded-xl shadow-xl">
+                <p className="text-xs font-bold text-slate-400 mb-1">{data.name}</p>
                 <div className="flex items-baseline gap-2">
-                    <span className="text-xl font-black text-white font-mono italic">
-                        {data.value}
-                    </span>
-                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Units</span>
+                    <span className="text-xl font-bold text-slate-800">{data.value}</span>
+                    <span className="text-xs text-slate-500 font-medium">Projects</span>
                 </div>
             </div>
         );
@@ -79,28 +75,25 @@ const Piegraph = () => {
     };
 
     if (loading && statusData.length === 0) {
-        return <div className="w-full h-[450px] bg-white border-2 border-slate-900 animate-pulse flex items-center justify-center font-black text-[10px] text-slate-400 uppercase tracking-widest">Analyzing_Distribution...</div>;
+        return <div className="w-full h-[450px] bg-white animate-pulse flex items-center justify-center font-bold text-sm text-slate-400">Loading distribution...</div>;
     }
 
     return (
-        <div className="w-full bg-white border-2 border-slate-900 shadow-[12px_12px_0px_rgba(15,23,42,0.05)] overflow-hidden group">
+        <div className="w-full bg-white transition-all group">
             {/* Header */}
-            <div className="px-8 pt-8 pb-4 border-b border-slate-100 flex justify-between items-start">
+            <div className="px-4 pt-4 pb-6 flex justify-between items-end">
                 <div className="space-y-1">
-                    <div className="flex items-center space-x-2">
-                        <span className="w-1.5 h-6 bg-slate-900"></span>
-                        <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter">Status Distribution</h3>
-                    </div>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest pl-3.5">Analysis: VOLUME_SPLIT</p>
+                    <h3 className="text-lg font-bold text-slate-900">Status Distribution</h3>
+                    <p className="text-xs text-slate-500 font-medium italic">Project layout by phase and activity</p>
                 </div>
                 <div className="text-right">
-                    <p className="text-[9px] text-slate-400 uppercase tracking-[0.3em] font-black mb-1">TOTAL_RECORDS</p>
-                    <p className="text-2xl font-black text-slate-900 font-mono italic">{total}</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Total Records</p>
+                    <p className="text-2xl font-bold text-slate-900">{total}</p>
                 </div>
             </div>
 
             {/* Chart + Legend */}
-            <div className="flex flex-col xl:flex-row items-center p-8 gap-8">
+            <div className="flex flex-col xl:flex-row items-center p-4 gap-8">
                 <div className="w-full xl:w-1/2 h-[260px]">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
@@ -109,45 +102,43 @@ const Piegraph = () => {
                                 activeShape={renderActiveShape}
                                 data={visibleData}
                                 cx="50%" cy="50%"
-                                innerRadius={75}
-                                outerRadius={95}
+                                innerRadius={70}
+                                outerRadius={90}
                                 dataKey="value"
                                 onMouseEnter={(_, index) => setActiveIndex(index)}
                                 isAnimationActive={true}
+                                animationDuration={1000}
                                 stroke="none"
                             >
                                 {visibleData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={entry.color} />
                                 ))}
                             </Pie>
-                            <Tooltip content={<CustomTooltip total={total} />} />
-                            <text x="50%" y="60%" textAnchor="middle" dominantBaseline="middle" className="text-[8px] uppercase tracking-[0.4em] fill-slate-300 font-black">
-                                PROTOCOL_MAP
-                            </text>
+                            <Tooltip content={<CustomTooltip />} />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
 
                 {/* Legend Items */}
-                <div className="w-full xl:w-1/2 space-y-3">
+                <div className="w-full xl:w-1/2 grid grid-cols-1 gap-3">
                     {statusData.map((item) => {
                         const isHidden = hidden.includes(item.name);
                         return (
                             <button
                                 key={item.name}
                                 onClick={() => toggleLegend(item.name)}
-                                className={`w-full flex items-center justify-between p-4 border-l-4 transition-all duration-200 shadow-sm ${
-                                    isHidden ? "bg-slate-50 border-slate-200 opacity-40" : "bg-slate-50 border-slate-900 hover:bg-white"
+                                className={`flex items-center justify-between p-4 rounded-xl transition-all duration-200 ${
+                                    isHidden ? "bg-slate-50 opacity-40" : "bg-slate-50 hover:bg-slate-100"
                                 }`}
                             >
-                                <div className="flex items-center gap-4">
-                                    <div className="w-2 h-2" style={{ backgroundColor: isHidden ? "#d1d5db" : item.color }} />
-                                    <span className={`text-[10px] font-black uppercase tracking-widest ${isHidden ? "text-slate-400" : "text-slate-900"}`}>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: isHidden ? "#cbd5e1" : item.color }} />
+                                    <span className={`text-xs font-bold ${isHidden ? "text-slate-400" : "text-slate-700"}`}>
                                         {item.name}
                                     </span>
                                 </div>
-                                <span className={`text-[10px] font-black font-mono italic ${isHidden ? "text-slate-400" : "text-slate-900"}`}>
-                                    {item.value} Units
+                                <span className={`text-xs font-black ${isHidden ? "text-slate-400" : "text-slate-900"}`}>
+                                    {item.value} 
                                 </span>
                             </button>
                         );
@@ -155,25 +146,17 @@ const Piegraph = () => {
                 </div>
             </div>
 
-            {/* Footer Summary Bar */}
-            <div className="px-8 py-4 bg-slate-900 text-white text-[9px] font-black uppercase tracking-[0.3em] flex items-center justify-between border-t border-slate-800">
-                <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-emerald-400"></div>
-                        <span>Done: {statusData.find(d => d.name === "Completed")?.value || 0}</span>
+            {/* Footer Summary */}
+            <div className="mt-4 flex items-center gap-6 px-4 py-6 border-t border-slate-50">
+                {statusData.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }}></div>
+                        <span className="text-[11px] font-bold text-slate-500">{item.name}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-blue-400"></div>
-                        <span>Active: {statusData.find(d => d.name === "In Progress")?.value || 0}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-amber-400"></div>
-                        <span>Pending: {statusData.find(d => d.name === "Pending")?.value || 0}</span>
-                    </div>
-                </div>
+                ))}
             </div>
         </div>
     );
 };
 
-export default Piegraph;
+export default Piegraph;

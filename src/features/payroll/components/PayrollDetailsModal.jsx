@@ -1,0 +1,167 @@
+import React from 'react';
+import { X, Printer, User, DollarSign, Calendar, FileText, CheckCircle, AlertCircle, TrendingUp, TrendingDown } from 'lucide-react';
+import Icon from '../../../components/AppIcon';
+import Button from '../../../components/ui/Button';
+
+const PayrollDetailsModal = ({ isOpen, onClose, payroll }) => {
+    if (!isOpen || !payroll) return null;
+
+    const employee = payroll.employee || {};
+    const user = employee.user || {};
+    const fullName = `${user.firstName || ''} ${user.lastName || ''}`;
+    const initials = `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`;
+
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            maximumFractionDigits: 0
+        }).format(amount || 0);
+    };
+
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const monthLabel = monthNames[payroll.month - 1] || '---';
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm transition-all duration-300">
+            <div className="bg-white w-full max-w-2xl rounded-[24px] shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-300">
+                {/* Header Section */}
+                <div className="relative px-8 pt-8 pb-6 border-b border-slate-50">
+                    <button 
+                        onClick={onClose}
+                        className="absolute right-6 top-6 p-2 bg-slate-50 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-all"
+                    >
+                        <X size={20} />
+                    </button>
+                    
+                    <div className="flex items-center gap-5">
+                        <div className="w-16 h-16 bg-blue-600 rounded-[20px] flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-blue-600/20">
+                            {initials}
+                        </div>
+                        <div className="space-y-1">
+                            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{fullName}</h2>
+                            <div className="flex items-center gap-3">
+                                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{employee.employeeCode}</span>
+                                <span className="w-1 h-1 bg-slate-200 rounded-full"></span>
+                                <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-tight py-0.5 px-2 rounded-lg ${
+                                    payroll.status === 'paid' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                                }`}>
+                                    {payroll.status === 'paid' ? <CheckCircle size={10} strokeWidth={3} /> : <AlertCircle size={10} strokeWidth={3} />}
+                                    {payroll.status}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Content Section */}
+                <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
+                    {/* Month/Year Summary */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-4">
+                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-sm">
+                                <Calendar size={18} />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Cycle Period</p>
+                                <p className="text-sm font-bold text-slate-800 uppercase tracking-tighter">{monthLabel} {payroll.year}</p>
+                            </div>
+                        </div>
+                        <div className="p-5 bg-blue-600 rounded-2xl shadow-lg shadow-blue-600/20 flex items-center gap-4">
+                            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white">
+                                <DollarSign size={18} />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black text-blue-100 uppercase tracking-widest leading-none mb-1">Net Payable</p>
+                                <p className="text-sm font-bold text-white tracking-tighter">{formatCurrency(payroll.netSalary)}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Breakdown */}
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                                <FileText size={16} className="text-slate-400" />
+                                Salary Breakdown
+                            </h3>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Values in INR</span>
+                        </div>
+
+                        <div className="space-y-3">
+                            {/* Basic */}
+                            <div className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl hover:border-slate-200 transition-colors">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-500">
+                                        <Icon name="Activity" size={14} />
+                                    </div>
+                                    <span className="text-sm font-bold text-slate-700">Basic Monthly Component</span>
+                                </div>
+                                <span className="text-sm font-bold text-slate-900">{formatCurrency(payroll.basicSalary)}</span>
+                            </div>
+
+                            {/* Allowances */}
+                            <div className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl hover:border-slate-200 transition-colors">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-500 font-bold">
+                                        <TrendingUp size={14} />
+                                    </div>
+                                    <span className="text-sm font-bold text-slate-700">Additional Allowances</span>
+                                </div>
+                                <span className="text-sm font-bold text-emerald-600">+{formatCurrency(payroll.allowances)}</span>
+                            </div>
+
+                            {/* Overtime */}
+                            <div className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl hover:border-slate-200 transition-colors">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-500 font-bold">
+                                        <TrendingUp size={14} />
+                                    </div>
+                                    <span className="text-sm font-bold text-slate-700">Overtime Pay</span>
+                                </div>
+                                <span className="text-sm font-bold text-emerald-600">+{formatCurrency(payroll.overtime || 0)}</span>
+                            </div>
+
+                            {/* Deductions */}
+                            <div className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl hover:border-slate-200 transition-colors">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center text-rose-500 font-bold">
+                                        <TrendingDown size={14} />
+                                    </div>
+                                    <span className="text-sm font-bold text-slate-700">Total Deductions</span>
+                                </div>
+                                <span className="text-sm font-bold text-rose-600">-{formatCurrency(payroll.deductions)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Notes Section */}
+                    <div className="pt-6 border-t border-slate-50">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-3">Manager Reminders & Notes</p>
+                        <div className="p-4 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
+                            <p className="text-sm text-slate-600 italic">
+                                {payroll.notes || "No additional administrative notes provided for this pay cycle."}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Footer Section */}
+                <div className="px-8 py-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Generated On</span>
+                        <span className="text-xs font-bold text-slate-700 uppercase tracking-tighter">
+                            {new Date(payroll.createdAt || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <Button variant="outline" onClick={onClose} className="rounded-xl font-bold">Close Details</Button>
+                        <Button iconName="Printer" className="rounded-xl font-bold shadow-md shadow-blue-500/20">Print Invoice</Button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default PayrollDetailsModal;

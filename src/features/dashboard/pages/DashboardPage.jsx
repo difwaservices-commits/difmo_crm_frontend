@@ -52,40 +52,32 @@ const Dashboard = () => {
 
   const metricsData = [
     {
-      title: 'Total Employees',
+      title: 'TOTAL EMPLOYEE',
       value: (metrics?.totalEmployees ?? 0).toString(),
-      change: '+12',
-      changeType: 'positive',
+      description: 'Active Personnel',
       icon: 'Users',
       color: 'primary'
     },
     {
-      title: 'Present Today',
-      value: `${metrics?.presentToday ?? 0} / ${metrics?.totalEmployees ?? 0}`,
-      change: metrics?.attendanceBreakdown 
-        ? (metrics.attendanceBreakdown.early > 0 || metrics.attendanceBreakdown.late > 0)
-          ? `${metrics.attendanceBreakdown.early > 0 ? `${metrics.attendanceBreakdown.early} Early` : ''}${metrics.attendanceBreakdown.early > 0 && metrics.attendanceBreakdown.late > 0 ? ', ' : ''}${metrics.attendanceBreakdown.late > 0 ? `${metrics.attendanceBreakdown.late} Late` : ''}`
-          : 'All on time'
-        : 'Calculating...',
-      changeType: metrics?.attendanceBreakdown?.late > 0 ? 'negative' : 'positive',
+      title: 'PRESENT TODAY',
+      value: (metrics?.presentToday ?? 0).toString(),
+      description: 'Currently On-Site',
       icon: 'UserCheck',
       color: 'success'
     },
     {
-      title: 'Tasks Completed',
-      value: (metrics?.tasksCompleted ?? 0).toString(),
-      change: '+18%',
-      changeType: 'positive',
-      icon: 'CheckSquare',
-      color: 'primary'
+      title: 'PRODUCTIVITY',
+      value: `${metrics?.avgProductivity ?? 0}%`,
+      description: 'Target Achievement',
+      icon: 'TrendingUp',
+      color: 'purple'
     },
     {
-      title: 'Avg Productivity',
-      value: `${metrics?.avgProductivity ?? 0}%`,
-      change: '+3.1%',
-      changeType: 'positive',
-      icon: 'TrendingUp',
-      color: 'success'
+      title: 'ANALYTICS',
+      value: (metrics?.activeProjects ?? 0).toString(),
+      description: 'System Activity',
+      icon: 'Activity',
+      color: 'warning'
     }
   ];
 
@@ -137,105 +129,89 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#F8FAFC]">
       <Header />
       <Sidebar isCollapsed={sidebarCollapsed} onToggleCollapse={handleToggleSidebar} />
 
       <main className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60'} pt-16 pb-20 lg:pb-8`}>
-        <div className="p-8 max-w-[1600px] mx-auto space-y-12">
+        <div className="p-8 max-w-[1600px] mx-auto space-y-8">
           
-          {/* Industrial Header Block */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-8 bg-blue-800 text-white border-b-4 border-slate-700 shadow-[8px_8px_0px_rgba(15,23,42,0.1)]">
-            <div className="space-y-2">
-              <div className="flex items-center space-x-3 text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">
-                <span className="w-8 h-px bg-slate-700"></span>
-                <Icon name="Briefcase" size={14} />
-                <span>COMMAND_MODULE_ACTIVE</span>
-              </div>
-              <h1 className="text-4xl font-black uppercase tracking-tighter">
-                HELLO, {user?.name?.split(' ')[0] || 'ADMIN'} <span className="text-slate-500 font-normal">/</span> DASHBOARD
-              </h1>
-              <div className="flex items-center space-x-4 pt-2">
-                <div className="flex items-center space-x-2 px-3 py-1 bg-white/10 text-[10px] font-black uppercase tracking-widest border border-white/10">
-                  <span className="w-2 h-2 bg-emerald-500 animate-pulse"></span>
-                  <span>System Synced</span>
-                </div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic opacity-60">ADMIN_ACCESS: GRANTED_SECURE_TOKEN</span>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4 mt-6 lg:mt-0">
-               <div className="text-right pr-6 border-r border-white/10 hidden sm:block">
-                  <p className="text-xl font-black font-mono tracking-tighter uppercase whitespace-nowrap">
-                    {currentTime?.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
-                  </p>
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">
-                    {currentTime?.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                  </p>
-               </div>
-               <button
-                  onClick={handleRefreshData}
-                  className="p-3 bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all active:translate-y-0.5 group"
-                >
-                  <Icon name="RefreshCw" size={18} className={loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'} />
-                </button>
-            </div>
-          </div>
-
-          {/* Metrics Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 border border-slate-900 shadow-[12px_12px_0px_rgba(15,23,42,0.05)]">
+          {/* Top Metrics Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {metricsData?.map((metric, index) => (
-              <div key={index} className={`border-slate-900  ${index < metricsData.length - 1 ? 'lg:border-r' : ''} ${index % 2 === 0 && index < metricsData.length - 2 ? 'sm:border-r lg:border-r' : ''} ${index < 2 ? 'sm:border-b lg:border-b-0' : ''} ${index >= 2 ? 'border-t lg:border-t-0' : ''}`}>
-                <MetricsCard
-                  title={metric?.title}
-                  value={metric?.value}
-                  change={metric?.change}
-                  changeType={metric?.changeType}
-                  icon={metric?.icon}
-                  color={metric?.color}
-                />
-              </div>
+              <MetricsCard
+                key={index}
+                title={metric?.title}
+                value={metric?.value}
+                description={metric?.description}
+                icon={metric?.icon}
+                color={metric?.color}
+              />
             ))}
           </div>
 
+          {/* Page Header Section - Matching Screenshot */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-4">
+            <div>
+              <h2 className="text-3xl font-bold text-slate-900 tracking-tight">CRM Dashboard</h2>
+              <p className="text-slate-500 text-sm mt-1">Manage and track all your clients, projects, and business relationships in one place</p>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="relative group">
+                <Icon name="Search" size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                <input 
+                  type="text" 
+                  placeholder="Search clients, projects, emails..." 
+                  className="pl-11 pr-4 py-2.5 w-64 lg:w-80 bg-white border border-slate-200 rounded-none text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                />
+              </div>
+              <button
+                onClick={() => navigate("/add-project")}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white font-bold rounded-none text-sm shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95"
+              >
+                <Icon name="Plus" size={18} strokeWidth={3} />
+                Add Client / Project
+              </button>
+            </div>
+          </div>
+
           {/* Charts Row */}
-          <div className="grid grid-cols-1 xl:grid-cols-5 gap-0 border border-slate-200">
-            <div className="xl:col-span-3 border-b xl:border-b-0 xl:border-r border-slate-200">
+          <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+            <div className="xl:col-span-3 bg-white p-6 rounded-none border border-slate-100 shadow-sm">
               <AttendanceChart data={charts?.attendance} loading={loading} />
             </div>
-            <div className="xl:col-span-2">
+            <div className="xl:col-span-2 bg-white p-6 border border-slate-100 shadow-sm">
               <ProductivityChart data={charts?.productivity} loading={loading} />
             </div>
           </div>
 
           {isAdmin && financials && (
-            <div className="border border-slate-900 shadow-[12px_12px_0px_rgba(15,23,42,0.05)]">
+            <div className="bg-white border border-slate-100 shadow-sm overflow-hidden">
               <FinancialSummaryCard data={financials} loading={loading} />
             </div>
           )}
 
-          {/* Quick Actions / Command Center */}
+          {/* Quick Actions */}
           <div className="space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b-2 border-slate-900">
-              <h2 className="text-xl font-black uppercase tracking-widest text-slate-900 flex items-center gap-4">
-                <span className="w-12 h-1 bg-slate-900"></span>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-3">
+                <div className="w-2 h-8 bg-blue-600"></div>
                 Action Terminal
               </h2>
-              <span className="text-[10px] font-black uppercase text-slate-400 tracking-[0.3em]">Operational Hotlinking v2.4</span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {quickActions?.map((action, index) => (
-                <div key={index}>
-                  <QuickActionCard
-                    title={action?.title}
-                    description={action?.description}
-                    icon={action?.icon}
-                    color={action?.color}
-                    badge={action?.badge}
-                    onClick={action?.onClick}
-                  />
-                </div>
+                <QuickActionCard
+                  key={index}
+                  title={action?.title}
+                  description={action?.description}
+                  icon={action?.icon}
+                  color={action?.color}
+                  badge={action?.badge}
+                  onClick={action?.onClick}
+                />
               ))}
             </div>
           </div>

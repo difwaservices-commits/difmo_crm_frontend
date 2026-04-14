@@ -8,7 +8,7 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from "recharts";
-import useProjectStore from "store/useProjectStore"; // Ensure path is correct
+import useProjectStore from "store/useProjectStore";
 
 const CustomTooltip = ({ active, payload, label, growthData }) => {
     if (active && payload && payload.length && growthData) {
@@ -18,17 +18,19 @@ const CustomTooltip = ({ active, payload, label, growthData }) => {
         const diff = value - previousValue;
 
         return (
-            <div className="bg-slate-900 border-none p-4 shadow-[8px_8px_0px_rgba(15,23,42,0.1)]">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">{label}_CHRONO_POINT</p>
+            <div className="bg-white border border-slate-100 p-4 rounded-xl shadow-xl">
+                <p className="text-xs font-bold text-slate-400 mb-2">{label}</p>
                 <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-white font-mono italic">{value}</span>
-                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Units</span>
+                    <span className="text-3xl font-bold text-slate-800">{value}</span>
+                    <span className="text-xs text-slate-500 font-medium">Projects</span>
                 </div>
-                <div className="mt-3 pt-3 border-t border-slate-800">
-                    <p className={`text-[9px] font-black uppercase tracking-widest ${diff >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                        {diff >= 0 ? "VECTOR: POSITIVE" : "VECTOR: NEGATIVE"} [ {Math.abs(diff)} ]
-                    </p>
-                </div>
+                {diff !== 0 && (
+                    <div className="mt-2 pt-2 border-t border-slate-50">
+                        <p className={`text-[11px] font-bold ${diff > 0 ? "text-emerald-500" : "text-rose-500"}`}>
+                            {diff > 0 ? "+" : ""}{diff} from last month
+                        </p>
+                    </div>
+                )}
             </div>
         );
     }
@@ -40,7 +42,7 @@ const CustomCursor = (props) => {
     if (!points || !points[0]) return null;
     const { x } = points[0];
     return (
-        <line x1={x} y1={0} x2={x} y2={height} stroke="#0f172a" strokeWidth={2} strokeDasharray="0 0" />
+        <line x1={x} y1={0} x2={x} y2={height} stroke="#e2e8f0" strokeWidth={1} />
     );
 };
 
@@ -69,55 +71,53 @@ const ProjectLineGraph = () => {
     }, [growthData]);
 
     if (loading && growthData.length === 0) {
-        return <div className="w-full h-[400px] bg-white border-2 border-slate-900 animate-pulse flex items-center justify-center font-black text-[10px] text-slate-400 uppercase tracking-widest">Initializing_Growth_Stream...</div>;
+        return <div className="w-full h-[400px] bg-white animate-pulse flex items-center justify-center font-bold text-sm text-slate-400">Loading growth data...</div>;
     }
 
     return (
-        <div className="w-full bg-white border-2 border-slate-900 shadow-[12px_12px_0px_rgba(15,23,42,0.05)] overflow-hidden group">
-            <div className="px-8 pt-8 pb-4 border-b border-slate-100 flex justify-between items-start">
+        <div className="w-full bg-white transition-all group">
+            <div className="px-4 pt-4 pb-6 flex justify-between items-end">
                 <div className="space-y-1">
-                    <div className="flex items-center space-x-2">
-                        <span className="w-1.5 h-6 bg-slate-900"></span>
-                        <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter">Project Growth</h3>
-                    </div>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest pl-3.5">Feed: EXPANSION_METRICS</p>
+                    <h3 className="text-lg font-bold text-slate-900">Project Growth</h3>
+                    <p className="text-xs text-slate-500 font-medium italic">Monthly project initialization trends</p>
                 </div>
-                <div className="flex gap-8">
+                <div className="flex gap-10">
                     <div className="text-right">
-                        <p className="text-[9px] text-slate-400 uppercase tracking-[0.3em] font-black mb-1">Cumulative</p>
-                        <p className="text-2xl font-black text-slate-900 font-mono italic">{stats.total}</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Total</p>
+                        <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
                     </div>
-                    <div className="text-right border-l border-slate-100 pl-8">
-                        <p className="text-[9px] text-slate-400 uppercase tracking-[0.3em] font-black mb-1">Variance</p>
-                        <p className={`text-2xl font-black font-mono italic ${Number(stats.pct) >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                            {Number(stats.pct) >= 0 ? '+' : ''}{stats.pct}%
+                    <div className="text-right">
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Growth</p>
+                        <p className={`text-2xl font-bold ${Number(stats.pct) >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                            {Number(stats.pct) >= 0 ? '↑' : '↓'}{Math.abs(stats.pct)}%
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div className="p-4 pt-2 h-[320px]">
+            <div className="h-[320px]">
                 <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={growthData} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
+                    <AreaChart data={growthData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
                             <linearGradient id="projectGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#0f172a" stopOpacity={0.05} />
-                                <stop offset="100%" stopColor="#0f172a" stopOpacity={0} />
+                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
+                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                             </linearGradient>
                         </defs>
-                        <CartesianGrid vertical={false} strokeDasharray="0" stroke="#e2e8f0" />
+                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
                         <XAxis
                             dataKey="month"
-                            axisLine={{ stroke: '#0f172a', strokeWidth: 1 }}
+                            axisLine={false}
                             tickLine={false}
-                            tick={{ fill: '#64748b', fontSize: 10, fontWeight: 900 }}
+                            tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 600 }}
                             dy={10}
                         />
                         <YAxis 
-                            axisLine={{ stroke: '#0f172a', strokeWidth: 1 }} 
+                            axisLine={false} 
                             tickLine={false} 
-                            tick={{ fill: '#64748b', fontSize: 10, fontWeight: 900 }} 
+                            tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 600 }} 
                             allowDecimals={false} 
+                            dx={-5}
                         />
                         <Tooltip
                             content={<CustomTooltip growthData={growthData} />}
@@ -127,28 +127,32 @@ const ProjectLineGraph = () => {
                         <Area
                             type="monotone"
                             dataKey="projects"
-                            stroke="#0f172a"
+                            stroke="#3b82f6"
                             strokeWidth={3}
                             fill="url(#projectGradient)"
                             fillOpacity={1}
-                            activeDot={{ r: 4, strokeWidth: 4, stroke: '#ffffff', fill: '#0f172a' }}
-                            animationDuration={1500}
+                            activeDot={{ r: 6, strokeWidth: 0, fill: '#3b82f6' }}
+                            animationDuration={2000}
+                            animationEasing="ease-in-out"
                         />
                     </AreaChart>
                 </ResponsiveContainer>
             </div>
-
-            <div className="px-8 py-4 bg-slate-900 text-white text-[9px] font-black uppercase tracking-[0.3em] flex items-center justify-between border-t border-slate-800">
-                <div className="flex items-center gap-4">
-                    <span className="w-2 h-2 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.4)]"></span>
-                    <span>Mean_Flow_Index: {stats?.avg?.toFixed(1) || 0} unit/mo</span>
+            
+            <div className="mt-8 flex items-center justify-between px-4 border-t border-slate-50 pt-6">
+                <div className="flex items-center gap-3">
+                    <div className="w-2.5 h-2.5 bg-blue-500 rounded-full shadow-lg shadow-blue-500/20"></div>
+                    <span className="text-xs font-bold text-slate-700">Project Distribution Overview</span>
                 </div>
-                <div className="flex items-center gap-4">
-                    <span>Performance_Peak: {stats?.peak?.projects || 0}_ARTF @ {stats?.peak?.month?.toUpperCase() || "NULL"}</span>
+                <div className="flex items-center gap-6">
+                    <div className="text-right">
+                        <span className="text-[10px] font-bold text-slate-400 block uppercase">Peak Performance</span>
+                        <span className="text-xs font-black text-slate-900">{stats?.peak?.projects || 0} Projects ({stats?.peak?.month})</span>
+                    </div>
                 </div>
             </div>
         </div>
     );
 };
 
-export default ProjectLineGraph;
+export default ProjectLineGraph;

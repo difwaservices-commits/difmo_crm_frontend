@@ -1,189 +1,163 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Shield, Mail, ArrowLeft, Info } from 'lucide-react';
+import { Mail, ArrowLeft } from 'lucide-react';
 
 const PrivacyPolicy = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-white font-sans selection:bg-red-100 italic">
-            {/* Industrial Header */}
-            <header className="bg-white border-b-2 border-slate-900 sticky top-0 z-50">
+        <div className="min-h-screen bg-white font-sans">
+            {/* Header */}
+            <header className="bg-white border-b border-slate-100 sticky top-0 z-50">
                 <div className="max-w-4xl mx-auto px-8 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-6">
                         <button
                             onClick={() => navigate(-1)}
-                            className="p-3 bg-slate-100 hover:bg-slate-900 hover:text-white border-2 border-slate-900 transition-all active:scale-95 shadow-[4px_4px_0px_rgba(15,23,42,0.1)]"
+                            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-bold transition-all"
                         >
-                            <ArrowLeft size={20} strokeWidth={3} />
+                            <ArrowLeft size={18} />
+                            <span>Go Back</span>
                         </button>
-                        <Link to="/" className="text-2xl font-black text-slate-900 uppercase tracking-tighter italic">
+
+                        <Link to="/" className="text-xl font-bold text-slate-900">
                             DashFlow
                         </Link>
-                    </div>
-                    <div className="hidden sm:block text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">
-                        DOCUMENT_INTERNAL: PRIVACY_PROTOCOL
                     </div>
                 </div>
             </header>
 
-            {/* Content Container */}
+            {/* Content */}
             <main className="max-w-4xl mx-auto px-8 py-16">
-                <div className="bg-white p-2 sm:p-4">
-                    
-                    {/* Main Title Block */}
-                    <div className="border-b-2 border-slate-100 pb-10 mb-12">
-                        <h1 className="text-5xl font-black text-red-600 uppercase tracking-tighter leading-none mb-4 italic">
+                <div>
+                    {/* Title */}
+                        <h1 className="text-6xl font-black text-red-600 mb-2 uppercase tracking-tighter">
                             Privacy Policy
                         </h1>
-                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">
+                        <p className="text-base font-bold text-blue-600 uppercase tracking-widest">
                             Effective Date: April 14, 2026
                         </p>
-                    </div>
 
-                    {/* Policy Body */}
-                    <div className="space-y-12 text-slate-900 font-bold leading-relaxed text-sm">
-                        
-                        <section className="text-lg italic leading-relaxed text-slate-700 p-6 bg-slate-50 border-l-4 border-red-600">
-                            This Privacy Policy is prepared by Dashflow ("We", "Us", or "Our"). 
-                            We are committed to protecting and preserving the privacy of our visitors when visiting our site or communicating electronically with us.
+                    {/* Body */}
+                    <div className="space-y-16 text-xl text-slate-700 leading-relaxed">
+
+                        <section className="text-2xl font-bold text-slate-800">
+                            This Privacy Policy is prepared by <span className="text-red-600">DashFlow</span> ("We", "Us", or "Our").
+                            We are committed to protecting and preserving the privacy of our visitors.
                         </section>
 
-                        <div className="grid grid-cols-1 gap-12">
-                            <PolicySection 
-                                id="1" 
-                                title="About the App" 
-                                content="DashFlow is an employee management application that allows users to manage employee records, attendance, and salary details. The app is publicly available and can be used by individuals or organizations."
+                        <div className="divide-y divide-slate-100">
+                            <PolicySection
+                                id="1"
+                                title="About the App"
+                                content="DashFlow is an employee management application that allows users to manage employee records, attendance, and salary details."
                             />
 
-                            <PolicySection 
-                                id="2" 
-                                title="Types of Information We May Collect from You" 
-                                content="We may collect, store, and use the following kinds of personal information about individuals who visit and use our website and social media sites: Information you supply to us, including when you submit a contact/inquiry form. This may include your name, address, e-mail address, and phone number."
+                            <PolicySection
+                                id="2"
+                                title="Information We Collect"
+                                content="We may collect your name, email, phone number, and other details when you interact with the app."
                             />
 
-                            <PolicySection 
-                                id="3" 
-                                title="How We Use Information" 
+                            <PolicySection
+                                id="3"
+                                title="How We Use Data"
                                 content={
-                                    <ul className="list-disc pl-5 space-y-2 mt-4 text-slate-600">
-                                        <li>Manage employee records</li>
+                                    <ul className="list-disc pl-5 space-y-2 mt-4">
+                                        <li>Manage employee data</li>
                                         <li>Track attendance</li>
-                                        <li>Generate salary information</li>
-                                        <li>Improve app functionality and user experience</li>
+                                        <li>Generate salary profiles</li>
+                                        <li>Improve user experience</li>
                                     </ul>
                                 }
                             />
 
-                            <PolicySection 
-                                id="4" 
-                                title="Data Sharing and Disclosure" 
-                                content="We do NOT sell, trade, or rent users' personal information to others. We may share data only in the following cases: If required by law, to protect our legal rights, or with trusted service providers (such as cloud storage or analytics tools) only to operate the app."
+                            <PolicySection
+                                id="4"
+                                title="Data Sharing"
+                                content="We do NOT sell user data. We only share data when required by law or for app functionality."
                             />
 
-                            <PolicySection 
-                                id="5" 
-                                title="Data Security" 
-                                content="We implement appropriate security measures to protect your personal data from unauthorized access, alteration, disclosure, or destruction."
+                            <PolicySection
+                                id="5"
+                                title="Security"
+                                content="We implement industry-standard security measures to protect your data from unauthorized access."
                             />
 
-                            <PolicySection 
-                                id="6" 
-                                title="User Rights" 
+                            <PolicySection
+                                id="6"
+                                title="User Rights"
                                 content={
-                                    <>
-                                        <p>Users have the right to: Access their data, Request correction of their data, Request deletion of their data.</p>
-                                        <div className="mt-4 p-4 border-2 border-red-600 bg-red-50">
-                                            To request data deletion, please contact us at <span className="text-red-600">difmotech@gmail.com</span>
-                                        </div>
-                                    </>
-                                }
-                            />
-
-                            <PolicySection 
-                                id="7" 
-                                title="Third-Party Services" 
-                                content="Our app may use third-party services such as Firebase, analytics tools, or hosting providers that may collect information in accordance with their own privacy policies."
-                            />
-
-                            <PolicySection 
-                                id="8" 
-                                title="Changes to This Privacy Policy" 
-                                content="We may update our Privacy Policy from time to time. Users are advised to review this page periodically for any changes."
-                            />
-
-                            <PolicySection 
-                                id="9" 
-                                title="Contact Us" 
-                                content={
-                                    <div className="flex items-center gap-4 text-red-600">
-                                        <Mail size={18} strokeWidth={3} />
-                                        <a href="mailto:difmotech@gmail.com" className="hover:underline">difmotech@gmail.com</a>
+                                    <div>
+                                        <p>You can access, update, or delete your data anytime.</p>
+                                        <p className="mt-4 font-bold text-blue-600">
+                                            Contact support: <a href="mailto:difmotech@gmail.com" className="underline hover:text-red-600">difmotech@gmail.com</a>
+                                        </p>
                                     </div>
                                 }
                             />
 
-                            {/* App Access Instructions Section */}
-                            <section className="mt-16 pt-12 border-t-2 border-slate-100">
-                                <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-8 flex items-center gap-3 italic">
-                                    <div className="w-8 h-8 bg-red-600 text-white flex items-center justify-center text-xs">10</div>
-                                    App Access Instructions for DashFlow
+                            <PolicySection
+                                id="7"
+                                title="Third-Party Services"
+                                content="We may use services like Firebase for authentication or basic analytics tools to improve performance."
+                            />
+
+                            {/* App Access Section Simplified */}
+                            <section className="py-12">
+                                <h2 className="text-3xl font-black text-red-600 mb-8 uppercase tracking-tight">
+                                    08. App Access Instructions
                                 </h2>
-                                
-                                <div className="bg-slate-900 text-white p-8 space-y-6 shadow-[12px_12px_0px_rgba(220,38,38,0.2)]">
-                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500 border-b border-white/10 pb-2">Credentials_Package</p>
-                                    <div className="space-y-2">
-                                        <p className="text-lg"><span className="text-slate-400 uppercase text-xs mr-2">Email:</span> test@dashflow.com</p>
-                                        <p className="text-lg"><span className="text-slate-400 uppercase text-xs mr-2">Password:</span> 123456</p>
+
+                                <div className="space-y-12 pl-0 sm:pl-4">
+                                    <div className="grid sm:grid-cols-2 gap-12">
+                                        <div>
+                                            <p className="text-blue-600 text-sm font-bold uppercase mb-4">Demo Credentials</p>
+                                            <div className="p-6 border border-slate-100 rounded-none space-y-2 font-mono text-lg">
+                                                <p><span className="text-slate-400">EMAIL:</span> test@dashflow.com</p>
+                                                <p><span className="text-slate-400">PASS:</span> 123456</p>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <p className="text-blue-600 text-sm font-bold uppercase mb-4">How to Login</p>
+                                            <ol className="list-decimal pl-5 space-y-4 text-lg text-slate-600">
+                                                <li>Navigate to the login screen</li>
+                                                <li>Enter the provided credentials</li>
+                                                <li>Click the Login button to access the dashboard</li>
+                                            </ol>
+                                        </div>
                                     </div>
 
-                                    <div className="space-y-4 pt-4">
-                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500 border-b border-white/10 pb-2">Execution_Steps</p>
-                                        <ol className="list-decimal pl-5 space-y-2 text-sm italic">
-                                            <li>Open the DashFlow app</li>
-                                            <li>Enter the above email and password on the login screen</li>
-                                            <li>Tap on Login</li>
-                                        </ol>
-                                    </div>
-
-                                    <div className="pt-4 p-4 border border-white/20 bg-white/5 text-xs text-slate-300 leading-relaxed italic">
-                                        After login, you will be able to: View employee records, Mark attendance, Manage salary details.
-                                        No additional permissions or approvals are required to access the app.
+                                    <div className="p-4 text-sm text-slate-400 border-t border-slate-50 italic">
+                                        Authorized access allows for employee management, attendance tracking, and payroll processing.
                                     </div>
                                 </div>
                             </section>
                         </div>
                     </div>
 
-                    {/* Footer Info */}
-                    <div className="mt-20 pt-8 border-t border-slate-100 flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        <span>Last Updated: April 14, 2025</span>
-                        <span className="text-slate-100">INTERNAL_V1.5</span>
+                    {/* Footer */}
+                    <div className="mt-20 pt-8 border-t border-slate-100 flex justify-between text-xs font-bold text-slate-400 uppercase tracking-widest">
+                        <span>Last Updated: April 2026</span>
+                        <span>v1.0.0 Stable</span>
                     </div>
                 </div>
             </main>
 
-            {/* Global Footer */}
-            <footer className="py-12 bg-white border-t border-slate-100">
-                <div className="max-w-4xl mx-auto px-8 text-center text-slate-300">
-                    <p className="text-[10px] font-black uppercase tracking-[0.4em]">
-                        © 2026 DashFlow Ecosystem. All Protocol Reserved.
-                    </p>
-                </div>
+            <footer className="py-12 border-t border-slate-50 text-center text-slate-400 text-sm font-medium">
+                © 2026 DashFlow. All rights reserved.
             </footer>
         </div>
     );
 };
 
 const PolicySection = ({ id, title, content }) => (
-    <section className="space-y-4">
-        <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight flex items-center gap-3 italic">
-            <div className="w-8 h-8 bg-red-600 text-white flex items-center justify-center text-xs">
-                {id}
-            </div>
+    <section className="py-16 first:pt-0">
+        <h2 className="text-3xl font-black text-blue-600 mb-6 flex items-baseline gap-4 uppercase tracking-tight">
+            <span className="text-red-600 text-2xl font-mono">{id.padStart(2, '0')}.</span>
             {title}
         </h2>
-        <div className="text-slate-700 italic leading-relaxed pl-11">
+        <div className="text-xl text-slate-600 pl-0 sm:pl-12 font-medium">
             {content}
         </div>
     </section>

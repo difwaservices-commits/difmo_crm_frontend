@@ -74,13 +74,13 @@ const TaskDetailPanel = ({ task, onClose, onUpdate, onDelete }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center z-[110] p-4 italic font-sans selection:bg-blue-100">
-      <div className="bg-white border-4 border-slate-900 rounded-none w-full max-w-5xl shadow-[40px_40px_0px_rgba(15,23,42,0.15)] flex flex-col md:flex-row max-h-[90vh] overflow-hidden animate-in slide-in-from-bottom-8 duration-300">
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[110] p-4 italic font-sans selection:bg-blue-100">
+      <div className="bg-white border border-slate-200 rounded-none w-full max-w-5xl shadow-2xl flex flex-col md:flex-row max-h-[90vh] overflow-hidden animate-in slide-in-from-bottom-8 duration-300">
         
         {/* Detail Body */}
-        <div className="flex-1 flex flex-col min-w-0 border-r-4 border-slate-900">
+        <div className="flex-1 flex flex-col min-w-0 border-r border-slate-100">
           {/* Header Module */}
-          <div className="p-8 bg-blue-900 text-white border-b-4 border-slate-900">
+          <div className="p-8 bg-blue-900 text-white border-b border-slate-800">
             <div className="flex items-center space-x-3 mb-2">
               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">UNIT_DIAGNOSTIC::DETAIL</span>
               <span className="w-12 h-px bg-slate-700"></span>
@@ -88,10 +88,10 @@ const TaskDetailPanel = ({ task, onClose, onUpdate, onDelete }) => {
             <div className="flex items-start justify-between gap-4">
               <h2 className="text-4xl font-black uppercase tracking-tighter leading-none">{task?.title}</h2>
               <div className="flex items-center space-x-2 shrink-0">
-                <span className={`px-3 py-1 border-2 text-[10px] font-black uppercase tracking-widest ${getPriorityColor(task?.priority)}`}>
+                <span className={`px-3 py-1 border text-[10px] font-black uppercase tracking-widest ${getPriorityColor(task?.priority)}`}>
                   {task?.priority}
                 </span>
-                <span className={`px-3 py-1 border-2 text-[10px] font-black uppercase tracking-widest bg-white ${getStatusColor(task?.status)}`}>
+                <span className={`px-3 py-1 border text-[10px] font-black uppercase tracking-widest bg-white ${getStatusColor(task?.status)}`}>
                   {task?.status?.replace('-', ' ')}
                 </span>
               </div>
@@ -112,7 +112,7 @@ const TaskDetailPanel = ({ task, onClose, onUpdate, onDelete }) => {
                   <div className="space-y-4">
                     <ManifestLabel label="Assigned_Unit" />
                     <div className="flex items-center space-x-3">
-                       <div className="w-10 h-10 border-2 border-slate-900 grayscale">
+                       <div className="w-10 h-10 border border-slate-200 grayscale">
                           <Image src={task?.assignee?.avatar} alt={task?.assignee?.name} className="w-full h-full object-cover" />
                        </div>
                        <div className="space-y-0.5">
@@ -137,7 +137,7 @@ const TaskDetailPanel = ({ task, onClose, onUpdate, onDelete }) => {
                    <ManifestLabel label="Completion_Vector" />
                    <span className="font-mono text-xl font-black text-slate-900">{task?.progress}%</span>
                 </div>
-                <div className="h-6 bg-slate-100 border-2 border-slate-900 p-1 flex">
+                <div className="h-6 bg-slate-100 border border-slate-200 p-1 flex">
                    <div 
                     className={`h-full transition-all duration-1000 ${task?.status === 'completed' ? 'bg-emerald-500' : 'bg-slate-900'}`}
                     style={{ width: `${task?.progress}%` }}
@@ -163,11 +163,11 @@ const TaskDetailPanel = ({ task, onClose, onUpdate, onDelete }) => {
 
              {/* Manifest Attachments */}
              {task?.attachments?.length > 0 && (
-               <div className="space-y-6 pt-12 border-t-2 border-slate-100">
+               <div className="space-y-6 pt-12 border-t border-slate-100">
                   <ManifestLabel label="Identified_Assets" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {task.attachments.map(att => (
-                      <div key={att.id} className="p-4 bg-slate-50 border-2 border-slate-200 flex items-center justify-between group hover:border-slate-900 transition-colors">
+                      <div key={att.id} className="p-4 bg-slate-50 border border-slate-200 flex items-center justify-between group hover:border-blue-500 transition-colors">
                         <div className="flex items-center space-x-3">
                            <Icon name="File" size={16} className="text-slate-400 group-hover:text-slate-900" />
                            <div className="space-y-0.5">
@@ -175,7 +175,7 @@ const TaskDetailPanel = ({ task, onClose, onUpdate, onDelete }) => {
                               <div className="text-[9px] font-bold text-slate-400 uppercase">Size: {(att.size / 1024 / 1024).toFixed(2)} MB</div>
                            </div>
                         </div>
-                        <button className="p-2 border-2 border-slate-200 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all">
+                        <button className="p-2 border border-slate-200 hover:bg-slate-900 hover:text-white transition-all">
                            <Icon name="Download" size={14} strokeWidth={3} />
                         </button>
                       </div>
@@ -188,7 +188,7 @@ const TaskDetailPanel = ({ task, onClose, onUpdate, onDelete }) => {
 
         {/* Intelligence / Comments Sidebar */}
         <div className="w-full md:w-96 flex flex-col bg-slate-50">
-          <div className="p-6 border-b-4 border-slate-900 flex items-center justify-between bg-white">
+          <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white">
              <div className="flex items-center space-x-2">
                 <Icon name="MessageSquare" size={16} className="text-slate-900" />
                 <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-900">INTEL_FEED</h3>
@@ -205,12 +205,12 @@ const TaskDetailPanel = ({ task, onClose, onUpdate, onDelete }) => {
                   placeholder="TRANSMIT_NEW_INTEL_SIGNAL..."
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  className="w-full p-4 bg-white border-2 border-slate-200 focus:border-slate-900 outline-none text-[11px] font-bold text-slate-900 uppercase h-24 resize-none transition-all placeholder:text-slate-300"
+                  className="w-full p-4 bg-white border border-slate-200 focus:border-blue-500 outline-none text-[11px] font-bold text-slate-900 uppercase h-24 resize-none transition-all placeholder:text-slate-300"
                 />
                 <button 
                   onClick={handleAddComment}
                   disabled={!newComment.trim()}
-                  className="w-full py-3 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.3em] hover:shadow-[4px_4px_0px_rgba(15,23,42,0.2)] active:translate-y-0.5 transition-all disabled:opacity-30"
+                  className="w-full py-3 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.3em] active:translate-y-0.5 transition-all disabled:opacity-30"
                 >
                   Confirm_Transmission
                 </button>
@@ -227,7 +227,7 @@ const TaskDetailPanel = ({ task, onClose, onUpdate, onDelete }) => {
                         </div>
                         <span className="text-[9px] font-bold text-slate-400 uppercase italic">Time: {new Date(c.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                      </div>
-                     <div className="p-4 bg-white border-2 border-slate-200 group-hover:border-slate-900 transition-colors">
+                     <div className="p-4 bg-white border border-slate-100 group-hover:border-blue-200 transition-colors">
                         <p className="text-[11px] font-bold text-slate-600 leading-normal uppercase">{c.content}</p>
                      </div>
                   </div>
@@ -236,13 +236,13 @@ const TaskDetailPanel = ({ task, onClose, onUpdate, onDelete }) => {
           </div>
 
           {/* Footer Controls */}
-          <div className="p-6 border-t-2 border-slate-200 bg-white grid grid-cols-2 gap-4">
-             <button className="py-3 border-2 border-slate-900 text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all">
+          <div className="p-6 border-t border-slate-100 bg-white grid grid-cols-2 gap-4">
+             <button className="py-3 border border-slate-200 text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all">
                 Export_Report
              </button>
              <button 
               onClick={() => onDelete(task.id)}
-              className="py-3 border-2 border-red-600 text-red-600 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all"
+              className="py-3 border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all"
              >
                 Purge_Record
              </button>
