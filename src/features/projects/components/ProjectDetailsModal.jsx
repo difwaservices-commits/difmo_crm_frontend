@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { X, Briefcase, Calendar, DollarSign, Github, ExternalLink, Mail, User, Clock, Loader2 } from "lucide-react";
+import { X, Briefcase, Calendar, DollarSign, Github, ExternalLink, Mail, User, Clock, Loader2, FileText, CheckCircle2, AlertCircle } from "lucide-react";
 import apiClient from "../../../api/client";
 import { API_ENDPOINTS } from "../../../api/endpoints";
 import { employeeService } from "../../../services/employee.service";
@@ -8,6 +8,7 @@ const ProjectDetailsModal = ({ projectId, onClose }) => {
     const [project, setProject] = useState(null);
     const [loading, setLoading] = useState(true);
     const [employeeMap, setEmployeeMap] = useState({});
+    const [invoices, setInvoices] = useState([]);
 
     const fetchProjectData = async () => {
         try {
@@ -33,9 +34,27 @@ const ProjectDetailsModal = ({ projectId, onClose }) => {
                 assignedPeople = [];
             }
             
-            setProject({ ...data, assignedPeople });
+            const enrichedProject = { ...data, assignedPeople };
+            setProject(enrichedProject);
+
+            // Fetch Invoices for this project
+            // Since invoices are linked to clients, we fetch the client details which includes invoices relation
+            if (data.clientId) {
+                const clientRes = await apiClient.get(`${API_ENDPOINTS.PROJECTS.CLIENTS}/${data.clientId}`);
+                const clientData = clientRes.data.data || clientRes.data;
+                
+                if (clientData.invoices && Array.isArray(clientData.invoices)) {
+                    // Filter invoices by projectId OR projectName (for backward compatibility)
+                    const projectInvoices = clientData.invoices.filter(inv => 
+                        inv.projectId === projectId || 
+                        inv.projectName === data.projectName || 
+                        inv.projectName === data.name
+                    );
+                    setInvoices(projectInvoices);
+                }
+            }
         } catch (err) {
-            console.error("Error fetching project:", err);
+            console.error("Error fetching project details:", err);
         } finally {
             setLoading(false);
         }
@@ -50,186 +69,231 @@ const ProjectDetailsModal = ({ projectId, onClose }) => {
     if (!projectId) return null;
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm transition-all duration-300">
-            <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-none shadow-[24px_24px_0px_rgba(15,23,42,0.1)] overflow-hidden border-2 border-slate-900 flex flex-col animate-in fade-in zoom-in duration-300">
-                {/* Industrial Header Bloc */}
-                <div className="px-8 py-6 border-b-2 border-slate-900 flex justify-between items-center bg-blue-800 text-white">
-                    <div className="flex items-center gap-6">
-                        <div className="w-14 h-14 bg-blue-900 text-blue-200 border-2 border-blue-700 flex items-center justify-center">
-                            <Briefcase size={28} strokeWidth={3} />
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-none transition-all duration-300">
+            <div className="bg-white w-full max-w-5xl max-h-[95vh] rounded-none shadow-none border border-slate-200 flex flex-col animate-in fade-in duration-200">
+                {/* Dashboard Style Header */}
+                <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-white">
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-blue-600 text-white flex items-center justify-center rounded-none">
+                            <Briefcase size={20} />
                         </div>
-                        <div className="space-y-1">
-                            <div className="flex items-center space-x-2 text-[10px] font-black uppercase tracking-[0.4em] text-blue-300">
-                                <span className="w-8 h-px bg-blue-500"></span>
-                                <span>PROJECT_OVERSIGHT_PROTOCOL</span>
-                            </div>
-                            <h2 className="text-3xl font-black uppercase tracking-tighter leading-none italic">
-                                Unit_Details
+                        <div>
+                            <h2 className="text-lg font-bold text-slate-900 leading-none">
+                                {loading ? "Loading Project..." : project?.projectName || "Project Details"}
                             </h2>
+                            <p className="text-[11px] text-slate-500 mt-1 uppercase tracking-widest font-medium">Project Management Interface</p>
                         </div>
                     </div>
                     <button 
                         onClick={onClose}
-                        className="p-3 bg-blue-900 text-blue-200 border-2 border-blue-700 hover:bg-white hover:text-blue-950 transition-all hover:scale-105 active:scale-95"
+                        className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-all rounded-none"
                     >
-                        <X size={24} strokeWidth={3} />
+                        <X size={20} />
                     </button>
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
+                {/* Main Content Area */}
+                <div className="flex-1 overflow-y-auto p-0 custom-scrollbar bg-slate-50/30">
                     {loading ? (
                         <div className="flex flex-col items-center justify-center h-96">
-                            <div className="w-16 h-1 bg-slate-100 overflow-hidden relative mb-6">
-                                <div className="absolute inset-0 bg-slate-900 animate-[loading-bar_1.5s_infinite]"></div>
-                            </div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">SYNCHRONIZING_CORE_DATA...</p>
+                            <Loader2 className="w-8 h-8 text-blue-600 animate-spin mb-4" />
+                            <p className="text-xs font-medium text-slate-400 uppercase tracking-widest">Retrieving Project Data...</p>
                         </div>
                     ) : project ? (
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                            {/* Left Side: Overview & Team */}
-                            <div className="lg:col-span-2 space-y-10">
-                                {/* Diagnostic Row */}
-                                <div className="grid grid-cols-1 sm:grid-cols-3 bg-white border-2 border-slate-900 divide-y sm:divide-y-0 sm:divide-x-2 divide-slate-900">
-                                    <DetailCard 
-                                        icon={<DollarSign size={18} strokeWidth={3} />} 
-                                        label="Capital_Allocation" 
-                                        value={`₹${project.totalPayment?.toLocaleString()}`} 
-                                    />
-                                    <DetailCard 
-                                        icon={<Clock size={18} strokeWidth={3} />} 
-                                        label="Temporal_Deadline" 
-                                        value={new Date(project.deadline).toLocaleDateString()} 
-                                    />
-                                    <DetailCard 
-                                        icon={<ExternalLink size={18} strokeWidth={3} />} 
-                                        label="Deployment_Phase" 
-                                        value={project.phase} 
-                                    />
-                                </div>
-
-                                {/* Description Area */}
-                                <div className="bg-slate-50 border-2 border-slate-900 p-8 relative overflow-hidden group">
-                                    <div className="absolute top-0 right-0 w-16 h-16 bg-slate-900/[0.03] group-hover:bg-slate-900/[0.05 transition-all -rotate-45 translate-x-8 -translate-y-8" />
-                                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4 border-b border-slate-200 pb-2">Technical_Summary</h3>
-                                    <p className="text-slate-900 font-bold leading-relaxed text-sm italic">
-                                        "{project.description || "NO_SPECIFICATIONS_PROVIDED_FOR_THIS_UNIT."}"
-                                    </p>
-                                </div>
-
-                                {/* Personnel Manifest */}
-                                <div>
-                                    <div className="flex items-center gap-2 mb-6 border-b-2 border-slate-900 pb-2">
-                                        <User size={18} strokeWidth={3} className="text-slate-900" />
-                                        <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.4em]">Team_Manifest</h3>
-                                    </div>
-                                    <div className="flex flex-wrap gap-4">
-                                        {project.assignedPeople?.length > 0 ? (
-                                            project.assignedPeople.map((person, i) => {
-                                                const resolvedName = employeeMap[person] || person;
-                                                return (
-                                                    <div key={i} className="flex items-center gap-4 bg-white border-2 border-slate-900 px-6 py-3 transition-all hover:bg-slate-900 group">
-                                                        <div className="w-6 h-6 bg-slate-900 text-white flex items-center justify-center text-[10px] font-black group-hover:bg-white group-hover:text-slate-900 transition-colors">
-                                                            {resolvedName.charAt(0).toUpperCase()}
-                                                        </div>
-                                                        <span className="text-[11px] font-black text-slate-900 uppercase tracking-widest group-hover:text-white transition-colors">
-                                                            {resolvedName}
-                                                        </span>
-                                                    </div>
-                                                );
-                                            })
-                                        ) : (
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] italic">Personnel: UNASSIGNED</p>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* External Links */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
-                                    <LinkSection icon={<Github size={18} />} label="Repository_Branch" url={project.githubLink} />
-                                    <LinkSection icon={<ExternalLink size={18} />} label="Deployment_Vector" url={project.deploymentLink} />
-                                </div>
+                        <div className="p-6 space-y-6">
+                            {/* Summary Metrics Row */}
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <MetricCard 
+                                    icon={<DollarSign size={16} className="text-blue-600" />} 
+                                    label="Project Budget" 
+                                    value={`₹${(project.totalPayment || project.budget || 0).toLocaleString()}`} 
+                                />
+                                <MetricCard 
+                                    icon={<Clock size={16} className="text-purple-600" />} 
+                                    label="Project Deadline" 
+                                    value={project.deadline ? new Date(project.deadline).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'} 
+                                />
+                                <MetricCard 
+                                    icon={<ExternalLink size={16} className="text-emerald-600" />} 
+                                    label="Current Phase" 
+                                    value={project.phase || "Planning"} 
+                                />
+                                <MetricCard 
+                                    icon={<Activity size={16} className="text-orange-600" />} 
+                                    label="Project Status" 
+                                    value={project.status || "Active"} 
+                                />
                             </div>
 
-                            {/* Right Side: Client & Progress */}
-                            <div className="space-y-8">
-                                {/* Client Entity Card */}
-                                <div className="bg-slate-900 p-8 text-white border-2 border-slate-900 shadow-[8px_8px_0px_rgba(15,23,42,0.1)] group">
-                                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-8 border-b border-white/10 pb-2">Client_Identity</h3>
-                                    <div className="space-y-6">
-                                        <div>
-                                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Full_Designation</p>
-                                            <p className="text-2xl font-black tracking-tight mt-1 italic">{project.clientName}</p>
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                {/* Left Column: Description & Team */}
+                                <div className="lg:col-span-2 space-y-6">
+                                    {/* Description Section */}
+                                    <div className="bg-white border border-slate-200 p-6">
+                                        <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Technical Description</h3>
+                                        <p className="text-slate-600 text-sm leading-relaxed">
+                                            {project.description || "No technical specifications provided for this project unit."}
+                                        </p>
+                                    </div>
+
+                                    {/* Team Manifest */}
+                                    <div className="bg-white border border-slate-200 p-6">
+                                        <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Assigned Project Personnel</h3>
+                                        <div className="flex flex-wrap gap-3">
+                                            {project.assignedPeople?.length > 0 ? (
+                                                project.assignedPeople.map((person, i) => {
+                                                    const resolvedName = employeeMap[person] || person;
+                                                    return (
+                                                        <div key={i} className="flex items-center gap-3 bg-slate-50 border border-slate-200 px-4 py-2 hover:bg-slate-100 transition-colors cursor-default">
+                                                            <div className="w-5 h-5 bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-bold">
+                                                                {resolvedName.charAt(0).toUpperCase()}
+                                                            </div>
+                                                            <span className="text-[11px] font-semibold text-slate-700 uppercase tracking-tight">
+                                                                {resolvedName}
+                                                            </span>
+                                                        </div>
+                                                    );
+                                                })
+                                            ) : (
+                                                <div className="flex items-center gap-2 text-slate-400 italic py-2">
+                                                    <AlertCircle size={14} />
+                                                    <span className="text-xs">No personnel assigned to this project yet.</span>
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="flex items-center gap-5 bg-white/5 border border-white/10 p-5 group-hover:bg-white/10 transition-colors">
-                                            <div className="w-10 h-10 bg-white text-slate-900 flex items-center justify-center">
-                                                <Mail size={20} strokeWidth={3} />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Comm_Channel</p>
-                                                <p className="text-xs font-bold truncate lowercase">{project.clientEmail}</p>
-                                            </div>
+                                    </div>
+
+                                    {/* Invoice History Section */}
+                                    <div className="bg-white border border-slate-200 overflow-hidden">
+                                        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Project Invoice History</h3>
+                                            <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5">{invoices.length} Records</span>
                                         </div>
-                                        <div>
-                                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Metadata</p>
-                                            <p className="text-[11px] font-bold text-slate-300 leading-relaxed italic">{project.contactInfo || "NO_ADDITIONAL_INTERCEPTED_DATA"}</p>
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-left">
+                                                <thead>
+                                                    <tr className="bg-white border-b border-slate-100">
+                                                        <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Invoice #</th>
+                                                        <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date Issued</th>
+                                                        <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Amount</th>
+                                                        <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-50">
+                                                    {invoices.length > 0 ? (
+                                                        invoices.map((inv) => (
+                                                            <tr key={inv.id} className="hover:bg-slate-50 transition-colors">
+                                                                <td className="px-6 py-3">
+                                                                    <span className="text-xs font-bold text-blue-600 font-mono tracking-tight">{inv.invoiceNumber}</span>
+                                                                </td>
+                                                                <td className="px-6 py-3 text-[11px] text-slate-600">
+                                                                    {new Date(inv.issuedAt).toLocaleDateString('en-IN')}
+                                                                </td>
+                                                                <td className="px-6 py-3 text-xs font-bold text-slate-900">
+                                                                    ₹{Number(inv.amount).toLocaleString()}
+                                                                </td>
+                                                                <td className="px-6 py-3">
+                                                                    <span className={`px-2 py-0.5 text-[9px] font-black uppercase tracking-widest ${
+                                                                        inv.status === 'Paid' ? 'bg-emerald-50 text-emerald-600' : 'bg-orange-50 text-orange-600'
+                                                                    }`}>
+                                                                        {inv.status}
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    ) : (
+                                                        <tr>
+                                                            <td colSpan="4" className="px-6 py-8 text-center text-xs text-slate-400 italic">
+                                                                No financial records found for this project unit.
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Industrial Collection Gauge */}
-                                <div className="bg-white p-8 border-2 border-slate-900 shadow-[8px_8px_0px_rgba(15,23,42,0.05)]">
-                                    <div className="flex justify-between items-end mb-6">
-                                        <div>
-                                            <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.3em]">Collection_Level</h3>
-                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">Status: PHASE_COMPLETE</p>
+                                {/* Right Column: Client & Recovery */}
+                                <div className="space-y-6">
+                                    {/* Client Entity Card */}
+                                    <div className="bg-slate-900 p-6 text-white border border-slate-900">
+                                        <div className="flex items-center gap-2 mb-6 opacity-60">
+                                            <User size={14} />
+                                            <h3 className="text-[10px] font-bold uppercase tracking-widest">Client Identity</h3>
                                         </div>
-                                        <span className="text-sm font-black text-emerald-600 font-mono italic">
-                                            {project.totalPayment > 0 ? Math.round((project.paymentReceived / project.totalPayment) * 100) : 0}%
-                                        </span>
+                                        <div className="space-y-6">
+                                            <div>
+                                                <p className="text-xl font-bold tracking-tight">{project.clientName || 'Private Client'}</p>
+                                                <div className="flex items-center gap-2 mt-2 text-blue-400 hover:text-blue-300 transition-colors">
+                                                    <Mail size={12} />
+                                                    <span className="text-[11px] font-medium truncate">{project.clientEmail}</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="pt-4 border-t border-white/10 space-y-3">
+                                                <div className="flex justify-between items-center text-[10px] uppercase tracking-wider font-bold text-white/40">
+                                                    <span>Quick Links</span>
+                                                </div>
+                                                <LinkSection icon={<Github size={14} />} label="Repository" url={project.githubLink} />
+                                                <LinkSection icon={<ExternalLink size={14} />} label="Live Demo" url={project.deploymentLink} />
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="w-full bg-slate-100 h-6 border-2 border-slate-900 overflow-hidden relative">
-                                        <div 
-                                            className="bg-emerald-500 h-full transition-all duration-1000 ease-out border-r-2 border-slate-900 shadow-[2px_0_0_rgba(15,23,42,1)]" 
-                                            style={{ width: `${project.totalPayment > 0 ? (project.paymentReceived / project.totalPayment) * 100 : 0}%` }}
-                                        >
-                                            <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.1)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.1)_50%,rgba(255,255,255,0.1)_75%,transparent_75%,transparent)] bg-[length:20px_20px]" />
+
+                                    {/* Financial Recovery Gauge */}
+                                    <div className="bg-white p-6 border border-slate-200">
+                                        <div className="flex justify-between items-end mb-4">
+                                            <div>
+                                                <h3 className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">Payment Recovery</h3>
+                                                <p className="text-[9px] text-slate-400 uppercase mt-1">Status: {Number(project.paymentReceived) >= Number(project.totalPayment) ? 'Recovered' : 'Calculated Inbound'}</p>
+                                            </div>
+                                            <span className="text-xs font-bold text-emerald-600">
+                                                {project.totalPayment > 0 ? Math.round((project.paymentReceived / project.totalPayment) * 100) : 0}%
+                                            </span>
                                         </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4 mt-8">
-                                        <div>
-                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Received</p>
-                                            <p className="text-base font-black text-slate-900 font-mono italic">₹{project.paymentReceived?.toLocaleString()}</p>
+                                        <div className="w-full bg-slate-100 h-2 overflow-hidden">
+                                            <div 
+                                                className="bg-emerald-500 h-full transition-all duration-1000 ease-out" 
+                                                style={{ width: `${project.totalPayment > 0 ? (project.paymentReceived / project.totalPayment) * 100 : 0}%` }}
+                                            />
                                         </div>
-                                        <div className="text-right border-l-2 border-slate-100 pl-4">
-                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Deficit</p>
-                                            <p className="text-base font-black text-slate-900 font-mono italic">₹{(project.totalPayment - project.paymentReceived)?.toLocaleString()}</p>
+                                        <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-slate-50">
+                                            <div>
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Received</p>
+                                                <p className="text-sm font-bold text-slate-900">₹{project.paymentReceived?.toLocaleString()}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Outstanding</p>
+                                                <p className="text-sm font-bold text-rose-600">₹{(project.totalPayment - project.paymentReceived)?.toLocaleString()}</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     ) : (
-                        <div className="p-24 text-center border-2 border-slate-100 border-dashed">
-                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">CRITICAL_ERROR: PROJECT_NOT_FOUND</p>
+                        <div className="p-24 text-center">
+                             <AlertCircle className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Project Not Found in Database</p>
                         </div>
                     )}
                 </div>
 
-                {/* Footer Protocols */}
-                <div className="px-8 py-6 border-t-2 border-slate-900 bg-slate-50 flex justify-end gap-6">
+                {/* Footer Controls */}
+                <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
                     <button 
                         onClick={onClose}
-                        className="px-8 py-3 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] bg-white border-2 border-slate-200 hover:border-slate-900 hover:text-slate-950 transition-all active:scale-95"
+                        className="px-6 py-2 text-[11px] font-bold text-slate-600 uppercase tracking-wider bg-white border border-slate-200 hover:bg-slate-100 transition-all active:scale-95"
                     >
-                        Exit_Diagnostics
+                        Close Portal
                     </button>
                     {project && (
                         <a 
                             href={`/edit-project/${project.id}`}
-                            className="px-8 py-3 text-[10px] font-black text-white bg-slate-900 border-2 border-slate-900 hover:bg-slate-800 transition-all active:scale-95 shadow-[4px_4px_0px_rgba(15,23,42,0.1)]"
+                            className="px-6 py-2 text-[11px] font-bold text-white uppercase tracking-wider bg-blue-600 border border-blue-600 hover:bg-blue-700 transition-all active:scale-95 shadow-sm"
                         >
-                            Execute_Full_Modification
+                            Modify Parameters
                         </a>
                     )}
                 </div>
@@ -238,8 +302,20 @@ const ProjectDetailsModal = ({ projectId, onClose }) => {
     );
 };
 
-// Internal Industrial Components
-const DetailCard = ({ icon, label, value }) => {
+// Internal Components
+const MetricCard = ({ icon, label, value }) => (
+    <div className="bg-white border border-slate-200 p-4 flex items-center gap-4">
+        <div className="w-8 h-8 bg-slate-50 flex items-center justify-center">
+            {icon}
+        </div>
+        <div>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">{label}</p>
+            <p className="text-sm font-bold text-slate-900 tracking-tight">{value || "N/A"}</p>
+        </div>
+    </div>
+);
+
+const MetricCard2 = ({ icon, label, value }) => {
     return (
         <div className="p-6 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-3">
@@ -254,23 +330,39 @@ const DetailCard = ({ icon, label, value }) => {
 };
 
 const LinkSection = ({ icon, label, url }) => (
-    <div className="bg-white p-5 border-2 border-slate-900 flex items-center justify-between group hover:bg-slate-50 transition-colors">
-        <div className="flex items-center gap-5">
-            <div className="w-10 h-10 bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 group-hover:border-slate-900 group-hover:text-slate-900 transition-all">
+    <div className="flex items-center justify-between group">
+        <div className="flex items-center gap-3">
+            <div className="text-white/20 group-hover:text-blue-400 transition-all">
                 {icon}
             </div>
-            <div>
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{label}</p>
-                {url ? (
-                    <a href={url} target="_blank" rel="noreferrer" className="text-[11px] font-black text-blue-800 hover:underline flex items-center gap-1 uppercase tracking-widest">
-                        Access_Vector <ExternalLink size={10} strokeWidth={3} />
-                    </a>
-                ) : (
-                    <p className="text-[10px] font-black text-slate-300 uppercase italic">U_UNDEFINED</p>
-                )}
-            </div>
+            <span className="text-[11px] font-medium text-white/50">{label}</span>
         </div>
+        {url ? (
+            <a href={url} target="_blank" rel="noreferrer" className="text-[10px] font-bold text-blue-400 hover:underline flex items-center gap-1 uppercase tracking-widest">
+                Link <ExternalLink size={10} />
+            </a>
+        ) : (
+            <span className="text-[10px] font-bold text-white/10 uppercase italic">N/A</span>
+        )}
     </div>
+);
+
+// Added Activity icon to imports since it was missing but used in MetricCard
+const Activity = ({ size, className }) => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width={size} 
+        height={size} 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        className={className}
+    >
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    </svg>
 );
 
 export default ProjectDetailsModal;

@@ -1,178 +1,185 @@
 import React from 'react';
-import { X, IndianRupee, Tag, FileText, Calendar, User, CreditCard, AlertCircle } from 'lucide-react';
-import { format } from 'date-fns';
+import { X, IndianRupee, Tag, FileText, Calendar, User, CreditCard, Wallet, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
+import { format, isValid, parseISO } from 'date-fns';
+
+const safeParse = (dateStr) => {
+    if (!dateStr) return null;
+    const d = typeof dateStr === 'string' ? parseISO(dateStr) : new Date(dateStr);
+    return isValid(d) ? d : null;
+};
 
 const ExpenseViewModal = ({ isOpen, onClose, expense }) => {
     if (!isOpen || !expense) return null;
 
-    const getStatusColor = (status) => {
+    // Detect if this is a payroll row (built in FinanceDashboardPage)
+    const isPayroll = expense._type === 'payroll' || expense.id?.toString?.().startsWith('payroll-');
+    const rawExpense = expense._raw || expense;
+
+    const getStatusBadge = (status) => {
         switch (status) {
             case 'approved':
-                return 'bg-green-500/10 text-green-600';
+                return { cls: 'bg-emerald-50 text-emerald-700 border border-emerald-100', label: 'Approved / Done', Icon: CheckCircle2 };
             case 'pending':
-                return 'bg-yellow-500/10 text-yellow-600';
+                return { cls: 'bg-amber-50 text-amber-700 border border-amber-100', label: 'Pending Review', Icon: Clock };
             case 'rejected':
-                return 'bg-red-500/10 text-red-600';
+                return { cls: 'bg-rose-50 text-rose-700 border border-rose-100', label: 'Rejected', Icon: AlertCircle };
             default:
-                return 'bg-gray-500/10 text-gray-600';
+                return { cls: 'bg-slate-50 text-slate-600 border border-slate-100', label: status || 'N/A', Icon: CheckCircle2 };
         }
     };
 
-    const getTypeColor = (type) => {
-        return type === 'credit' ? 'text-green-500' : 'text-red-500';
-    };
+    const isCredit = expense.rawType === 'credit' || rawExpense.type === 'credit';
+    const title = expense.title || rawExpense.title || '—';
+    const amount = Number(expense.amount || rawExpense.amount || rawExpense.netSalary || rawExpense.total || 0);
+    const category = expense.category || rawExpense.category || 'Misc';
+    const status = expense.status || rawExpense.status || 'approved';
+    const description = expense.description || rawExpense.description || '';
+    const currency = expense.currency || rawExpense.currency || 'INR';
+    const dateValue = expense.date ? (expense.date instanceof Date ? expense.date : safeParse(expense.dateStr || expense.date)) : safeParse(rawExpense.date || rawExpense.createdAt);
+    const createdAt = safeParse(rawExpense.createdAt);
+    const updatedAt = safeParse(rawExpense.updatedAt);
+    const employee = expense.employee || rawExpense.employee;
 
-    const getTypeLabel = (type) => {
-        return type === 'credit' ? 'Incoming (Credit)' : 'Outgoing (Debit)';
-    };
+    const statusInfo = getStatusBadge(status);
+    const StatusIcon = statusInfo.Icon;
+
+    const formatAmt = (v) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(v || 0);
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6">
-            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm transition-opacity" onClick={onClose} />
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
-            <div className="relative w-full max-w-2xl bg-card border border-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden z-10">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-border bg-gradient-to-r from-primary/5 to-transparent">
-                    <div>
-                        <h2 className="text-2xl font-bold">Expense Details</h2>
-                        <p className="text-xs text-muted-foreground mt-1">Complete information about this transaction</p>
+                <div className={`flex items-center justify-between px-6 py-5 border-b border-slate-100 ${isCredit ? 'bg-emerald-50/60' : isPayroll ? 'bg-amber-50/60' : 'bg-rose-50/40'}`}>
+                    <div className="flex items-center gap-3">
+                        <div className={`p-2.5 rounded-xl ${isCredit ? 'bg-emerald-100 text-emerald-700' : isPayroll ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'}`}>
+                            {isPayroll ? <Wallet size={20} /> : isCredit ? <IndianRupee size={20} /> : <CreditCard size={20} />}
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-bold text-slate-900">{isPayroll ? 'Payroll Details' : 'Transaction Details'}</h2>
+                            <p className="text-xs text-slate-500 mt-0.5">{isCredit ? 'Incoming Credit' : isPayroll ? 'Payroll Disbursement' : 'Outgoing Debit'}</p>
+                        </div>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-muted rounded-full transition-colors text-muted-foreground hover:text-foreground"
-                    >
-                        <X size={24} />
+                    <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400 hover:text-slate-700">
+                        <X size={20} />
                     </button>
                 </div>
 
-                {/* Content */}
-                <div className="p-6 space-y-6">
-                    {/* Title and Type */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
-                                <FileText size={14} className="inline mr-1" /> Title
-                            </label>
-                            <p className="text-lg font-bold text-foreground">{expense.title}</p>
-                        </div>
-                        <div>
-                            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
-                                Transaction Type
-                            </label>
-                            <div className={`inline-flex items-center px-3 py-1.5 rounded-lg font-semibold text-sm ${getTypeColor(expense.type)} bg-opacity-10`}>
-                                <CreditCard size={14} className="mr-1.5" />
-                                {getTypeLabel(expense.type)}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Amount Section */}
-                    <div className="bg-muted/30 border border-border rounded-xl p-4">
-                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
-                            <IndianRupee size={14} className="inline mr-1" /> Amount
-                        </label>
-                        <p className={`text-4xl font-bold ${getTypeColor(expense.type)}`}>
-                            {expense.type === 'credit' ? '+' : '-'}₹{Number(expense.amount).toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
+                {/* Body */}
+                <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+                    {/* Amount - hero */}
+                    <div className={`rounded-xl p-5 text-center ${isCredit ? 'bg-emerald-50 border border-emerald-100' : isPayroll ? 'bg-amber-50 border border-amber-100' : 'bg-rose-50 border border-rose-100'}`}>
+                        <p className="text-[10px] font-bold uppercase tracking-widest mb-1 text-slate-500">Amount</p>
+                        <p className={`text-4xl font-bold tracking-tight ${isCredit ? 'text-emerald-600' : isPayroll ? 'text-amber-600' : 'text-rose-600'}`}>
+                            {isCredit ? '+' : '−'}{formatAmt(amount)}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-2">Currency: {expense.currency || 'INR'}</p>
+                        <p className="text-xs text-slate-400 mt-1">Currency: {currency}</p>
                     </div>
 
-                    {/* Category and Date */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
-                                <Tag size={14} className="inline mr-1" /> Category
-                            </label>
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-primary" />
-                                <span className="font-semibold text-foreground">{expense.category || 'Uncategorized'}</span>
-                            </div>
-                        </div>
-                        <div>
-                            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
-                                <Calendar size={14} className="inline mr-1" /> Date
-                            </label>
-                            <p className="font-semibold text-foreground">
-                                {format(new Date(expense.date), 'MMMM dd, yyyy')}
-                                <span className="text-sm text-muted-foreground ml-2">
-                                    ({format(new Date(expense.date), 'EEEE')})
-                                </span>
+                    {/* Title & Type grid */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-slate-50 rounded-xl p-4">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1">
+                                <FileText size={11} /> Title
                             </p>
+                            <p className="text-sm font-bold text-slate-900">{title}</p>
+                        </div>
+                        <div className="bg-slate-50 rounded-xl p-4">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1">
+                                <Tag size={11} /> Category
+                            </p>
+                            <span className="inline-block text-xs font-bold text-slate-700 bg-white border border-slate-200 px-2.5 py-1 rounded-full">
+                                {category}
+                            </span>
                         </div>
                     </div>
 
-                    {/* Status */}
-                    <div>
-                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
-                            Status
-                        </label>
-                        <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider ${getStatusColor(expense.status)}`}>
-                            {expense.status || 'Verified'}
-                        </span>
+                    {/* Date & Status */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-slate-50 rounded-xl p-4">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1">
+                                <Calendar size={11} /> Date
+                            </p>
+                            <p className="text-sm font-bold text-slate-900">
+                                {dateValue ? format(dateValue, 'MMM dd, yyyy') : '—'}
+                            </p>
+                            {dateValue && <p className="text-[10px] text-slate-400 mt-0.5">{format(dateValue, 'EEEE')}</p>}
+                        </div>
+                        <div className="bg-slate-50 rounded-xl p-4">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Status</p>
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold ${statusInfo.cls}`}>
+                                <StatusIcon size={13} /> {statusInfo.label}
+                            </span>
+                        </div>
                     </div>
 
                     {/* Description */}
-                    {expense.description && (
-                        <div>
-                            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
-                                Description
-                            </label>
-                            <div className="bg-muted/20 border border-border rounded-lg p-4">
-                                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
-                                    {expense.description}
-                                </p>
-                            </div>
+                    {description && (
+                        <div className="bg-slate-50 rounded-xl p-4">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Description / Notes</p>
+                            <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{description}</p>
                         </div>
                     )}
 
-                    {/* Employee Information */}
-                    {expense.employee?.user && (
-                        <div className="bg-muted/20 border border-border rounded-lg p-4">
-                            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 block">
-                                <User size={14} className="inline mr-1" /> Posted By
-                            </label>
+                    {/* Employee Info */}
+                    {employee?.user && (
+                        <div className="bg-slate-50 rounded-xl p-4">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1">
+                                <User size={11} /> {isPayroll ? 'Employee' : 'Posted By'}
+                            </p>
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                                    <span className="text-sm font-bold text-primary">
-                                        {expense.employee.user.firstName?.[0]}{expense.employee.user.lastName?.[0]}
-                                    </span>
+                                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm flex-shrink-0">
+                                    {(employee.user.firstName?.[0] || '') + (employee.user.lastName?.[0] || '')}
                                 </div>
                                 <div>
-                                    <p className="font-semibold text-foreground">
-                                        {expense.employee.user.firstName} {expense.employee.user.lastName}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">{expense.employee.user.email}</p>
+                                    <p className="font-semibold text-slate-900 text-sm">{employee.user.firstName} {employee.user.lastName}</p>
+                                    <p className="text-xs text-slate-400">{employee.user.email}</p>
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {/* Metadata */}
-                    <div className="bg-muted/10 border border-border rounded-lg p-3 text-xs text-muted-foreground space-y-1">
-                        <p><strong>Expense ID:</strong> {expense.id}</p>
-                        <p><strong>Created:</strong> {format(new Date(expense.createdAt), 'PPpp')}</p>
-                        {expense.updatedAt && (
-                            <p><strong>Last Updated:</strong> {format(new Date(expense.updatedAt), 'PPpp')}</p>
+                    <div className="bg-slate-50/60 rounded-xl p-4 text-xs text-slate-400 space-y-1.5 border border-slate-100">
+                        {rawExpense.id && (
+                            <div className="flex justify-between">
+                                <span className="font-semibold">ID</span>
+                                <span className="font-mono text-slate-500">{rawExpense.id}</span>
+                            </div>
+                        )}
+                        {createdAt && (
+                            <div className="flex justify-between">
+                                <span className="font-semibold">Created</span>
+                                <span>{format(createdAt, 'MMM dd, yyyy — HH:mm')}</span>
+                            </div>
+                        )}
+                        {updatedAt && createdAt && updatedAt.getTime() !== createdAt.getTime() && (
+                            <div className="flex justify-between">
+                                <span className="font-semibold">Last Updated</span>
+                                <span>{format(updatedAt, 'MMM dd, yyyy — HH:mm')}</span>
+                            </div>
                         )}
                     </div>
 
-                    {/* Alert for pending status */}
-                    {expense.status === 'pending' && (
-                        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 flex items-start gap-3">
-                            <AlertCircle size={20} className="text-yellow-600 flex-shrink-0 mt-0.5" />
+                    {/* Pending Alert */}
+                    {status === 'pending' && (
+                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 items-start">
+                            <AlertCircle size={18} className="text-amber-500 flex-shrink-0 mt-0.5" />
                             <div>
-                                <p className="font-semibold text-yellow-700 text-sm">Pending Verification</p>
-                                <p className="text-xs text-yellow-600 mt-1">This expense is awaiting approval. You can edit or delete it before it's verified.</p>
+                                <p className="text-sm font-bold text-amber-700">Awaiting Approval</p>
+                                <p className="text-xs text-amber-600 mt-0.5">This transaction is pending verification. It can still be edited before approval.</p>
                             </div>
                         </div>
                     )}
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center gap-3 p-6 border-t border-border bg-muted/20">
+                <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50">
                     <button
                         onClick={onClose}
-                        className="flex-1 px-4 py-2.5 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors"
+                        className="w-full px-4 py-2.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors text-sm"
                     >
                         Close
                     </button>

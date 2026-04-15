@@ -14,6 +14,7 @@ const Sidebar = ({ isCollapsed = false, onToggleCollapse }) => {
   const { user } = useAuthStore();
   const isAdmin = user?.roles?.some(r => ['Super Admin', 'Admin'].includes(r.name));
   const isEmployee = user?.roles?.some(r => r.name === 'Employee');
+  const isIntern = user?.roles?.some(r => r.name === 'Interns');
 
   const comingSoonPaths = [];
 
@@ -133,13 +134,13 @@ const Sidebar = ({ isCollapsed = false, onToggleCollapse }) => {
       {
         label: 'My Leaves',
         path: '/employee/leaves',
-        icon: 'EmployeeDashboardLayout', // Leave form/status ke liye
+        icon: 'Calendar',
         tooltip: 'Apply and track leaves'
       },
       {
         label: 'My Payroll',
         path: '/employee/payroll',
-        icon: 'EmployeeDashboardLayout', // Salary/Payslip ke liye
+        icon: 'Calculator',
         tooltip: 'View my payslips and salary'
       },
       {
@@ -148,20 +149,51 @@ const Sidebar = ({ isCollapsed = false, onToggleCollapse }) => {
         icon: 'CalendarCheck',
         tooltip: 'My daily attendance'
       },
-      //if needed add another field
     ];
-  
+
+  } else if (isIntern) {
+    navigationItems = [
+      {
+        label: 'My Dashboard',
+        path: '/employee-dashboard',
+        icon: 'LayoutDashboard',
+        tooltip: 'My Intern Dashboard'
+      },
+      {
+        label: 'My Leaves',
+        path: '/employee/leaves',
+        icon: 'Calendar',
+        tooltip: 'Apply and track leaves'
+      },
+      {
+        label: 'Attendance',
+        path: '/employee-attendance',
+        icon: 'CalendarCheck',
+        tooltip: 'My daily attendance'
+      },
+    ];
+
   } else {
-    // Default/Fallback (Full menu for now if no role matches, or handle as guest/error)
+    // Fallback: show minimal employee-style nav for unknown roles
     navigationItems = [
       {
         label: 'Dashboard',
-        path: '/dashboard',
+        path: '/employee-dashboard',
         icon: 'LayoutDashboard',
-        tooltip: 'Analytics overview and metrics'
+        tooltip: 'My Dashboard'
       },
-      // ... simplified items?
-      { label: 'Employees', path: '/employee-management', icon: 'Users', tooltip: 'Workforce management' },
+      {
+        label: 'My Leaves',
+        path: '/employee/leaves',
+        icon: 'Calendar',
+        tooltip: 'Apply and track leaves'
+      },
+      {
+        label: 'Attendance',
+        path: '/employee-attendance',
+        icon: 'CalendarCheck',
+        tooltip: 'My daily attendance'
+      },
     ];
   }
 

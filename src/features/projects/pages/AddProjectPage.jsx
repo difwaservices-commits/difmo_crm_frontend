@@ -186,10 +186,10 @@ const AddProject = () => {
                       type="button"
                       onClick={() => setStep(s.num)}
                       className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
-                          ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
-                          : isCompleted
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            : "bg-slate-50 text-slate-400 border border-slate-200"
+                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
+                        : isCompleted
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          : "bg-slate-50 text-slate-400 border border-slate-200"
                         }`}
                     >
                       <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${isActive ? "bg-white/20" : isCompleted ? "bg-emerald-100" : "bg-slate-100"
@@ -459,8 +459,8 @@ const AddProject = () => {
                 type="button"
                 onClick={step === 4 ? handleSubmit : () => setStep(step + 1)}
                 className={`flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-bold transition-all shadow-lg ${step === 4
-                    ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-emerald-200 hover:shadow-emerald-300"
-                    : "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-indigo-200 hover:shadow-indigo-300"
+                  ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-emerald-200 hover:shadow-emerald-300"
+                  : "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-indigo-200 hover:shadow-indigo-300"
                   }`}
               >
                 {step === 4 ? (loading ? "Creating..." : "Create Project") : "Next Step"}

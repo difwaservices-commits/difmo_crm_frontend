@@ -167,11 +167,11 @@ const Dashboard = () => {
                 />
               </div>
               <button
-                onClick={() => navigate("/add-project")}
+              
                 className="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white font-bold rounded-none text-sm shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95"
               >
-                <Icon name="Plus" size={18} strokeWidth={3} />
-                Add Client / Project
+                <Icon name="Download" size={18} strokeWidth={3} />
+               Export
               </button>
             </div>
           </div>

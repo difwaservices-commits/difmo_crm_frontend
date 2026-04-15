@@ -5,7 +5,7 @@ import {
   Globe, Phone, MapPin, Building2, DollarSign, ArrowRight, ArrowLeft,
   ShieldCheck, CreditCard, Layers, LayoutGrid, Calendar, Clock, FileText,
   Edit2, Save, Github, ExternalLink, Trash, Tag, FolderOpen, Link as LinkIcon, CheckSquare,
-  UserPlus, Eye
+  UserPlus, Eye, MessageSquare
 } from 'lucide-react';
 import { useClientStore } from '../store/useClientStore';
 import Sidebar from './ui/Sidebar';
@@ -20,14 +20,14 @@ import ProjectEditModal from '../features/projects/components/ProjectEditModal';
 const ClientAdmin = () => {
   const { clients, fetchClients, processInvoice, addClient, updateClient } = useClientStore();
   const { user, isAuthenticated } = useAuthStore();
-  const { projects, fetchProjects, updateProject, createProject } = useProjectStore();
-
+  const { projects, fetchProjects, updateProject, createProject, deleteProject } = useProjectStore();
+  
   // --- UI CONTROLS ---
   const [searchTerm, setSearchTerm] = useState('');
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
-  const [isProjectFormOpen, setIsProjectFormOpen] = useState(false); // New state for inline project form
-  const [selectedClientForProject, setSelectedClientForProject] = useState(null); // Selected client for new project
+  const [isProjectFormOpen, setIsProjectFormOpen] = useState(false);
+  const [selectedClientForProject, setSelectedClientForProject] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
   const [selectedEntity, setSelectedEntity] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,6 +39,10 @@ const ClientAdmin = () => {
   const [createBoth, setCreateBoth] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [viewProjectId, setViewProjectId] = useState(null);
+
+  // New states for unified management
+  const [editingInvoiceMessage, setEditingInvoiceMessage] = useState(null);
+  const [tempInvoiceMessage, setTempInvoiceMessage] = useState('');
 
   // --- FORM STATES ---
   const [newClient, setNewClient] = useState({
@@ -93,60 +97,79 @@ const ClientAdmin = () => {
     return projectMap;
   }, [projects]);
 
-  // SEARCH & MERGE LOGIC
+  // UNIFIED DATA LOGIC: Single row per client/entity
   const combinedData = useMemo(() => {
+    const dataMap = new Map();
     const safeClients = Array.isArray(clients) ? clients : [];
-    const clientList = safeClients.map(c => ({
-      ...c,
-      type: 'Client',
-      searchKey: (c.name + c.email + c.company).toLowerCase(),
-      projectDetails: null,
-      clientProjects: getProjectsByClient.get(c.email) || [],
-      clientDetails: {
+    const safeProjects = Array.isArray(projects) ? projects : [];
+
+    // 1. Process real clients first
+    safeClients.forEach(c => {
+      const emailLower = (c.email || '').toLowerCase();
+      dataMap.set(emailLower, {
+        id: c.id,
+        clientId: c.id,
+        type: 'Client',
         name: c.name,
         email: c.email,
-        phone: c.phone,
-        company: c.company,
-        address: c.address,
-        city: c.city,
-        state: c.state,
-        pincode: c.pincode,
-        country: c.country,
-        status: c.status,
-        source: c.source,
-        priority: c.priority,
-        budget: c.budget,
-        currency: c.currency,
-        notes: c.notes
-      }
-    }));
+        company: c.company || c.companyName || 'N/A',
+        phone: c.phone || '',
+        status: c.status || 'Lead',
+        address: c.address || '',
+        city: c.city || '',
+        state: c.state || '',
+        pincode: c.pincode || '',
+        country: c.country || 'India',
+        source: c.source || 'Website',
+        priority: c.priority || 'Medium',
+        budget: Number(c.budget) || 0,
+        currency: c.currency || 'INR',
+        notes: c.notes || '',
+        invoiceMessage: c.invoiceMessage || '',
+        clientProjects: getProjectsByClient.get(c.email) || [],
+        searchKey: (c.name + c.email + (c.company || '')).toLowerCase()
+      });
+    });
 
-    const projectList = (projects || []).map(p => ({
-      ...p,
-      type: 'Project',
-      name: p.projectName,
-      email: p.clientEmail,
-      company: p.clientDetails?.companyName || 'Contractual',
-      searchKey: (p.projectName + p.clientEmail).toLowerCase(),
-      projectDetails: {
-        description: p.description,
-        assigningDate: p.assigningDate,
-        deadline: p.deadline,
-        phase: p.phase,
-        status: p.status,
-        totalPayment: p.totalPayment,
-        paymentReceived: p.paymentReceived,
-        budget: p.budget,
-        githubLink: p.githubLink,
-        deploymentLink: p.deploymentLink,
-        contactInfo: p.contactInfo,
-        assignedPeople: p.assignedPeople,
-        links: p.links,
-        tasks: p.tasks,
-        notes: p.notes
+    // 2. Process projects to pick up orphans or virtual clients
+    safeProjects.forEach(p => {
+      const emailLower = (p.clientEmail || '').toLowerCase();
+      if (!dataMap.has(emailLower)) {
+        // Create a 'Virtual Client' for orphan projects
+        dataMap.set(emailLower, {
+          id: p.id, // Use project ID as surrogate
+          clientId: null,
+          type: 'Virtual',
+          name: p.clientName || 'Unknown',
+          email: p.clientEmail,
+          company: p.clientDetails?.companyName || 'Contractual',
+          phone: p.contactInfo || '',
+          status: 'Active',
+          address: '',
+          city: '',
+          state: '',
+          pincode: '',
+          country: 'India',
+          source: 'Project',
+          priority: 'Medium',
+          budget: 0,
+          currency: 'INR',
+          notes: '',
+          invoiceMessage: '',
+          clientProjects: getProjectsByClient.get(p.clientEmail) || [],
+          searchKey: (p.projectName + p.clientEmail).toLowerCase()
+        });
       }
-    }));
-    return [...clientList, ...projectList].filter(item => item.searchKey.includes(searchTerm.toLowerCase()));
+    });
+
+    const result = Array.from(dataMap.values());
+    console.log("Unified combinedData:", result);
+
+    return result.filter(item =>
+      item.searchKey.includes(searchTerm.toLowerCase()) ||
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   }, [clients, projects, searchTerm, getProjectsByClient]);
 
   const projectNamesList = useMemo(() => {
@@ -565,7 +588,8 @@ const ClientAdmin = () => {
         gstNumber: gstNumber,
         clientEmail: clientEmail,
         clientName: clientName,
-        projectName: selectedEntity.type === 'Project' ? selectedEntity.name : null
+        projectId: selectedEntity.type === 'Project' ? selectedEntity.id : null,
+        projectName: selectedEntity.type === 'Project' ? (selectedEntity.projectName || selectedEntity.name) : null
       };
 
       if (clientId) {
@@ -610,9 +634,40 @@ const ClientAdmin = () => {
   const taxAmount = subtotal * 0.18;
   const grandTotal = subtotal + taxAmount;
 
+  const handleDeleteProject = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this project?")) return;
+    try {
+      await deleteProject(id, user.company.id);
+      alert("Project deleted successfully!");
+    } catch (err) {
+      alert("Failed to delete project");
+    }
+  };
+
+  const handleUpdateInvoiceMessage = async (clientId, message) => {
+    setIsSubmitting(true);
+    try {
+      await updateClient(clientId, { invoiceMessage: message });
+      setEditingInvoiceMessage(null);
+      fetchClients();
+    } catch (err) {
+      alert("Failed to update message");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGenerateInvoiceClick = (entity) => {
+    setSelectedEntity(entity);
+    setIsInvoiceModalOpen(true);
+  };
+
   const totalEntities = combinedData.length;
-  const estimatedRevenue = subtotal;
-  const activeWorkflows = projects?.length || 0;
+  const estimatedRevenue = combinedData.reduce((acc, item) => {
+    const projSum = item.clientProjects?.reduce((sum, p) => sum + (Number(p.paymentReceived) || 0), 0) || 0;
+    return acc + projSum;
+  }, 0);
+  const activeWorkflows = projects?.filter(p => p.status === 'active').length || 0;
 
   return (
     <div className="flex h-screen bg-gray-50 font-sans text-gray-900 overflow-hidden">
@@ -687,7 +742,7 @@ const ClientAdmin = () => {
                 onClick={() => { setStep(1); setIsClientModalOpen(true); }}
                 className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all duration-200"
               >
-                <Plus size={18} /> Add Client / Project
+                {/* <Plus size={18} /> Add Client / Project */}
               </button>
             </div>
           </div>
@@ -712,429 +767,221 @@ const ClientAdmin = () => {
               {combinedData.map((item) => (
                 <div
                   key={item.id}
-                  className={`bg-white  border-2 transition-all duration-300 cursor-pointer hover:shadow-lg ${expandedId === item.id ? 'border-blue-500 shadow-lg' : 'border-gray-200 hover:border-gray-300 shadow-sm'
-                    }`}
+                  className={`bg-white border-2 transition-all duration-300 cursor-pointer hover:shadow-lg ${expandedId === item.id ? 'border-blue-500 shadow-lg' : 'border-gray-200 hover:border-gray-300 shadow-sm'}`}
                 >
                   <div className="p-5 flex items-center justify-between" onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}>
                     <div className="flex items-center gap-4 flex-1">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-base shadow-md ${item.type === 'Project' ? 'bg-gradient-to-br from-purple-500 to-purple-600 text-white' : 'bg-gradient-to-br from-blue-500 to-blue-600 text-white'
-                        }`}>
-                        {item.type === 'Project' ? <Briefcase size={22} /> : item.name?.charAt(0).toUpperCase()}
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-base shadow-md bg-gradient-to-br from-blue-500 to-blue-600 text-white`}>
+                        {item.name?.charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-1">
                           <h3 className="font-bold text-gray-900">{item.name}</h3>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${item.type === 'Project' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                            {item.type}
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm bg-slate-100 text-slate-600`}>
+                            {item.clientId ? 'Client Record' : 'Individual / Project'}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-500">{item.company || 'Direct Organization'}</p>
+                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                          <span className="flex items-center gap-1"><Mail size={12} /> {item.email}</span>
+                          <span className="text-slate-300">•</span>
+                          <span>{item.company}</span>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="hidden lg:block text-right">
-                        <p className="text-xs font-semibold text-gray-500 uppercase">Projects</p>
-                        <p className="text-lg font-bold text-gray-900">
-                          {item.type === 'Client' ? (item.clientProjects?.length || 0) : '1'}
-                        </p>
+                    <div className="flex items-center gap-6">
+                      <div className="hidden md:block text-right">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Projects</p>
+                        <p className="text-lg font-black text-slate-900 leading-none">{item.clientProjects?.length || 0}</p>
                       </div>
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${expandedId === item.id ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}>
                         <ChevronRight size={20} className={`transition-transform duration-300 ${expandedId === item.id ? 'rotate-90' : ''}`} />
                       </div>
                     </div>
                   </div>
-                  {/* EXPANDED DETAILS SECTION */}
+
+                  {/* EXPANDED SECTION */}
                   {expandedId === item.id && (
-                    <div className="px-5 pb-5 pt-3 border-t border-gray-200 bg-gradient-to-b from-white to-gray-50">
-                      {item.type === 'Project' && item.projectDetails ? (
-                        // PROJECT DETAILS SECTION
-                        <div className="space-y-4 mt-3">
-                        <div className="flex justify-between items-center">
-                          <h4 className="text-xs font-semibold text-blue-600 uppercase tracking-wide">Project Actions</h4>
-                          <div className="flex gap-2">
-                             <button
-                               onClick={() => {
-                                 setViewProjectId(item.id);
-                                 setIsViewModalOpen(true);
-                               }}
-                               className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all flex items-center gap-1"
-                             >
-                                <Eye size={12} /> View Details
-                             </button>
-                             <button
-                               onClick={() => {
-                                 setSelectedEntity(item);
-                                 setIsInvoiceModalOpen(true);
-                               }}
-                               className="bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-medium flex items-center gap-1 hover:bg-green-700 transition-colors"
-                             >
-                               <Send size={12} /> Send Invoice
-                             </button>
-                             <button
-                               onClick={() => {
-                                 setEditData({
-                                   id: item.id,
-                                   projectName: item.name,
-                                   description: item.projectDetails.description || '',
-                                   assigningDate: item.projectDetails.assigningDate || '',
-                                   deadline: item.projectDetails.deadline || '',
-                                   phase: item.projectDetails.phase || 'Planning',
-                                   status: item.projectDetails.status || 'active',
-                                   totalPayment: item.projectDetails.totalPayment || 0,
-                                   paymentReceived: item.projectDetails.paymentReceived || 0,
-                                   budget: item.projectDetails.budget || 0,
-                                   githubLink: item.projectDetails.githubLink || '',
-                                   deploymentLink: item.projectDetails.deploymentLink || '',
-                                   contactInfo: item.projectDetails.contactInfo || '',
-                                   clientEmail: item.email || '',
-                                   clientName: item.clientName || '',
-                                   links: item.projectDetails.links || {},
-                                   tasks: item.projectDetails.tasks || [],
-                                   notes: item.projectDetails.notes || ''
-                                 });
-                                 setIsEditing(true);
-                               }}
-                               className="text-blue-600 hover:text-blue-700 text-xs flex items-center gap-1 font-bold"
-                             >
-                               <Edit2 size={12} /> Edit Project
-                             </button>
-                          </div>
-                        </div>
-
-                        {/* Basic Project Info */}
-                        <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-2xl border border-blue-200">
-                          <h5 className="text-sm font-bold text-blue-900 mb-4 flex items-center gap-2">
-                            <FolderOpen size={16} className="text-blue-600" /> Project Information
-                          </h5>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <p className="text-xs font-semibold text-blue-600 uppercase mb-1">Project Name</p>
-                              <p className="text-base font-bold text-blue-900">{item.name}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs font-semibold text-blue-600 uppercase mb-1">Phase</p>
-                              <span className="inline-flex px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-700">
-                                {item.projectDetails.phase || 'Planning'}
-                              </span>
-                            </div>
-                            {item.projectDetails.assigningDate && (
-                              <div>
-                                <p className="text-xs font-semibold text-blue-600 uppercase mb-1">Start Date</p>
-                                <p className="text-base font-bold text-blue-900">
-                                  {new Date(item.projectDetails.assigningDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                </p>
-                              </div>
-                            )}
-                            {item.projectDetails.deadline && (
-                              <div>
-                                <p className="text-xs font-semibold text-blue-600 uppercase mb-1">Deadline</p>
-                                <p className="text-base font-bold text-red-600">
-                                  {new Date(item.projectDetails.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Description */}
-                        {item.projectDetails.description && (
-                          <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                            <div className="flex items-start gap-2">
-                              <FileText size={14} className="text-blue-500 mt-0.5" />
-                              <div>
-                                <p className="text-xs font-medium text-gray-700">Description</p>
-                                <p className="text-sm text-gray-600 mt-1">{item.projectDetails.description}</p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Client Details */}
-                        <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                          <h5 className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
-                            <Users size={12} /> Client Information
-                          </h5>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                              <p className="text-xs text-gray-500">Client Name</p>
-                              <p className="text-sm font-medium text-gray-900">{item.clientName || 'N/A'}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500">Client Email</p>
-                              <p className="text-sm font-medium text-gray-900">{item.email || 'N/A'}</p>
-                            </div>
-                            {item.projectDetails.contactInfo && (
-                              <div>
-                                <p className="text-xs text-gray-500">Contact Info</p>
-                                <p className="text-sm font-medium text-gray-900">{item.projectDetails.contactInfo}</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-
-                        
-
-                        {/* Financial Details */}
-                        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 rounded-2xl border border-emerald-200">
-                          <h5 className="text-sm font-bold text-emerald-900 mb-4 flex items-center gap-2">
-                            <DollarSign size={16} className="text-emerald-600" /> Financial Summary
-                          </h5>
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {item.projectDetails.budget > 0 && (
-                              <div className="bg-white rounded-xl p-3 border border-emerald-100">
-                                <p className="text-xs font-semibold text-emerald-600 uppercase mb-1">Budget</p>
-                                <p className="text-xl font-bold text-emerald-900">₹{item.projectDetails.budget.toLocaleString()}</p>
-                              </div>
-                            )}
-                            {item.projectDetails.totalPayment > 0 && (
-                              <div className="bg-white rounded-xl p-3 border border-emerald-100">
-                                <p className="text-xs font-semibold text-emerald-600 uppercase mb-1">Total Payment</p>
-                                <p className="text-xl font-bold text-emerald-900">₹{item.projectDetails.totalPayment.toLocaleString()}</p>
-                              </div>
-                            )}
-                            {item.projectDetails.paymentReceived > 0 && (
-                              <div className="bg-white rounded-xl p-3 border border-emerald-100">
-                                <p className="text-xs font-semibold text-green-600 uppercase mb-1">Payment Received</p>
-                                <p className="text-xl font-bold text-green-700">₹{item.projectDetails.paymentReceived.toLocaleString()}</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Assigned Employees Section */}
-                        {editData.assignedEmployees && editData.assignedEmployees.length > 0 && (
-                          <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
-                            <h5 className="text-xs font-semibold text-purple-800 mb-2 flex items-center gap-1">
-                              <Users size={12} /> Assigned Team Members
-                            </h5>
-                            <div className="flex flex-wrap gap-2">
-                              {editData.assignedEmployees.map((employee, idx) => (
-                                <div key={idx} className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-purple-200">
-                                  <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center">
-                                    <span className="text-xs font-bold text-purple-600">
-                                      {employee.name?.charAt(0).toUpperCase()}
-                                    </span>
-                                  </div>
-                                  <div>
-                                    <p className="text-xs font-medium text-gray-800">{employee.name}</p>
-                                    <p className="text-xs text-gray-500">{employee.role || 'Team Member'}</p>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        {/* Assigned Employees in Edit Modal */}
-                        <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
-                          <label className="flex text-xs font-semibold text-purple-800 mb-2 items-center gap-1">
-                            <Users size={12} /> Assigned Team Members
-                          </label>
-                          <div className="space-y-2">
-                            {editData.assignedEmployees && editData.assignedEmployees.map((employee, idx) => (
-                              <div key={idx} className="flex items-center justify-between p-2 bg-white rounded-lg border border-purple-100">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                                    <span className="text-xs font-bold text-purple-600">
-                                      {employee.name?.charAt(0).toUpperCase()}
-                                    </span>
-                                  </div>
-                                  <div>
-                                    <p className="text-sm font-medium text-gray-800">{employee.name}</p>
-                                    <p className="text-xs text-gray-500">{employee.role || 'Team Member'} • {employee.email}</p>
-                                  </div>
-                                </div>
+                    <div className="px-5 pb-6 pt-2 border-t border-slate-100 bg-slate-50/30">
+                      <div className="flex flex-col lg:flex-row gap-6">
+                        {/* Summary & Client Info */}
+                        <div className="lg:w-1/3 space-y-4">
+                          <div className="bg-white p-4 rounded-2xl border border-slate-200/60 shadow-sm">
+                            <div className="flex justify-between items-center mb-4">
+                              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Profile Actions</h4>
+                              <div className="flex gap-2">
                                 <button
-                                  type="button"
-                                  onClick={() => {
-                                    const updatedEmployees = editData.assignedEmployees.filter(e => e.id !== employee.id);
-                                    handleEditChange('assignedEmployees', updatedEmployees);
-                                  }}
-                                  className="text-red-400 hover:text-red-600"
+                                  onClick={() => { setSelectedClientForProject(item); setIsProjectFormOpen(true); }}
+                                  className="p-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-600 hover:text-white transition-all"
+                                  title="Add Project"
                                 >
-                                  <Trash2 size={14} />
+                                  <Plus size={14} />
+                                </button>
+                                <button
+                                  onClick={() => handleClientEditSelect(item.clientId || item.id)}
+                                  className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all"
+                                  title="Edit Profile"
+                                >
+                                  <Edit2 size={14} />
                                 </button>
                               </div>
-                            ))}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                // Add logic to add new employee to edit form
-                                const newEmployee = prompt("Enter employee name:");
-                                if (newEmployee) {
-                                  const updatedEmployees = [...(editData.assignedEmployees || []), { id: Date.now(), name: newEmployee, role: "Team Member" }];
-                                  handleEditChange('assignedEmployees', updatedEmployees);
-                                }
-                              }}
-                              className="text-purple-600 hover:text-purple-700 text-xs flex items-center gap-1"
-                            >
-                              <UserPlus size={12} /> Add Team Member
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Links Section */}
-                        {(item.projectDetails.githubLink || item.projectDetails.deploymentLink) && (
-                          <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                            <h5 className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
-                              <LinkIcon size={12} /> Project Links
-                            </h5>
-                            <div className="flex gap-3">
-                              {item.projectDetails.githubLink && (
-                                <a href={item.projectDetails.githubLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-1">
-                                  <Github size={14} /> GitHub
-                                </a>
-                              )}
-                              {item.projectDetails.deploymentLink && (
-                                <a href={item.projectDetails.deploymentLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-1">
-                                  <ExternalLink size={14} /> Deployment
-                                </a>
-                              )}
                             </div>
-                          </div>
-                        )}
 
-                        {/* Status Badge */}
-                        <div className="flex flex-wrap gap-4">
-                          {item.projectDetails.status && (
-                            <div>
-                              <p className="text-xs text-gray-500">Project Status</p>
-                              <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium mt-1 ${item.projectDetails.status === 'active' ? 'bg-green-100 text-green-700' :
-                                item.projectDetails.status === 'completed' ? 'bg-blue-100 text-blue-700' :
-                                  'bg-yellow-100 text-yellow-700'
-                                }`}>
-                                {item.projectDetails.status}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Notes */}
-                        {item.projectDetails.notes && (
-                          <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-100">
-                            <div className="flex items-start gap-2">
-                              <FileText size={14} className="text-yellow-600 mt-0.5" />
-                              <div>
-                                <p className="text-xs font-medium text-yellow-700">Additional Notes</p>
-                                <p className="text-sm text-gray-700 mt-1">{item.projectDetails.notes}</p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      // CLIENT DETAILS SECTION with Multiple Projects and Add Project Button
-                      <div className="space-y-4 mt-3">
-                        <div className="flex justify-between items-center">
-                          <h4 className="text-xs font-semibold text-blue-600 uppercase tracking-wide">Complete Client Details</h4>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => {
-                                setSelectedClientForProject(item);
-                                setIsProjectFormOpen(true);
-                              }}
-                              className="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs font-medium flex items-center gap-1 hover:bg-indigo-700 transition-colors"
-                              title="Add New Project"
-                            >
-                              <PlusCircle size={14} /> Add Project
-                            </button>
-                            <button
-                              onClick={() => {
-                                setSelectedEntity(item);
-                                setIsInvoiceModalOpen(true);
-                              }}
-                              className="bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-medium flex items-center gap-1 hover:bg-green-700 transition-colors"
-                            >
-                              <Send size={12} /> Send Invoice
-                            </button>
-                            <button
-                              onClick={() => handleClientEditSelect(item.id)}
-                              className="text-blue-600 hover:text-blue-700 text-xs flex items-center gap-1"
-                            >
-                              <Edit2 size={12} /> Edit Client
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Notes Section for Clients */}
-                        {item.notes && (
-                          <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-100">
-                            <div className="flex items-start gap-2">
-                              <FileText size={14} className="text-yellow-600 mt-0.5" />
-                              <div>
-                                <p className="text-xs font-medium text-yellow-700">Notes</p>
-                                <p className="text-sm text-gray-700 mt-1">{item.notes}</p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Associated Projects Section */}
-                        {item.clientProjects && item.clientProjects.length > 0 && (
-                          <div className="mt-6 border-t border-gray-200 pt-4">
-                            <h5 className="text-xs font-semibold text-purple-700 mb-3 flex items-center gap-1 uppercase tracking-wide">
-                              <Briefcase size={14} /> Client Projects
-                            </h5>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {item.clientProjects.map(proj => (
-                                <div key={proj.id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                                  <div className="flex justify-between items-start mb-2">
-                                    <h6 className="font-bold text-gray-900 text-sm">{proj.projectName}</h6>
-                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                      proj.status === 'active' ? 'bg-green-100 text-green-700' :
-                                      proj.status === 'completed' ? 'bg-blue-100 text-blue-700' :
-                                      'bg-yellow-100 text-yellow-700'
-                                    }`}>
-                                      {proj.status || 'Active'}
-                                    </span>
-                                  </div>
-                                  <div className="text-xs text-gray-500 mb-3 line-clamp-2 min-h-[32px]">
-                                    {proj.description || 'No description provided.'}
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-2 text-xs">
-                                    <div className="bg-gray-50 p-2 rounded border border-gray-100">
-                                      <p className="text-gray-500 font-medium">Phase</p>
-                                      <p className="font-semibold text-gray-800">{proj.phase || 'N/A'}</p>
-                                    </div>
-                                    <div className="bg-gray-50 p-2 rounded border border-gray-100">
-                                      <p className="text-gray-500 font-medium">Budget</p>
-                                      <p className="font-semibold text-gray-800">₹{proj.budget?.toLocaleString() || '0'}</p>
-                                    </div>
-                                    <div className="bg-gray-50 p-2 rounded border border-gray-100 flex flex-col justify-center">
-                                      <p className="text-gray-500 font-medium">Deadline</p>
-                                      <p className={`font-semibold ${new Date(proj.deadline) < new Date() ? 'text-red-600' : 'text-gray-800'}`}>
-                                        {proj.deadline ? new Date(proj.deadline).toLocaleDateString() : 'N/A'}
-                                      </p>
-                                    </div>
-                                    <div className="bg-gray-50 p-2 rounded border border-gray-100 flex flex-col items-center justify-center">
-                                       <button 
-                                          onClick={(e) => {
-                                             e.stopPropagation();
-                                             setExpandedId(proj.id);
-                                              setViewProjectId(proj.id);
-                                              setIsViewModalOpen(true);
-                                             window.scrollTo({ top: 0, behavior: 'smooth' });
-                                          }}
-                                          className="text-blue-600 hover:text-blue-800 font-medium hover:underline text-center w-full"
-                                       >
-                                         View Details <Eye size={12} />
-                                       </button>
-                                    </div>
-                                  </div>
+                            <div className="space-y-3">
+                              {item.phone && (
+                                <div className="flex items-center gap-3 text-sm">
+                                  <Phone size={14} className="text-slate-400" />
+                                  <span className="text-slate-600">{item.phone}</span>
                                 </div>
-                              ))}
+                              )}
+                              <div className="flex items-center gap-3 text-sm">
+                                <Building2 size={14} className="text-slate-400" />
+                                <span className="text-slate-600">{item.company}</span>
+                              </div>
+                              <div className="flex items-start gap-3 text-sm">
+                                <MapPin size={14} className="text-slate-400 mt-0.5" />
+                                <span className="text-slate-600 leading-tight">
+                                  {item.address || 'Address not set'}<br />
+                                  {item.city}, {item.state} {item.pincode}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        )}
+
+                          {/* Invoice Message Card */}
+                          <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl">
+                            <div className="flex justify-between items-center mb-2">
+                              <h5 className="text-[10px] font-bold text-blue-600 uppercase tracking-widest flex items-center gap-2">
+                                <MessageSquare size={14} /> Invoice Message
+                              </h5>
+                              {editingInvoiceMessage !== item.id ? (
+                                <button onClick={() => { setEditingInvoiceMessage(item.id); setTempInvoiceMessage(item.invoiceMessage || ''); }} className="text-[10px] font-bold text-blue-600 hover:underline">EDIT</button>
+                              ) : (
+                                <div className="flex gap-2">
+                                  <button onClick={() => handleUpdateInvoiceMessage(item.clientId || item.id, tempInvoiceMessage)} className="text-[10px] font-bold text-emerald-600">SAVE</button>
+                                  <button onClick={() => setEditingInvoiceMessage(null)} className="text-[10px] font-bold text-slate-400">ESC</button>
+                                </div>
+                              )}
+                            </div>
+                            {editingInvoiceMessage === item.id ? (
+                              <textarea
+                                value={tempInvoiceMessage}
+                                onChange={(e) => setTempInvoiceMessage(e.target.value)}
+                                className="w-full text-xs p-2 bg-white border border-blue-200 rounded-lg h-16 outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                            ) : (
+                              <p className="text-xs text-blue-700 italic leading-relaxed">
+                                "{item.invoiceMessage || 'No default message set.'}"
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Projects List Tabular View */}
+                        <div className="lg:w-2/3">
+                          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+                            <div className="px-4 py-3 bg-slate-50/50 border-b border-slate-100 flex justify-between items-center">
+                              <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Project Inventory</h5>
+                              <button
+                                onClick={() => handleGenerateInvoiceClick(item)}
+                                className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                              >
+                                <FileText size={12} /> BATCH INVOICE
+                              </button>
+                            </div>
+
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-left">
+                                <tbody className="divide-y divide-slate-100">
+                                  {(item.clientProjects || []).length > 0 ? (
+                                    item.clientProjects.map(proj => (
+                                      <tr key={proj.id} className="group hover:bg-slate-50/50 transition-colors">
+                                        <td className="py-4 px-4">
+                                          <p className="text-sm font-bold text-slate-900 leading-tight">{proj.projectName}</p>
+                                          <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">{proj.description || 'Service Delivery'}</p>
+                                        </td>
+                                        <td className="py-4 px-2">
+                                          <div className="flex flex-col">
+                                            <span className="text-[9px] font-bold text-purple-500 uppercase">{proj.phase}</span>
+                                            <span className={`text-[9px] font-bold uppercase ${proj.status === 'active' ? 'text-emerald-500' : 'text-blue-500'}`}>
+                                              {proj.status}
+                                            </span>
+                                          </div>
+                                        </td>
+                                        <td className="py-4 px-2 text-right">
+                                          <p className="text-xs font-bold text-slate-900">₹{proj.budget?.toLocaleString()}</p>
+                                          <p className="text-[10px] text-slate-400">Paid: {((proj.paymentReceived / (proj.budget || 1)) * 100).toFixed(0)}%</p>
+                                        </td>
+                                        <td className="py-4 px-4 text-right">
+                                          <div className="flex justify-end gap-2">
+                                            <button 
+                                              onClick={() => { setViewProjectId(proj.id); setIsViewModalOpen(true); }} 
+                                              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all shadow-sm border border-blue-100"
+                                              title="View Project"
+                                            >
+                                              <Eye size={14} />
+                                              <span className="text-[10px] font-bold uppercase tracking-wider">View</span>
+                                            </button>
+                                            <button 
+                                              onClick={() => handleProjectSelect(proj.id)} 
+                                              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-600 hover:text-white transition-all shadow-sm border border-purple-100"
+                                              title="Edit Project"
+                                            >
+                                              <Edit2 size={14} />
+                                              <span className="text-[10px] font-bold uppercase tracking-wider">Edit</span>
+                                            </button>
+                                            <button 
+                                              onClick={() => handleGenerateInvoiceClick({ ...proj, type: 'Project' })} 
+                                              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-600 hover:text-white transition-all shadow-sm border border-emerald-100"
+                                              title="Invoice Project"
+                                            >
+                                              <FileText size={14} />
+                                              <span className="text-[10px] font-bold uppercase tracking-wider">Bill</span>
+                                            </button>
+                                            <button 
+                                              onClick={() => handleDeleteProject(proj.id)} 
+                                              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-600 hover:text-white transition-all shadow-sm border border-rose-100"
+                                              title="Delete Project"
+                                            >
+                                              <Trash2 size={14} />
+                                              <span className="text-[10px] font-bold uppercase tracking-wider">Del</span>
+                                            </button>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    ))
+                                  ) : (
+                                    <tr>
+                                      <td className="py-8 text-center text-xs text-slate-400 italic">No project associations found.</td>
+                                    </tr>
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+
+                            {/* New Project Section inside Client Page */}
+                            <div className="p-4 bg-slate-50/50 border-t border-slate-100">
+                              <div className="bg-white border-2 border-dashed border-slate-200 rounded-xl p-6 text-center hover:border-blue-400 hover:bg-blue-50/10 transition-all group cursor-pointer"
+                                   onClick={() => { setSelectedClientForProject(item); setIsProjectFormOpen(true); }}>
+                                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                                  <Plus size={24} />
+                                </div>
+                                <h6 className="text-sm font-bold text-slate-900 mb-1">Scale this client relationship</h6>
+                                <p className="text-xs text-slate-500 mb-4">Click here to add a new project and expand your business with {item.name}</p>
+                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-[11px] font-bold uppercase tracking-wider shadow-md hover:bg-blue-700 transition-all">
+                                  <PlusCircle size={14} /> Add New Project
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </main>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </main>
       </div>
 
       {/* INLINE PROJECT FORM MODAL */}

@@ -69,6 +69,11 @@ const financeService = {
         return response.data;
     },
 
+    deleteExpense: async (expenseId) => {
+        const response = await apiClient.delete(`${API_ENDPOINTS.FINANCE.BASE}/expenses/${expenseId}`);
+        return response.data;
+    },
+
     //create a payroll
     createPayroll: async (data) => {
         const response = await apiClient.post(

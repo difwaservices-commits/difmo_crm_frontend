@@ -12,7 +12,7 @@ const InlineProjectForm = ({ client, onClose, onSubmit, isSubmitting }) => {
   const [isLoadingEmployees, setIsLoadingEmployees] = useState(false);
   const [showEmployeeDropdown, setShowEmployeeDropdown] = useState(false);
   const [employeeSearchTerm, setEmployeeSearchTerm] = useState('');
-  
+
   const [formData, setFormData] = useState({
     projectName: '',
     description: '',
@@ -35,31 +35,31 @@ const InlineProjectForm = ({ client, onClose, onSubmit, isSubmitting }) => {
 
   const fetchEmployees = async () => {
     setIsLoadingEmployees(true);
-    
+
     try {
       const response = await apiClient.get('/employees');
-      
+
       let employeesArray = [];
-      
+
       if (response.data && Array.isArray(response.data.data)) {
         employeesArray = response.data.data;
       } else if (Array.isArray(response.data)) {
         employeesArray = response.data;
       }
-      
+
       // Clean each employee - extract from user object
       const cleanedEmployees = employeesArray.map(emp => {
         const userData = emp.user || {};
-        
+
         // Get name from user object
         let employeeName = userData.name || userData.firstName || '';
         if (employeeName && userData.lastName) {
           employeeName = `${userData.firstName} ${userData.lastName}`;
         }
-        
+
         // Get email from user object
         const employeeEmail = userData.email || '';
-        
+
         // Get role
         let employeeRole = 'Team Member';
         if (emp.role) {
@@ -69,7 +69,7 @@ const InlineProjectForm = ({ client, onClose, onSubmit, isSubmitting }) => {
             employeeRole = emp.role.name;
           }
         }
-        
+
         // Get department
         let employeeDepartment = '';
         if (emp.department) {
@@ -79,7 +79,7 @@ const InlineProjectForm = ({ client, onClose, onSubmit, isSubmitting }) => {
             employeeDepartment = emp.department.name;
           }
         }
-        
+
         return {
           id: emp.id,
           name: employeeName || 'Unknown',
@@ -89,15 +89,15 @@ const InlineProjectForm = ({ client, onClose, onSubmit, isSubmitting }) => {
           status: emp.status || 'active'
         };
       });
-      
+
       // Filter only active employees with valid names
-      const activeEmployees = cleanedEmployees.filter(emp => 
+      const activeEmployees = cleanedEmployees.filter(emp =>
         emp.name !== 'Unknown' && emp.name !== '' && emp.name !== null
       );
-      
+
       setEmployees(activeEmployees);
       setFilteredEmployees(activeEmployees);
-      
+
       if (activeEmployees.length === 0) {
         toast.error("No active employees found");
       } else {
@@ -119,7 +119,7 @@ const InlineProjectForm = ({ client, onClose, onSubmit, isSubmitting }) => {
       setFilteredEmployees(employees);
     } else {
       const searchLower = employeeSearchTerm.toLowerCase();
-      const filtered = employees.filter(emp => 
+      const filtered = employees.filter(emp =>
         emp.name.toLowerCase().includes(searchLower) ||
         emp.email.toLowerCase().includes(searchLower) ||
         emp.role.toLowerCase().includes(searchLower) ||
@@ -160,18 +160,18 @@ const InlineProjectForm = ({ client, onClose, onSubmit, isSubmitting }) => {
   // FIXED: Handle submit with proper null values for dates
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     const assignedEmployeeIds = formData.assignedEmployees.map(emp => emp.id);
-    
+
     // Convert empty strings to null for date fields
-    const assigningDate = formData.assigningDate && formData.assigningDate.trim() !== '' 
-      ? formData.assigningDate 
+    const assigningDate = formData.assigningDate && formData.assigningDate.trim() !== ''
+      ? formData.assigningDate
       : null;
-    
-    const deadline = formData.deadline && formData.deadline.trim() !== '' 
-      ? formData.deadline 
+
+    const deadline = formData.deadline && formData.deadline.trim() !== ''
+      ? formData.deadline
       : null;
-    
+
     const submitData = {
       projectName: formData.projectName,
       description: formData.description || null,
@@ -190,7 +190,7 @@ const InlineProjectForm = ({ client, onClose, onSubmit, isSubmitting }) => {
       assignedEmployees: assignedEmployeeIds,
       companyId: user?.company?.id
     };
-    
+
     console.log("Submitting project data:", submitData);
     onSubmit(submitData);
   };
@@ -206,12 +206,12 @@ const InlineProjectForm = ({ client, onClose, onSubmit, isSubmitting }) => {
 
   const getEmployeeColor = (name) => {
     const colors = [
-      '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', 
+      '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e',
       '#ef4444', '#f97316', '#f59e0b', '#eab308',
       '#84cc16', '#10b981', '#14b8a6', '#06b6d4',
       '#0ea5e9', '#3b82f6'
     ];
-    
+
     const nameStr = String(name || '');
     let hash = 0;
     for (let i = 0; i < nameStr.length; i++) {
@@ -232,7 +232,7 @@ const InlineProjectForm = ({ client, onClose, onSubmit, isSubmitting }) => {
             </p>
           </div>
           <button onClick={onClose} className="p-1.5 text-white hover:bg-white/20 rounded-lg transition-colors">
-            <X size={18}/>
+            <X size={18} />
           </button>
         </div>
 
@@ -377,11 +377,10 @@ const InlineProjectForm = ({ client, onClose, onSubmit, isSubmitting }) => {
                           type="button"
                           onClick={() => !isAlreadyAssigned && handleAddEmployee(employee)}
                           disabled={isAlreadyAssigned}
-                          className={`w-full flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-100 last:border-0 ${
-                            isAlreadyAssigned ? 'opacity-50 cursor-not-allowed bg-gray-50' : ''
-                          }`}
+                          className={`w-full flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-100 last:border-0 ${isAlreadyAssigned ? 'opacity-50 cursor-not-allowed bg-gray-50' : ''
+                            }`}
                         >
-                          <div 
+                          <div
                             className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0"
                             style={{ backgroundColor: getEmployeeColor(employee.name) }}
                           >
@@ -410,7 +409,7 @@ const InlineProjectForm = ({ client, onClose, onSubmit, isSubmitting }) => {
                 {formData.assignedEmployees.map((employee) => (
                   <div key={employee.id} className="flex items-center justify-between p-2 bg-white rounded-lg border border-purple-100 shadow-sm">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div 
+                      <div
                         className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0"
                         style={{ backgroundColor: getEmployeeColor(employee.name) }}
                       >

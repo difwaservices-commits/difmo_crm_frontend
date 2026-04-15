@@ -15,10 +15,11 @@ const Login = () => {
 
             const isAdmin = user?.roles?.some(r => ['Super Admin', 'Admin'].includes(r.name));
             const isEmployee = user?.roles?.some(r => r.name === 'Employee');
+            const isIntern = user?.roles?.some(r => r.name === 'Interns');
 
             if (isAdmin) {
                 targetPath = '/dashboard';
-            } else if (isEmployee) {
+            } else if (isEmployee || isIntern) {
                 targetPath = '/employee-dashboard';
             }
 
