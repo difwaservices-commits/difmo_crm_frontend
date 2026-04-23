@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Icon from 'components/AppIcon';
 import apiClient from 'api/client';
 import { API_ENDPOINTS } from 'api/endpoints';
+import DataLoader from 'components/ui/DataLoader';
 
 const TYPE_COLORS = {
   'Full-time': 'bg-blue-50 text-blue-700 border-blue-200',
@@ -27,14 +28,20 @@ export default function JobsTab({ setActiveTab }) {
   const [filterType, setFilterType] = useState('All');
   const [deleteId, setDeleteId] = useState(null);
   const [editingJob, setEditingJob] = useState(null); // New: for edit mode
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => { fetchJobs(); }, []);
 
   async function fetchJobs() {
     try {
+      setIsLoading(true);
       const res = await apiClient.get(API_ENDPOINTS.JOBS.BASE);
       setJobs(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Failed to fetch jobs', err);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -49,6 +56,7 @@ export default function JobsTab({ setActiveTab }) {
   async function handleSubmit(e) {
     e.preventDefault();
     try {
+      setIsSubmitting(true);
       const payload = {
         title: form.title,
         department: form.department,
@@ -77,6 +85,8 @@ export default function JobsTab({ setActiveTab }) {
       setForm(EMPTY_FORM);
     } catch (err) {
       console.error('Job submission failed', err);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -107,11 +117,14 @@ export default function JobsTab({ setActiveTab }) {
   function confirmDelete(id) { setDeleteId(id); }
   async function doDelete() {
     try {
+      setIsSubmitting(true);
       await apiClient.delete(API_ENDPOINTS.JOBS.BY_ID(deleteId));
       await fetchJobs();
       setDeleteId(null);
     } catch (err) {
       console.error('Delete failed', err);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -195,7 +208,9 @@ export default function JobsTab({ setActiveTab }) {
       </div>
 
       {/* Job Cards Grid */}
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <DataLoader message="Loading job postings..." subMessage="Fetching the latest career opportunities" />
+      ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center bg-white border border-gray-200 rounded-lg animate-in fade-in duration-500">
           <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center mb-3">
             <Icon name="Briefcase" size="24" className="text-gray-400" />
@@ -402,7 +417,12 @@ export default function JobsTab({ setActiveTab }) {
                 <button type="button" onClick={() => { setIsOpen(false); setForm(EMPTY_FORM); setEditingJob(null); }} className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
                   Cancel
                 </button>
-                <button type="submit" className="px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm">
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-all shadow-sm flex items-center justify-center gap-2 min-w-[100px]"
+                >
+                  {isSubmitting && <Icon name="Loader2" size="14" className="animate-spin" />}
                   {editingJob ? 'Update Job' : 'Post Job'}
                 </button>
               </div>
@@ -422,7 +442,15 @@ export default function JobsTab({ setActiveTab }) {
             <p className="text-sm text-gray-500 mb-6">This job and all its data will be permanently deleted.</p>
             <div className="flex gap-3">
               <button type="button" onClick={() => setDeleteId(null)} className="flex-1 py-2.5 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">Cancel</button>
-              <button type="button" onClick={doDelete} className="flex-1 py-2.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow-sm shadow-red-200">Delete</button>
+              <button 
+                type="button" 
+                onClick={doDelete} 
+                disabled={isSubmitting}
+                className="flex-1 py-2.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-all shadow-sm shadow-red-200 flex items-center justify-center gap-2"
+              >
+                {isSubmitting && <Icon name="Loader2" size="14" className="animate-spin" />}
+                Delete
+              </button>
             </div>
           </div>
         </div>

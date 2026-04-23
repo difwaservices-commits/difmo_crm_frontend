@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Icon from 'components/AppIcon';
 import apiClient from 'api/client';
 import { API_ENDPOINTS } from 'api/endpoints';
+import DataLoader from 'components/ui/DataLoader';
 
 const ALL_STATUSES = ['ALL', 'PENDING', 'REVIEWED', 'SHORTLISTED', 'CALL DONE', 'INTERVIEW DONE', 'GOOGLE MEET DONE', 'SELECTED', 'REJECTED'];
 
@@ -29,6 +30,8 @@ export default function ApplicationsTab() {
   const [selected, setSelected] = useState(null);
   const [view, setView] = useState('table'); // 'table' | 'kanban'
   const [jobs, setJobs] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => { fetchApps(); fetchJobs(); }, []);
 
@@ -41,6 +44,7 @@ export default function ApplicationsTab() {
 
   async function fetchApps(page = 1) {
     try {
+      setIsLoading(true);
       const params = {
         page,
         limit: pagination.limit,
@@ -52,7 +56,11 @@ export default function ApplicationsTab() {
       const { applications, total, pages, page: currentPage } = res.data || {};
       setApps(Array.isArray(applications) ? applications : []);
       setPagination(prev => ({ ...prev, total, totalPages: pages, page: currentPage }));
-    } catch (err) { console.error('Fetch applications failed', err); }
+    } catch (err) { 
+      console.error('Fetch applications failed', err); 
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   // Trigger fetch on filter change or page change
@@ -73,6 +81,7 @@ export default function ApplicationsTab() {
   async function addCandidate(e) {
     e.preventDefault();
     try {
+      setIsSubmitting(true);
       let jobId = candidate.job;
       let jobTitle = candidate.job;
       if (jobs.length > 0) {
@@ -102,6 +111,8 @@ export default function ApplicationsTab() {
       setCandidate(EMPTY_CANDIDATE);
     } catch (err) {
       console.error('Failed to add candidate', err);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -196,7 +207,10 @@ export default function ApplicationsTab() {
       {/* ── Table View ── */}
       {view === 'table' && (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm animate-in fade-in duration-500">
-          <div className="overflow-x-auto">
+          {isLoading ? (
+            <DataLoader message="Loading applications..." subMessage="Fetching the latest candidate profiles" size="medium" />
+          ) : (
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
@@ -265,6 +279,7 @@ export default function ApplicationsTab() {
               </tbody>
             </table>
           </div>
+          )}
 
           {/* Pagination Controls */}
           {pagination.totalPages > 1 && (
@@ -308,7 +323,10 @@ export default function ApplicationsTab() {
       {/* ── Kanban View ── */}
       {view === 'kanban' && (
         <div className="overflow-x-auto pb-4 animate-in fade-in duration-500">
-          <div className="flex gap-4 min-w-max">
+          {isLoading ? (
+            <DataLoader message="Loading Kanban board..." size="large" />
+          ) : (
+            <div className="flex gap-4 min-w-max">
             {KANBAN_COLS.map(col => {
               const colApps = filtered.filter(a => (a.status || '').toUpperCase() === col);
               const sc = STATUS_CONFIG[col] || STATUS_CONFIG.PENDING;
@@ -343,6 +361,7 @@ export default function ApplicationsTab() {
               );
             })}
           </div>
+          )}
         </div>
       )}
 
@@ -498,7 +517,14 @@ export default function ApplicationsTab() {
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-2">
                 <button type="button" onClick={() => { setIsAddOpen(false); setCandidate(EMPTY_CANDIDATE); }} className="px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-all shadow-sm">Cancel</button>
-                <button type="submit" className="px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 active:scale-95 transition-all shadow-sm shadow-blue-200">Add Candidate</button>
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 active:scale-95 transition-all shadow-sm shadow-blue-200 flex items-center justify-center gap-2 min-w-[140px]"
+                >
+                  {isSubmitting && <Icon name="Loader2" size="16" className="animate-spin" />}
+                  Add Candidate
+                </button>
               </div>
             </form>
           </div>
